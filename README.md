@@ -9,6 +9,8 @@
 </p>
 
 <p align="center">
+  <a href="https://becktothefuture.github.io/studioflow/"><strong>Launch Live Microsite</strong></a>
+  ·
   <a href="#proof"><strong>Proof</strong></a>
   ·
   <a href="#workflow"><strong>Workflow</strong></a>
@@ -26,6 +28,10 @@
 ![StudioFlow static divider](studioflow-project/assets/studioflow-divider.png)
 
 </details>
+
+## Live Site
+
+**Microsite URL:** [https://becktothefuture.github.io/studioflow/](https://becktothefuture.github.io/studioflow/)
 
 ## Hero
 
