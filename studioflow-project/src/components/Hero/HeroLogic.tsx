@@ -106,33 +106,33 @@ export function HeroLogic() {
   const content = useMemo<LandingContent>(
     () => ({
       brandName: "StudioFlow",
-      announcement: "START FAST // 10-minute value proof",
+      announcement: "OPEN THE LOOP // from spark to shipped signal",
       kicker: "StudioFlow Workflow / Code -> Canvas -> Code",
-      heading: "Get your first design-engineering win in 10 minutes.",
-      body: "Run one command, generate a proof report, then step into the real Figma roundtrip using the same contract gates.",
+      heading: "Turn rough intent into living interfaces.",
+      body: "Run one command, capture proof, then move through a code-canvas-code rhythm that keeps intent and implementation aligned.",
       commandLine: "$ npm run setup:project",
       commandHint: "Then run npm run demo:website:capture to generate your first proof report.",
-      primaryActionLabel: "Start 10-Minute Win",
+      primaryActionLabel: "Start the Flow",
       secondaryActionLabel: "Jump to Proof + FAQ",
       topLinks: [
-        { label: "10-Min Win", href: "#how-to-use" },
+        { label: "First Flow", href: "#how-to-use" },
         { label: "Workflow", href: "#how-to-use" },
         { label: "Proof", href: "#proof" },
         { label: "Docs", href: "#docs" },
         { label: "Repo", href: "./README.md" }
       ],
-      whyTitle: "Why design engineers keep this loop close",
+      whyTitle: "Why teams keep this loop close",
       whyBody: "StudioFlow keeps design intent, sfids, tokens, and verification inside one operating rhythm. Teams move quickly and keep control.",
       supportTitle: "First-run readiness",
       supportMatrix: [
-        { label: "10-minute local proof path", status: "READY" },
+        { label: "Guided local proof path", status: "READY" },
         { label: "4-breakpoint contract", status: "READY" },
         { label: "Token and sfid gates", status: "READY" },
         { label: "Proof artifacts per run", status: "READY" }
       ],
       offerTitle: "What this workflow gives you",
       offerCards: [
-        { icon: "◉", title: "10-minute value demonstration", body: "Track A runs locally and writes before and after proof files on the first pass." },
+        { icon: "◉", title: "Rapid first proof", body: "Track A runs locally and writes before and after proof files in the opening pass." },
         { icon: "◎", title: "Modeled 28-46% faster loop time", body: "One payload contract and scripted gates reduce coordination overhead during iteration." },
         { icon: "◍", title: "Modeled 70-90% lower breakpoint drift", body: "Validation requires mobile, tablet, laptop, and desktop modes plus matching screens." },
         { icon: "◌", title: "Modeled 95%+ token consistency", body: "Token sync checks keep style values aligned with canonical token sources." },
@@ -141,25 +141,25 @@ export function HeroLogic() {
         { icon: "◒", title: "Tooling alignment", body: "Claude, Codex, and editor agents operate with the same contract vocabulary." },
         { icon: "◓", title: "Future-ready operating model", body: "The same workflow supports code-first and design-first entry with shared gates." }
       ],
-      howToTitle: "12-minute timer plan",
+      howToTitle: "From first spark to full roundtrip",
       howToSteps: [
         {
-          title: "Minute 0-4: Bootstrap and local proof",
+          title: "Open the loop",
           detail: "Install dependencies, prepare Claude config, run checks, and produce initial proof output.",
           command: "npm run setup:project && npm run demo:website:capture"
         },
         {
-          title: "Minute 4-6: Authenticate in Claude",
+          title: "Connect your workspace",
           detail: "Start Claude, run /mcp, and complete Figma auth for the active session.",
           command: "claude"
         },
         {
-          title: "Minute 6-8: Generate canvas handoff",
+          title: "Create the canvas handoff",
           detail: "Create the payload that mirrors your current website structure for Figma.",
           command: "npm run loop:code-to-canvas"
         },
         {
-          title: "Minute 8-12: Real roundtrip",
+          title: "Close the roundtrip with proof",
           detail: "Generate handoff, push in Figma, export canvas-to-code payload, verify, apply, and refresh manifest.",
           command: "npm run loop:verify-canvas && npm run loop:canvas-to-code && npm run check && npm run build && npm run manifest:update"
         }
@@ -220,8 +220,8 @@ export function HeroLogic() {
       faqTitle: "Proof + FAQ",
       faqItems: [
         {
-          question: "How fast can I see value from this repo?",
-          answer: "Run npm run setup:project and npm run demo:website:capture. This writes proof/latest/index.html and a share card in the first local run."
+          question: "How quickly does this workflow click?",
+          answer: "Run npm run setup:project and npm run demo:website:capture. The first local pass writes proof/latest/index.html and a share card you can review immediately."
         },
         {
           question: "What confirms roundtrip integrity?",
@@ -229,7 +229,7 @@ export function HeroLogic() {
         },
         {
           question: "What if Claude says no MCP servers are configured?",
-          answer: "Run claude mcp add --scope project --transport http figma https://mcp.figma.com/mcp, then run claude mcp list again."
+          answer: "Run claude mcp add --transport http figma https://mcp.figma.com/mcp --scope user, then run claude mcp list again."
         },
         {
           question: "Can this workflow run in CI pipelines?",
