@@ -1,117 +1,104 @@
-<p align="center">
-  <img src="studioflow-project/assets/studioflow-logo.png" alt="StudioFlow logo" width="92" />
-</p>
+# StudioFlow Workflow
 
-<h1 align="center">StudioFlow Workflow</h1>
+## Direct Value Summary
+StudioFlow aligns code and design by preserving one intent model across both environments. It enforces semantic parity through deterministic payload generation, stable naming, and contract-gated verification. Teams ship interface changes with proof artifacts that show what changed and why the loop is valid.
 
-<p align="center">
-  Contract-first design engineering for teams shipping UI across four breakpoints.
-</p>
+Primary audience:
+- Design system leads responsible for token governance and component integrity.
+- Hybrid designers operating across Figma and code.
+- Senior frontend engineers owning release quality.
 
-<p align="center">
-  <a href="https://becktothefuture.github.io/studioflow/"><strong>Launch Live Microsite</strong></a>
-  ·
-  <a href="#start-here"><strong>Start Here</strong></a>
-  ·
-  <a href="#proof-points-modeled"><strong>Proof Points</strong></a>
-  ·
-  <a href="#workflow"><strong>Workflow</strong></a>
-  ·
-  <a href="studioflow-project/"><strong>Repo</strong></a>
-</p>
+Secondary audience:
+- Engineering managers driving delivery predictability.
+- Product designers collaborating with system teams.
+- Platform and DevEx teams scaling workflow policy.
 
-![StudioFlow animated divider](studioflow-project/assets/studioflow-divider.gif)
+## Problem Definition
+Interface delivery drifts when intent is translated manually across tools. Token meaning shifts, component identity drifts, breakpoint behavior fragments, and teams spend review time on interpretation defects. StudioFlow addresses this operational failure by encoding intent into enforceable contracts.
 
-<details>
-<summary>Divider fallback (static PNG)</summary>
+## Principle: Intent Preservation
+Intent preservation means tokens, modes, screens, and stable identifiers carry the same meaning across code and canvas transitions. StudioFlow keeps this scope explicit through canonical payload schema, naming rules, and deterministic verification gates.
 
-![StudioFlow static divider](studioflow-project/assets/studioflow-divider.png)
+## System Guarantees
+The guarantees below are enforceable claims with direct verification mapping.
 
-</details>
+| Guarantee | Verify With | Evidence Path |
+| --- | --- | --- |
+| Every approved loop preserves stable component identity via `sfid` parity checks. | `npm run verify:id-sync` | `src/** data-sfid`, `snapshots/*.json` |
+| Every approved loop validates all four breakpoint modes and screens. | `npm run loop:verify-canvas` | `handoff/canvas-to-code.json` |
+| Style data entering code is token-backed and contract-validated. | `npm run verify:tokens-sync` + `npm run loop:verify-canvas` | `tokens/figma-variables.json`, `handoff/canvas-to-code.json` |
+| Roundtrip application is blocked when contract coverage is incomplete. | `npm run loop:verify-canvas` | `studioflow.manifest.json` gate status |
+| Proof artifacts are generated as review evidence, not optional output. | `npm run loop:proof` | `proof/latest/index.html`, `proof/latest/summary-card.png` |
+| Manifest state records loop outcomes for operational traceability. | `npm run manifest:update` | `studioflow-project/studioflow.manifest.json` |
 
-## Live Site
+## Architecture Overview
+High-level flow:
+1. Code emits canonical payload: `npm run loop:code-to-canvas`.
+2. Canvas updates return via `handoff/canvas-to-code.json`.
+3. Contract validation enforces token/mode/screen/sfid integrity: `npm run loop:verify-canvas`.
+4. Verified payload applies to source tokens and generated artifacts: `npm run loop:canvas-to-code`.
+5. Proof and manifest capture operational evidence: `npm run loop:proof && npm run manifest:update`.
 
-**Microsite URL:** [https://becktothefuture.github.io/studioflow/](https://becktothefuture.github.io/studioflow/)
+## Workflow Overview
+Code-first path:
+1. Generate payload from source.
+2. Apply updates in Figma using canonical schema.
+3. Verify contract coverage.
+4. Apply back to code.
+5. Run quality gates and produce proof.
 
-## Start Here
+Design-first path:
+1. Start from approved design state in Figma.
+2. Export canonical payload to `handoff/canvas-to-code.json`.
+3. Run the same verification and apply chain.
+4. Produce manifest and proof evidence.
 
-### Track A: First 10-minute win (local proof)
-
+## Installation
 ```bash
 cd studioflow-project
 npm run setup:project
 npm run demo:website:capture
 ```
 
-This generates proof artifacts at:
-- `proof/latest/index.html`
-- `proof/latest/summary-card.png`
-
-### Track B: Real website roundtrip (Code -> Figma Canvas -> Code)
+You can also run the same commands from this parent folder:
 
 ```bash
-cd studioflow-project
 npm run setup:project
-npm run loop:code-to-canvas
+npm run demo:website:capture
 ```
 
-Then in Claude Code:
-1. run `claude`,
-2. run `/mcp` and complete Figma auth,
-3. use `handoff/code-to-canvas.json` to create token frames, modes, and screens,
-4. export approved payload to `handoff/canvas-to-code.json`.
+First successful run criteria:
+- `proof/latest/index.html` exists.
+- `proof/latest/summary-card.png` exists.
+- `npm run check` passes.
+- `npm run build` passes.
 
-Apply and gate:
+## Naming & Semantic Conventions
+Core conventions:
+- `sfid` values define stable component identity.
+- `mobile`, `tablet`, `laptop`, `desktop` are fixed mode names.
+- Token authority starts in `tokens/figma-variables.json`.
+- Screen names map to breakpoint intent in contract payloads.
 
-```bash
-npm run loop:verify-canvas
-npm run loop:canvas-to-code
-npm run check
-npm run build
-npm run loop:proof
-npm run manifest:update
-```
+Glossary:
+- Intent: the semantic meaning of structure, naming, and token usage across environments.
+- Parity: matching semantic identity between source code and payload state.
+- Deterministic generation: repeatable payload output for the same code state.
+- Contract gate: validation rule that blocks apply when integrity checks fail.
+- Proof artifact: generated evidence file for review and audit.
 
-## Definition of Done
+## Roadmap
+Near-term:
+1. Add measured team baselines for loop time and drift outcomes.
+2. Expand automated checks for contract completeness in CI presets.
+3. Publish versioned glossary and naming governance policy.
 
-A loop is complete when all items are true:
-- verification passes for `3` token frames, `4` variable modes, `4` screens,
-- variable modes exist for `mobile (390)`, `tablet (768)`, `laptop (1280)`, `desktop (1440)`,
-- screens exist for all four breakpoints,
-- proof outputs exist in `proof/latest/`,
-- manifest is updated in `studioflow-project/studioflow.manifest.json`.
+Mid-term:
+1. Add richer manifest lineage for multi-repo orchestration.
+2. Standardize adoption templates for platform rollout.
+3. Formalize release policy bundles for governance teams.
 
-## Proof Points (Modeled)
-
-Modeled outcomes from local dry runs and contract-gated operation. Replace with measured team data over time.
-
-| Signal | Modeled range | Why it moves |
-| --- | --- | --- |
-| Design-to-merge loop time | `28-46%` faster | one payload contract + pre-merge gates |
-| Breakpoint drift | `70-90%` lower | required 4-mode + 4-screen validation |
-| Token compliance | `95%+` | token-only verification step |
-| Rework cycles after handoff | `25-40%` lower | stable `sfid` anchors + payload parity checks |
-| Team confidence score (internal rubric) | `+1.2 to +1.8` points | proof artifacts visible every loop |
-
-## Workflow
-
-| Step | Command | Result |
-| --- | --- | --- |
-| `01` | `npm run loop:code-to-canvas` | Build canvas handoff payloads from code. |
-| `02` | `npm run loop:verify-canvas` | Validate contract shape, token coverage, and `sfid` parity. |
-| `03` | `npm run loop:canvas-to-code` | Apply approved canvas updates back into code tokens. |
-| `04` | `npm run check && npm run build && npm run manifest:update` | Run gates, build output, and refresh manifest evidence. |
-
-## Keywords
-
-`contract-first handoff`, `token-native surfaces`, `roundtrip fidelity`, `breakpoint parity`, `proof-backed workflow`, `merge-safe design iteration`
-
-## Docs
-
-- `studioflow-project/README.md`
-- `studioflow-project/docs/STUDIOFLOW_WORKFLOW.md`
-- `studioflow-project/docs/CANVAS_EXCHANGE_CONTRACT.md`
-- `studioflow-project/docs/CLAUDE_CODE_SETUP.md`
-- `studioflow-project/docs/DEMO_WEBSITE_ROUNDTRIP.md`
-- `studioflow-project/CLAUDE.md`
-- `studioflow-project/.claude/commands/README.md`
+Strategic references:
+- Project operator manual: `studioflow-project/README.md`
+- Workflow specification: `studioflow-project/docs/STUDIOFLOW_WORKFLOW.md`
+- Brand and messaging framework: `studioflow-project/docs/BRAND_POSITIONING.md`

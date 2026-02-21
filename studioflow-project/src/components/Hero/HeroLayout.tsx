@@ -1,19 +1,11 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import logoMark from "../../../assets/studioflow-logo.png";
 import { ShaderBackground } from "../Background/ShaderBackground";
 import type { HeroContract } from "./Hero.contract";
 
 export function HeroLayout(props: HeroContract) {
   const { content } = props;
-  const firstUseCase = content.useCases.find(() => true);
   const [copied, setCopied] = useState(false);
-  const [activeUseCaseId, setActiveUseCaseId] = useState(firstUseCase?.id ?? "");
-  const [activeFaq, setActiveFaq] = useState(0);
-
-  const activeUseCase = useMemo(
-    () => content.useCases.find((item) => item.id === activeUseCaseId) ?? firstUseCase,
-    [activeUseCaseId, content.useCases, firstUseCase]
-  );
 
   const onCopyCommand = async () => {
     if (typeof window === "undefined") {
@@ -22,10 +14,10 @@ export function HeroLayout(props: HeroContract) {
 
     try {
       if (window.navigator.clipboard?.writeText) {
-        await window.navigator.clipboard.writeText(content.commandLine.replace(/^\$\s*/, ""));
+        await window.navigator.clipboard.writeText(content.hero.commandLine.replace(/^\$\s*/, ""));
       } else {
         const textarea = window.document.createElement("textarea");
-        textarea.value = content.commandLine.replace(/^\$\s*/, "");
+        textarea.value = content.hero.commandLine.replace(/^\$\s*/, "");
         textarea.style.position = "fixed";
         textarea.style.opacity = "0";
         window.document.body.appendChild(textarea);
@@ -75,26 +67,27 @@ export function HeroLayout(props: HeroContract) {
 
         <section className="hero-block" aria-labelledby="hero-title">
           <div data-sfid="sfid:hero-content" className="hero-panel">
-            <p className="announcement">{content.announcement}</p>
+            <p className="announcement">{content.hero.announcement}</p>
             <p data-sfid="sfid:hero-kicker" className="hero-kicker">
-              {content.kicker}
+              {content.hero.kicker}
             </p>
             <h1 id="hero-title" data-sfid="sfid:hero-title" className="hero-title">
-              {content.heading}
+              {content.hero.heading}
             </h1>
             <p data-sfid="sfid:hero-body" className="hero-body">
-              {content.body}
+              {content.hero.valueStatement}
             </p>
+            <p className="section-copy">{content.hero.supportingParagraph}</p>
             <div className="command-box" role="group" aria-label="Primary command">
-              <code className="command-line">{content.commandLine}</code>
+              <code className="command-line">{content.hero.commandLine}</code>
               <button type="button" className="command-copy" onClick={() => void onCopyCommand()}>
                 {copied ? "Copied" : "Copy"}
               </button>
             </div>
-            <p className="command-hint">{content.commandHint}</p>
+            <p className="command-hint">{content.hero.commandHint}</p>
             <div data-sfid="sfid:hero-actions" className="hero-actions">
               <button type="button" data-sfid="sfid:hero-primary-cta" className="button button-primary" onClick={props.onPrimaryAction}>
-                {content.primaryActionLabel}
+                {content.hero.primaryActionLabel}
               </button>
               <button
                 type="button"
@@ -102,137 +95,105 @@ export function HeroLayout(props: HeroContract) {
                 className="button button-secondary"
                 onClick={props.onSecondaryAction}
               >
-                {content.secondaryActionLabel}
+                {content.hero.secondaryActionLabel}
               </button>
             </div>
           </div>
         </section>
 
-        <section className="context-strip" aria-label="Context strip">
-          <article className="context-card">
-            <h2 className="section-title-small">{content.whyTitle}</h2>
-            <p className="section-copy">{content.whyBody}</p>
-          </article>
-          <article className="context-card">
-            <h2 className="section-title-small">{content.supportTitle}</h2>
-            <ul className="support-grid">
-              {content.supportMatrix.map((item) => (
-                <li key={item.label} className="support-item">
-                  <span>{item.label}</span>
-                  <strong>{item.status}</strong>
-                </li>
-              ))}
-            </ul>
-          </article>
+        <section className="offers" aria-labelledby="structural-alignment-title">
+          <h2 id="structural-alignment-title" className="section-title">
+            {content.structuralAlignment.title}
+          </h2>
+          <p className="section-copy">{content.structuralAlignment.body}</p>
+          <ul className="support-grid">
+            {content.structuralAlignment.matrix.map((item) => (
+              <li key={item.label} className="support-item">
+                <span>{item.label}</span>
+                <strong>{item.guarantee}</strong>
+                <code>{item.verification}</code>
+                <span>{item.evidence}</span>
+              </li>
+            ))}
+          </ul>
         </section>
 
-        <section className="offers" aria-labelledby="offers-title">
-          <h2 id="offers-title" className="section-title">{content.offerTitle}</h2>
+        <section className="offers" aria-labelledby="intent-preservation-title">
+          <h2 id="intent-preservation-title" className="section-title">
+            {content.intentPreservation.title}
+          </h2>
+          <p className="section-copy">{content.intentPreservation.body}</p>
           <div className="offers-grid">
-            {content.offerCards.map((card) => (
-              <article key={card.title} className="offer-card">
-                <span className="offer-icon" aria-hidden="true">
-                  {card.icon}
-                </span>
-                <h3>{card.title}</h3>
-                <p>{card.body}</p>
+            {content.intentPreservation.examples.map((example) => (
+              <article key={example.title} className="offer-card">
+                <h3>{example.title}</h3>
+                <p>{example.state}</p>
+                <p>{example.result}</p>
+                <code>{example.verification}</code>
               </article>
             ))}
           </div>
         </section>
 
-        <section className="execution-grid" id="how-to-use" aria-label="How to use and support">
+        <section className="execution-grid" id="how-to-use" aria-label="Deterministic workflow and identity parity">
           <article className="panel-card">
-            <h2 className="section-title-small">{content.howToTitle}</h2>
+            <h2 className="section-title-small">{content.deterministicGeneration.title}</h2>
+            <p className="section-copy">{content.deterministicGeneration.body}</p>
             <ol className="step-list">
-              {content.howToSteps.map((step) => (
+              {content.deterministicGeneration.steps.map((step) => (
                 <li key={step.title} className="step-item">
                   <h3>{step.title}</h3>
                   <p>{step.detail}</p>
                   {step.command ? <code>{step.command}</code> : null}
+                  <span>{step.verification}</span>
                 </li>
               ))}
             </ol>
           </article>
           <article className="panel-card">
-            <h2 className="section-title-small">{content.agentTitle}</h2>
+            <h2 className="section-title-small">{content.identityParity.title}</h2>
+            <p className="section-copy">{content.identityParity.body}</p>
             <ul className="agent-grid">
-              {content.agentSupport.map((agent) => (
-                <li key={agent.name} className="agent-item">
-                  <strong>{agent.name}</strong>
-                  <span>{agent.instruction}</span>
+              {content.identityParity.rules.map((rule) => (
+                <li key={rule.title} className="agent-item">
+                  <strong>{rule.title}</strong>
+                  <span>{rule.control}</span>
+                  <code>{rule.verification}</code>
                 </li>
               ))}
             </ul>
           </article>
         </section>
 
-        <section className="use-cases" aria-labelledby="use-cases-title">
-          <h2 id="use-cases-title" className="section-title">{content.useCaseTitle}</h2>
-          <div className="use-cases-layout">
-            <div className="use-case-buttons" role="tablist" aria-label="Use cases">
-              {content.useCases.map((item) => (
-                <button
-                  key={item.id}
-                  type="button"
-                  role="tab"
-                  aria-selected={activeUseCaseId === item.id}
-                  className={`use-case-button${activeUseCaseId === item.id ? " is-active" : ""}`}
-                  onClick={() => setActiveUseCaseId(item.id)}
-                >
-                  {item.label}
-                </button>
-              ))}
-            </div>
-            {activeUseCase ? (
-              <article className="use-case-panel">
-                <h3>{activeUseCase.title}</h3>
-                <p>{activeUseCase.body}</p>
-              </article>
-            ) : null}
-          </div>
-        </section>
-
-        <section className="tiers" aria-labelledby="tiers-title">
-          <h2 id="tiers-title" className="section-title">{content.tierTitle}</h2>
+        <section className="tiers" id="proof" aria-labelledby="team-outcomes-title">
+          <h2 id="team-outcomes-title" className="section-title">{content.teamOutcomes.title}</h2>
+          <p className="section-copy">{content.teamOutcomes.body}</p>
           <div className="tier-grid">
-            {content.tierCards.map((tier) => (
-              <article key={tier.name} className={`tier-card${tier.featured ? " is-featured" : ""}`}>
-                <h3>{tier.name}</h3>
-                <p className="tier-subtitle">{tier.subtitle}</p>
-                <ul>
-                  {tier.bullets.map((bullet) => (
-                    <li key={bullet}>{bullet}</li>
-                  ))}
-                </ul>
-                <a href={tier.ctaHref} className="button button-secondary tier-cta">
-                  {tier.ctaLabel}
-                </a>
+            {content.teamOutcomes.outcomes.map((outcome) => (
+              <article key={outcome.signal} className="tier-card">
+                <h3>{outcome.signal}</h3>
+                <p className="tier-subtitle">{outcome.range}</p>
+                <p className="section-copy">{outcome.measurement}</p>
               </article>
             ))}
           </div>
         </section>
 
-        <section className="faq" id="proof" aria-labelledby="faq-title">
-          <h2 id="faq-title" className="section-title">{content.faqTitle}</h2>
-          <div className="faq-list">
-            {content.faqItems.map((item, index) => {
-              const isOpen = activeFaq === index;
-              return (
-                <article key={item.question} className="faq-item">
-                  <button
-                    type="button"
-                    className="faq-question"
-                    aria-expanded={isOpen}
-                    onClick={() => setActiveFaq(isOpen ? -1 : index)}
-                  >
-                    <span>{item.question}</span>
-                    <span aria-hidden="true">{isOpen ? "−" : "+"}</span>
-                  </button>
-                  {isOpen ? <p className="faq-answer">{item.answer}</p> : null}
-                </article>
-              );
-            })}
+        <section className="offers" aria-labelledby="technical-foundations-title">
+          <h2 id="technical-foundations-title" className="section-title">
+            {content.technicalFoundations.title}
+          </h2>
+          <p className="section-copy">{content.technicalFoundations.body}</p>
+          <div className="offers-grid">
+            {content.technicalFoundations.foundations.map((foundation) => (
+              <article key={foundation.title} className="offer-card">
+                <h3>{foundation.title}</h3>
+                <p>{foundation.detail}</p>
+                <a href={foundation.referenceHref} className="nav-link">
+                  {foundation.referenceLabel}
+                </a>
+              </article>
+            ))}
           </div>
         </section>
 

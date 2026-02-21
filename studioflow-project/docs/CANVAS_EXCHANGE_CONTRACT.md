@@ -1,9 +1,9 @@
 # Canvas Exchange Contract (Canonical v3)
 
-`handoff/canvas-to-code.json` is the canonical v3 input for syncing Figma Canvas updates back into code.
+## Contract Purpose
+`handoff/canvas-to-code.json` is the canonical payload for preserving intent from canvas back into source code. This contract keeps token semantics, breakpoint coverage, and stable identifiers aligned during roundtrip operations.
 
 ## Required Top-Level Fields
-
 - `generatedAt`: ISO timestamp
 - `source`: `"figma-canvas"`
 - `integration`: `"canvas-central"`
@@ -14,10 +14,9 @@
 - `tokenFrames`: array
 - `variableModes`: array
 - `screens`: array
-- `sfids`: array of required stable IDs
+- `sfids`: array of required stable identifiers
 
-## Required Structure
-
+## Canonical Structure
 ```json
 {
   "generatedAt": "2026-02-21T20:00:00.000Z",
@@ -59,31 +58,34 @@
 ```
 
 ## Validation Rules
-
-1. Token frames must include:
-   - `Tokens / Colors`
-   - `Tokens / Typography`
-   - `Tokens / Spacing`
-2. `variableModes` must include exactly:
-   - `mobile` (390)
-   - `tablet` (768)
-   - `laptop` (1280)
-   - `desktop` (1440)
-3. Each mode must include values for every token from `tokens/figma-variables.json`.
+1. Token frames must include `Tokens / Colors`, `Tokens / Typography`, and `Tokens / Spacing`.
+2. Variable modes must include `mobile (390)`, `tablet (768)`, `laptop (1280)`, and `desktop (1440)`.
+3. Each mode must include all token names defined in `tokens/figma-variables.json`.
 4. Screens must include all four breakpoints with expected names and widths.
-5. Every screen must set `usesOnlyTokens: true`.
-6. `sfids` and each screen’s `sfids` must include every `data-sfid` from code.
+5. Each screen must set `usesOnlyTokens: true`.
+6. `sfids` and screen-level `sfids` must include every required source `data-sfid` value.
 
-## Commands
+## Intent-Preservation Guarantees Mapped to Commands
+| Guarantee | Command | Required Evidence |
+| --- | --- | --- |
+| Stable component identity parity | `npm run verify:id-sync` | source `data-sfid` + snapshots |
+| Full mode and screen coverage | `npm run loop:verify-canvas` | validated payload |
+| Token-backed style integrity | `npm run verify:tokens-sync` + `npm run loop:verify-canvas` | token source and mode values |
+| Apply blocked on incomplete coverage | `npm run loop:verify-canvas` | manifest gate outcome |
 
-Validate only:
-
+## Command Path
+Validate payload only:
 ```bash
 npm run loop:verify-canvas
 ```
 
-Apply if valid:
-
+Apply verified payload:
 ```bash
 npm run loop:canvas-to-code
+```
+
+Generate proof and manifest evidence:
+```bash
+npm run loop:proof
+npm run manifest:update
 ```

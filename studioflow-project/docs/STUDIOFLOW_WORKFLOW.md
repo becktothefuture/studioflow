@@ -1,98 +1,85 @@
-# StudioFlow Workflow (v3)
+# StudioFlow Workflow (Intent Preservation Model)
 
 ## Overview
+StudioFlow aligns code and design by preserving one intent model across both environments. The workflow executes deterministic code-to-canvas and canvas-to-code transitions, then validates semantic parity through contract gates.
 
-StudioFlow v3 is a **Code ↔ Canvas ↔ Code** workflow.
+## Audience and Ownership
+Primary operators:
+- Design system leads
+- Hybrid designers
+- Senior frontend engineers
 
-Central integration point:
-- Figma Code-to-Canvas (Sites canonical, Make exploratory)
+Supporting operators:
+- Engineering managers
+- Product designers
+- Platform and DevEx teams
 
-Preserved guarantees:
-- existing token system remains unchanged,
-- tokens roundtrip code -> Figma -> code,
-- stable IDs remain enforced.
+## Operational Problem
+Manual translation between design and code causes semantic drift. Token meaning, component identity, and breakpoint behavior diverge across tools. StudioFlow resolves this with shared vocabulary, deterministic payload generation, and enforceable verification.
 
-## Dual Track
+## Mechanism of Action
+StudioFlow preserves intent through three controls:
+1. Semantic alignment across tokens, modes, screens, and IDs.
+2. Naming parity via stable `sfid` identifiers and canonical naming rules.
+3. Deterministic generation and verification with script-level contract gates.
 
-1. Canonical track: `figma-sites`
-   - production-grade source for approved roundtrips.
-2. Exploratory track: `figma-make`
-   - rapid experimentation; must pass validation before promotion.
+## System Flow
+1. Generate canonical handoff from code.
+   - `npm run loop:code-to-canvas`
+2. Apply updates in Figma and export canonical response payload.
+   - `handoff/canvas-to-code.json`
+3. Verify contract integrity before source mutation.
+   - `npm run loop:verify-canvas`
+4. Apply verified updates into source artifacts.
+   - `npm run loop:canvas-to-code`
+5. Enforce project gates and publish evidence.
+   - `npm run check && npm run build && npm run loop:proof && npm run manifest:update`
 
-## Entry Path A: Code-first
+## Entry Paths
+Code-first:
+- Start in source code.
+- Generate payload to Figma.
+- Approve updates.
+- Verify and apply.
 
-1. Build/update rough structure in code with token-only styles and `sfid` IDs.
-2. Run:
-   ```bash
-   npm run loop:code-to-canvas
-   ```
-3. Claude Code + Figma MCP applies the payload in Figma.
-4. Save approved response to `handoff/canvas-to-code.json`.
-5. Run:
-   ```bash
-   npm run loop:verify-canvas
-   npm run loop:canvas-to-code
-   npm run check
-   npm run build
-   npm run manifest:update
-   ```
+Design-first:
+- Start in approved Figma state.
+- Export canonical payload.
+- Run the same verify/apply chain.
 
-## Entry Path B: Design-first
+## Enforceable Guarantees
+| Guarantee | Verification | Evidence |
+| --- | --- | --- |
+| Every approved loop preserves stable component identity via `sfid` parity checks. | `npm run verify:id-sync` | `snapshots/*.json`, source `data-sfid` |
+| Every approved loop validates all four breakpoint modes and screens. | `npm run loop:verify-canvas` | `handoff/canvas-to-code.json` |
+| Style data entering code is token-backed and contract-validated. | `npm run verify:tokens-sync` + `npm run loop:verify-canvas` | `tokens/figma-variables.json`, payload modes |
+| Roundtrip application is blocked when contract coverage is incomplete. | `npm run loop:verify-canvas` | manifest gate status |
+| Proof artifacts are generated as review evidence, not optional output. | `npm run loop:proof` | `proof/latest/index.html`, `proof/latest/summary-card.png` |
+| Manifest state records loop outcomes for operational traceability. | `npm run manifest:update` | `studioflow.manifest.json` |
 
-1. Begin in Figma Sites or Figma Make.
-2. Claude Code emits `handoff/canvas-to-code.json` from approved design state.
-3. Run:
-   ```bash
-   npm run loop:verify-canvas
-   npm run loop:canvas-to-code
-   npm run check
-   npm run build
-   npm run manifest:update
-   ```
-
-## Required Files
-
+## Canonical Files
 - Workflow config: `studioflow.workflow.json`
-- Token source: `tokens/figma-variables.json`
-- Canonical handoff files:
-  - `handoff/code-to-canvas.json`
-  - `handoff/canvas-to-code.json`
-  - `handoff/canvas-to-code.template.json`
-- Compatibility handoff files:
-  - `handoff/code-to-figma.json`
-  - `handoff/figma-to-code.json`
-  - `handoff/figma-to-code.template.json`
-- Breakpoint token export: `tokens/figma-breakpoint-variables.json`
-- Audit snapshots: `snapshots/figma-*.json`
-- Loop metadata: `studioflow.manifest.json`
+- Source tokens: `tokens/figma-variables.json`
+- Handoff request: `handoff/code-to-canvas.json`
+- Handoff response: `handoff/canvas-to-code.json`
+- Manifest evidence: `studioflow.manifest.json`
+- Proof artifacts: `proof/latest/*`
 
-## Invariants Enforced
-
-1. Token-only style values.
-2. Stable `sfid` parity between code and canvas payload.
-3. Complete token frame coverage.
-4. Complete mode coverage for `mobile/tablet/laptop/desktop`.
-5. Complete screen coverage for all 4 breakpoints.
-
-## Scripts
-
-- `loop:code-to-canvas`: generate canonical code->canvas payload and template.
-- `loop:verify-canvas`: validate canonical canvas contract and update manifest status.
-- `loop:canvas-to-code`: apply approved values back into token source and artifacts.
-- `loop:proof`: generate visual/token/sfid proof report (`proof/latest/index.html`) plus share card (`proof/latest/summary-card.png`).
-- `loop:run`: full happy-path chain.
-- `loop:*figma*`: compatibility wrappers.
+## Naming and Semantic Glossary
+- Intent: semantic meaning preserved across design and code transitions.
+- Semantic alignment: shared token/mode/screen/ID vocabulary.
+- Naming parity: stable identifiers and canonical naming map across files.
+- Deterministic generation: same source state creates same payload shape.
+- Contract gate: script validation step required before apply.
 
 ## Promotion Rule
+Payloads from exploratory providers require full `loop:verify-canvas` pass before canonical sync-back.
 
-If provider is `figma-make`, payload must pass `loop:verify-canvas` before it is treated as canonical for sync-back.
-
-## Suggested Daily Flow
-
+## Daily Operator Path
 ```bash
 npm run setup:project
 npm run loop:code-to-canvas
-# Claude Code + MCP + Figma work
+# Figma operations and export
 npm run loop:verify-canvas
 npm run loop:canvas-to-code
 npm run check
@@ -101,8 +88,7 @@ npm run loop:proof
 npm run manifest:update
 ```
 
-## Demo Walkthrough
-
-Use the live website in this repo as the example design roundtrip:
-
+## Related Docs
+- `docs/CANVAS_EXCHANGE_CONTRACT.md`
 - `docs/DEMO_WEBSITE_ROUNDTRIP.md`
+- `docs/BRAND_POSITIONING.md`

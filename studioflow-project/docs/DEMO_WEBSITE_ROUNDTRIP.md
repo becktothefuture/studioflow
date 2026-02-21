@@ -1,31 +1,24 @@
-# Demo: Website Roundtrip (Code -> Figma -> Code)
+# Demo: Website Roundtrip (Intent Preservation Walkthrough)
 
-This demo uses the current StudioFlow landing page as the source design.
+## Purpose
+This demo uses the StudioFlow landing page as a working example of intent preservation across code and canvas. The walkthrough maps each strategic claim to executable commands and concrete evidence files.
 
-Goal:
-1. push this website to Figma Canvas,
-2. customize tokens and layout behavior across 4 breakpoints,
-3. sync approved updates back to code.
-
-## What this demo proves
-
-- The website can be used as a live example design.
-- Token edits in Figma are preserved across `mobile/tablet/laptop/desktop`.
-- Contract validation blocks invalid payloads before code changes.
-- Resync updates token source + generated artifacts + snapshots + manifest.
+## What the Demo Validates
+1. One semantic model survives code-to-canvas and canvas-to-code transitions.
+2. Token and breakpoint intent remains aligned across all four required modes.
+3. Contract gates block incomplete payloads before source updates.
+4. Proof and manifest outputs provide operational traceability.
 
 ## Prerequisites
-
 ```bash
 npm run setup:project
 ```
 
-If `check:mcp` fails, complete `docs/CLAUDE_CODE_SETUP.md` first.
+If MCP readiness fails, complete `docs/CLAUDE_CODE_SETUP.md`.
 
-## Path A: Real Figma roundtrip
+## Path A: Live Figma Roundtrip
 
-### 1) Generate handoff from website code
-
+### 1) Generate canonical payload from code
 ```bash
 npm run loop:code-to-canvas
 ```
@@ -34,57 +27,47 @@ Generated files:
 - `handoff/code-to-canvas.json`
 - `handoff/canvas-to-code.template.json`
 
-### 2) Push to Figma with Claude Code
-
-Prompt in Claude Code:
-
-```text
-Use handoff/code-to-canvas.json.
-Push the current website structure into Figma Canvas.
-Create or update token frames:
-- Tokens / Colors
-- Tokens / Typography
-- Tokens / Spacing
-Create/update variable modes:
-- mobile (390)
-- tablet (768)
-- laptop (1280)
-- desktop (1440)
-Create/update screens:
-- Screen / Mobile
-- Screen / Tablet
-- Screen / Laptop
-- Screen / Desktop
-Preserve all sfid IDs from the payload.
+### 2) (Optional) Plan and sync variables
+Plan-only:
+```bash
+npm run figma:variables:plan
 ```
 
-### 3) Customize in Figma
+Live sync path:
+```bash
+FIGMA_ACCESS_TOKEN=... FIGMA_FILE_KEY=... npm run figma:variables:sync
+```
 
-Example customizations to perform in Figma:
-- adjust brand primary and secondary token values per breakpoint,
-- adjust title scale per breakpoint,
-- adjust panel width and spacing tokens per breakpoint,
-- keep all screens token-driven.
+### 3) Push payload to Figma with preserved naming
+Claude prompt:
+```text
+Use handoff/code-to-canvas.json.
+Create or update token frames, variable modes, and screens.
+Keep all sfid identifiers from the payload.
+Return the approved payload as handoff/canvas-to-code.json.
+```
 
-### 4) Export approved contract back to repo
+### 4) Apply design edits in Figma
+Recommended edits:
+- Token value updates per breakpoint mode
+- Typography scale updates per mode
+- Layout spacing updates that remain token-driven
 
+### 5) Export approved payload
 Save as:
 - `handoff/canvas-to-code.json`
 
-### 5) Verify and apply
-
+### 6) Verify, apply, and publish evidence
 ```bash
 npm run loop:verify-canvas
 npm run loop:canvas-to-code
 npm run check
 npm run build
+npm run loop:proof
 npm run manifest:update
 ```
 
-## Path B: Local simulated demo (no live Figma needed)
-
-This path generates a deterministic example payload with per-breakpoint token edits.
-
+## Path B: Local Simulated Roundtrip
 ```bash
 npm run loop:code-to-canvas
 npm run demo:website:generate
@@ -95,42 +78,31 @@ npm run build
 npm run manifest:update
 ```
 
-One-shot command:
-
+One-shot path:
 ```bash
 npm run demo:website:run
 ```
 
-(`demo:website:run` already includes `manifest:update`.)
-
-One-shot capture + proof report:
-
+Capture plus proof output:
 ```bash
 npm run demo:website:capture
 ```
 
-Output proof file:
-- `proof/latest/index.html`
-- `proof/latest/summary-card.png`
-
-## Expected output files after apply
-
+## Expected Evidence After Apply
 - `tokens/figma-variables.json`
 - `tokens/figma-breakpoint-variables.json`
 - `tokens/tokens.css`
 - `tokens/tokens.ts`
 - `src/styles/tokens.css`
 - `snapshots/figma-*.json`
+- `proof/latest/index.html`
+- `proof/latest/summary-card.png`
 - `studioflow.manifest.json`
 
-## Compatibility alias path
-
-If your team still uses Figma-named commands:
-
-```bash
-npm run loop:code-to-figma
-npm run loop:verify-figma
-npm run loop:figma-to-code
-```
-
-These commands delegate to the same v3 canvas internals.
+## Guarantee Mapping for This Demo
+| Strategic claim | Command | Evidence |
+| --- | --- | --- |
+| Stable identity parity | `npm run verify:id-sync` | source and snapshot sfid parity |
+| Full breakpoint validation | `npm run loop:verify-canvas` | payload mode and screen coverage |
+| Deterministic source updates | `npm run loop:canvas-to-code` | token artifacts and styles sync |
+| Review-ready traceability | `npm run loop:proof && npm run manifest:update` | proof output and manifest lineage |

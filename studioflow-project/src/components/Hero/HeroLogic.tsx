@@ -106,136 +106,198 @@ export function HeroLogic() {
   const content = useMemo<LandingContent>(
     () => ({
       brandName: "StudioFlow",
-      announcement: "OPEN THE LOOP // from spark to shipped signal",
-      kicker: "StudioFlow Workflow / Code -> Canvas -> Code",
-      heading: "Turn rough intent into living interfaces.",
-      body: "Run one command, capture proof, then move through a code-canvas-code rhythm that keeps intent and implementation aligned.",
-      commandLine: "$ npm run setup:project",
-      commandHint: "Then run npm run demo:website:capture to generate your first proof report.",
-      primaryActionLabel: "Start the Flow",
-      secondaryActionLabel: "Jump to Proof + FAQ",
+      tagline: "One intent. Two environments. Zero drift.",
       topLinks: [
-        { label: "First Flow", href: "#how-to-use" },
+        { label: "Alignment", href: "#structural-alignment-title" },
+        { label: "Intent", href: "#intent-preservation-title" },
         { label: "Workflow", href: "#how-to-use" },
         { label: "Proof", href: "#proof" },
         { label: "Docs", href: "#docs" },
         { label: "Repo", href: "./README.md" }
       ],
-      whyTitle: "Why teams keep this loop close",
-      whyBody: "StudioFlow keeps design intent, sfids, tokens, and verification inside one operating rhythm. Teams move quickly and keep control.",
-      supportTitle: "First-run readiness",
-      supportMatrix: [
-        { label: "Guided local proof path", status: "READY" },
-        { label: "4-breakpoint contract", status: "READY" },
-        { label: "Token and sfid gates", status: "READY" },
-        { label: "Proof artifacts per run", status: "READY" }
-      ],
-      offerTitle: "What this workflow gives you",
-      offerCards: [
-        { icon: "◉", title: "Rapid first proof", body: "Track A runs locally and writes before and after proof files in the opening pass." },
-        { icon: "◎", title: "Modeled 28-46% faster loop time", body: "One payload contract and scripted gates reduce coordination overhead during iteration." },
-        { icon: "◍", title: "Modeled 70-90% lower breakpoint drift", body: "Validation requires mobile, tablet, laptop, and desktop modes plus matching screens." },
-        { icon: "◌", title: "Modeled 95%+ token consistency", body: "Token sync checks keep style values aligned with canonical token sources." },
-        { icon: "◐", title: "Modeled 25-40% lower handoff rework", body: "Stable sfid anchors preserve identity through canvas and code sync passes." },
-        { icon: "◑", title: "Proof by default", body: "Each serious loop can produce report artifacts reviewers can open immediately." },
-        { icon: "◒", title: "Tooling alignment", body: "Claude, Codex, and editor agents operate with the same contract vocabulary." },
-        { icon: "◓", title: "Future-ready operating model", body: "The same workflow supports code-first and design-first entry with shared gates." }
-      ],
-      howToTitle: "From first spark to full roundtrip",
-      howToSteps: [
-        {
-          title: "Open the loop",
-          detail: "Install dependencies, prepare Claude config, run checks, and produce initial proof output.",
-          command: "npm run setup:project && npm run demo:website:capture"
-        },
-        {
-          title: "Connect your workspace",
-          detail: "Start Claude, run /mcp, and complete Figma auth for the active session.",
-          command: "claude"
-        },
-        {
-          title: "Create the canvas handoff",
-          detail: "Create the payload that mirrors your current website structure for Figma.",
-          command: "npm run loop:code-to-canvas"
-        },
-        {
-          title: "Close the roundtrip with proof",
-          detail: "Generate handoff, push in Figma, export canvas-to-code payload, verify, apply, and refresh manifest.",
-          command: "npm run loop:verify-canvas && npm run loop:canvas-to-code && npm run check && npm run build && npm run manifest:update"
-        }
-      ],
-      agentTitle: "Operator support",
-      agentSupport: [
-        { name: "Claude Code", instruction: "Use .claude/commands playbooks for repeatable loop actions." },
-        { name: "OpenAI Codex", instruction: "Keep AGENTS.md aligned with token and sfid gate policy." },
-        { name: "Cursor", instruction: "Pin contract and token guidance in project rules." },
-        { name: "GitHub Copilot", instruction: "Mirror workflow command gates in instruction files." }
-      ],
-      useCaseTitle: "Use cases",
-      useCases: [
-        {
-          id: "coding-agents",
-          label: "Coding Agents",
-          title: "Generated UI stays policy-aligned",
-          body: "Teams ship quickly while the workflow keeps style values, IDs, and payload shape coherent."
-        },
-        {
-          id: "design-systems",
-          label: "Design Systems",
-          title: "Token systems stay stable through growth",
-          body: "Design system stewards push updates once and track propagation across breakpoints and docs."
-        },
-        {
-          id: "product-teams",
-          label: "Product Teams",
-          title: "Roadmap pressure keeps quality visible",
-          body: "Feature squads move with confidence since each release carries proof artifacts beside code changes."
-        }
-      ],
-      tierTitle: "Adoption tiers",
-      tierCards: [
-        {
-          name: "Local Loop",
-          subtitle: "Solo or pair workflows",
-          bullets: ["Local command loop", "Proof strip in README", "Token and sfid validation"],
-          ctaLabel: "Run Local",
-          ctaHref: "#how-to-use"
-        },
-        {
-          name: "Team Flow",
-          subtitle: "Cross-functional product squads",
-          bullets: ["Shared handoff contracts", "Canvas verification gate", "Manifest lineage for reviews"],
-          ctaLabel: "View Workflow",
-          ctaHref: "./docs/STUDIOFLOW_WORKFLOW.md",
-          featured: true
-        },
-        {
-          name: "Enterprise Workflow",
-          subtitle: "Platform and governance programs",
-          bullets: ["Policy-driven release checks", "Audit-ready snapshots", "Multi-repo rollout patterns"],
-          ctaLabel: "Read Contract",
-          ctaHref: "./docs/CANVAS_EXCHANGE_CONTRACT.md"
-        }
-      ],
-      faqTitle: "Proof + FAQ",
-      faqItems: [
-        {
-          question: "How quickly does this workflow click?",
-          answer: "Run npm run setup:project and npm run demo:website:capture. The first local pass writes proof/latest/index.html and a share card you can review immediately."
-        },
-        {
-          question: "What confirms roundtrip integrity?",
-          answer: "loop:verify-canvas checks token frames, four variable modes, four screens, token coverage, and sfid parity before apply."
-        },
-        {
-          question: "What if Claude says no MCP servers are configured?",
-          answer: "Run claude mcp add --transport http figma https://mcp.figma.com/mcp --scope user, then run claude mcp list again."
-        },
-        {
-          question: "Can this workflow run in CI pipelines?",
-          answer: "Yes. Use the same loop commands in automation and gate merges on check, build, and verify outcomes."
-        }
-      ],
+      hero: {
+        announcement: "INTENT PRESERVATION WORKFLOW",
+        kicker: "StudioFlow / Code -> Canvas -> Code",
+        heading: "Preserve one intent from code to design.",
+        valueStatement: "StudioFlow keeps semantic identity stable across code and design through deterministic contracts and naming parity.",
+        supportingParagraph:
+          "Production teams use one operational language for tokens, modes, screens, and sfids, then verify each transition with explicit gates before release.",
+        commandLine: "$ npm run setup:project",
+        commandHint: "Then run npm run demo:website:capture to generate proof/latest/index.html and summary-card evidence.",
+        primaryActionLabel: "Start First Verified Loop",
+        secondaryActionLabel: "Inspect Proof + Guarantees"
+      },
+      structuralAlignment: {
+        title: "Structural Alignment",
+        body: "Shared schema keeps token vocabulary, breakpoint modes, screen definitions, and stable identifiers aligned across every environment.",
+        matrix: [
+          {
+            label: "Token frame coverage",
+            guarantee: "Required token frames are present and complete.",
+            verification: "npm run loop:verify-canvas",
+            evidence: "handoff/canvas-to-code.json -> tokenFrames"
+          },
+          {
+            label: "Breakpoint mode coverage",
+            guarantee: "mobile/tablet/laptop/desktop modes are validated with expected widths.",
+            verification: "npm run loop:verify-canvas",
+            evidence: "handoff/canvas-to-code.json -> variableModes"
+          },
+          {
+            label: "Screen parity",
+            guarantee: "All four breakpoint screens are required for apply.",
+            verification: "npm run loop:verify-canvas",
+            evidence: "handoff/canvas-to-code.json -> screens"
+          },
+          {
+            label: "Stable identity parity",
+            guarantee: "All required sfids remain aligned across code and payload.",
+            verification: "npm run verify:id-sync",
+            evidence: "snapshots/*.json and source data-sfid attributes"
+          }
+        ]
+      },
+      intentPreservation: {
+        title: "Preserving Intent Across Environments",
+        body: "Intent survives each transition when naming, token semantics, and screen coverage map to one contract model.",
+        examples: [
+          {
+            title: "Code to canvas",
+            state: "Source components emit canonical payload structure and sfid identity into handoff/code-to-canvas.json.",
+            result: "Figma receives the same semantic map used in code review and release checks.",
+            verification: "npm run loop:code-to-canvas"
+          },
+          {
+            title: "Canvas to contract",
+            state: "Approved edits return through handoff/canvas-to-code.json with complete token and mode coverage.",
+            result: "Contract gates confirm parity before code changes are accepted.",
+            verification: "npm run loop:verify-canvas"
+          },
+          {
+            title: "Contract to source",
+            state: "Verified payload updates token sources and generated artifacts in one deterministic apply step.",
+            result: "Code and design remain synchronized through one intent model.",
+            verification: "npm run loop:canvas-to-code"
+          }
+        ]
+      },
+      deterministicGeneration: {
+        title: "Deterministic Code-to-Canvas Generation",
+        body: "The workflow emits repeatable payloads, validates constraints, and records evidence for each approved loop.",
+        steps: [
+          {
+            title: "Initialize operator baseline",
+            detail: "Install dependencies, configure agent tooling, and run baseline checks before edits begin.",
+            command: "npm run setup:project",
+            verification: "Validation target: check + build pass in local environment."
+          },
+          {
+            title: "Generate canonical payload",
+            detail: "Export code state into handoff/code-to-canvas.json for deterministic downstream processing.",
+            command: "npm run loop:code-to-canvas",
+            verification: "Evidence file: handoff/code-to-canvas.json."
+          },
+          {
+            title: "Enforce contract gates",
+            detail: "Validate frames, modes, screens, and sfids before any source mutation is accepted.",
+            command: "npm run loop:verify-canvas",
+            verification: "Evidence file: studioflow.manifest.json gate status."
+          },
+          {
+            title: "Apply and record proof",
+            detail: "Apply verified payloads and publish review artifacts tied to the current loop state.",
+            command: "npm run loop:canvas-to-code && npm run loop:proof && npm run manifest:update",
+            verification: "Evidence files: proof/latest/index.html and studioflow.manifest.json."
+          }
+        ]
+      },
+      identityParity: {
+        title: "Naming and Component Identity Parity",
+        body: "Stable naming controls preserve component identity and semantic meaning across generated payloads and source assets.",
+        rules: [
+          {
+            title: "sfid continuity",
+            control: "Every required sfid from source must appear in contract payloads and verification snapshots.",
+            verification: "npm run verify:id-sync"
+          },
+          {
+            title: "Token source authority",
+            control: "Token names originate from tokens/figma-variables.json and remain canonical across generation outputs.",
+            verification: "npm run verify:tokens-sync"
+          },
+          {
+            title: "Mode naming lock",
+            control: "Mode names remain mobile/tablet/laptop/desktop with fixed width semantics.",
+            verification: "npm run loop:verify-canvas"
+          },
+          {
+            title: "Deterministic apply gate",
+            control: "Source updates occur only after contract verification reports complete coverage.",
+            verification: "npm run loop:verify-canvas && npm run loop:canvas-to-code"
+          }
+        ]
+      },
+      teamOutcomes: {
+        title: "Team-Level Outcomes",
+        body: "Operational outcomes are tracked as modeled signals until measured production baselines are established for each team.",
+        outcomes: [
+          {
+            signal: "Design-to-merge loop time",
+            range: "Modeled 28-46% faster",
+            measurement: "Track elapsed time from payload generation to manifest update across comparable releases."
+          },
+          {
+            signal: "Breakpoint drift rate",
+            range: "Modeled 70-90% lower",
+            measurement: "Count breakpoint-specific visual or semantic regressions after loop verification."
+          },
+          {
+            signal: "Token consistency pass rate",
+            range: "Modeled 95%+",
+            measurement: "Capture pass/fail rates from npm run verify:tokens-sync in CI and local loops."
+          },
+          {
+            signal: "Post-handoff rework cycles",
+            range: "Modeled 25-40% lower",
+            measurement: "Track code review rounds linked to design interpretation defects."
+          },
+          {
+            signal: "Operational confidence",
+            range: "Modeled +1.2 to +1.8 rubric points",
+            measurement: "Use internal readiness rubric tied to proof artifacts and gate coverage."
+          }
+        ]
+      },
+      technicalFoundations: {
+        title: "Technical Foundations",
+        body: "StudioFlow relies on explicit contracts, verification scripts, and manifest evidence to keep intent alignment inspectable at scale.",
+        foundations: [
+          {
+            title: "Workflow specification",
+            detail: "Runtime entry paths, gate policy, and promotion logic for code-first and design-first operation.",
+            referenceLabel: "Open STUDIOFLOW_WORKFLOW.md",
+            referenceHref: "./docs/STUDIOFLOW_WORKFLOW.md"
+          },
+          {
+            title: "Canvas exchange contract",
+            detail: "Canonical payload schema and validation rules for deterministic canvas-to-code synchronization.",
+            referenceLabel: "Open CANVAS_EXCHANGE_CONTRACT.md",
+            referenceHref: "./docs/CANVAS_EXCHANGE_CONTRACT.md"
+          },
+          {
+            title: "Demo roundtrip implementation",
+            detail: "Executable example that maps intent preservation claims to commands and output artifacts.",
+            referenceLabel: "Open DEMO_WEBSITE_ROUNDTRIP.md",
+            referenceHref: "./docs/DEMO_WEBSITE_ROUNDTRIP.md"
+          },
+          {
+            title: "Project operator manual",
+            detail: "Installation flow, glossary, naming conventions, and roadmap for system operators.",
+            referenceLabel: "Open Project README",
+            referenceHref: "./README.md"
+          }
+        ]
+      },
       footerGroups: [
         {
           title: "Workflow",
@@ -259,7 +321,7 @@ export function HeroLogic() {
           ]
         }
       ],
-      legalLine: "StudioFlow Workflow // Alexander Beck Studio // 2026"
+      legalLine: "StudioFlow Workflow // Intent Preservation System // 2026"
     }),
     []
   );

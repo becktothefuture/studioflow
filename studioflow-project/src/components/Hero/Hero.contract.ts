@@ -5,47 +5,92 @@ export interface TopLink {
   href: string;
 }
 
-export interface SupportMatrixItem {
+export interface AlignmentMatrixItem {
   label: string;
-  status: string;
+  guarantee: string;
+  verification: string;
+  evidence: string;
 }
 
-export interface OfferCard {
-  icon: string;
+export interface IntentExample {
   title: string;
-  body: string;
+  state: string;
+  result: string;
+  verification: string;
 }
 
-export interface HowToStep {
+export interface GenerationStep {
   title: string;
   detail: string;
   command?: string;
+  verification: string;
 }
 
-export interface AgentSupportItem {
-  name: string;
-  instruction: string;
+export interface IdentityRule {
+  title: string;
+  control: string;
+  verification: string;
 }
 
-export interface UseCase {
-  id: string;
-  label: string;
+export interface OutcomeItem {
+  signal: string;
+  range: string;
+  measurement: string;
+}
+
+export interface FoundationItem {
+  title: string;
+  detail: string;
+  referenceLabel: string;
+  referenceHref: string;
+}
+
+export interface HeroSection {
+  announcement: string;
+  kicker: string;
+  heading: string;
+  valueStatement: string;
+  supportingParagraph: string;
+  commandLine: string;
+  commandHint: string;
+  primaryActionLabel: string;
+  secondaryActionLabel: string;
+}
+
+export interface StructuralAlignmentSection {
   title: string;
   body: string;
+  matrix: AlignmentMatrixItem[];
 }
 
-export interface TierCard {
-  name: string;
-  subtitle: string;
-  bullets: string[];
-  ctaLabel: string;
-  ctaHref: string;
-  featured?: boolean;
+export interface IntentPreservationSection {
+  title: string;
+  body: string;
+  examples: IntentExample[];
 }
 
-export interface FaqItem {
-  question: string;
-  answer: string;
+export interface DeterministicGenerationSection {
+  title: string;
+  body: string;
+  steps: GenerationStep[];
+}
+
+export interface IdentityParitySection {
+  title: string;
+  body: string;
+  rules: IdentityRule[];
+}
+
+export interface TeamOutcomesSection {
+  title: string;
+  body: string;
+  outcomes: OutcomeItem[];
+}
+
+export interface TechnicalFoundationsSection {
+  title: string;
+  body: string;
+  foundations: FoundationItem[];
 }
 
 export interface FooterLink {
@@ -68,31 +113,15 @@ export interface ShaderBackgroundConfig {
 
 export interface LandingContent {
   brandName: string;
-  announcement: string;
-  kicker: string;
-  heading: string;
-  body: string;
-  commandLine: string;
-  commandHint: string;
-  primaryActionLabel: string;
-  secondaryActionLabel: string;
+  tagline: string;
   topLinks: TopLink[];
-  whyTitle: string;
-  whyBody: string;
-  supportTitle: string;
-  supportMatrix: SupportMatrixItem[];
-  offerTitle: string;
-  offerCards: OfferCard[];
-  howToTitle: string;
-  howToSteps: HowToStep[];
-  agentTitle: string;
-  agentSupport: AgentSupportItem[];
-  useCaseTitle: string;
-  useCases: UseCase[];
-  tierTitle: string;
-  tierCards: TierCard[];
-  faqTitle: string;
-  faqItems: FaqItem[];
+  hero: HeroSection;
+  structuralAlignment: StructuralAlignmentSection;
+  intentPreservation: IntentPreservationSection;
+  deterministicGeneration: DeterministicGenerationSection;
+  identityParity: IdentityParitySection;
+  teamOutcomes: TeamOutcomesSection;
+  technicalFoundations: TechnicalFoundationsSection;
   footerGroups: FooterGroup[];
   legalLine: string;
 }
