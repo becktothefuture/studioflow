@@ -1,38 +1,38 @@
 # StudioFlow
 
-<div align="center">
-  <img src="./assets/hero-banner.png" alt="StudioFlow Hero Banner: DESIGN · CODE · VERIFY · REPEAT">
-</div>
+**StudioFlow** is a practical workflow for creating a high-fidelity, verifiable bridge between your code and your Figma designs. It’s a set of rules and scripts that help you fight design-to-code drift and ship with confidence.
 
+It is **not** a magic, no-code solution. It’s a **code-first** process for teams who value craft and discipline.
+
+<br>
 <div align="center">
   <img src="./assets/divider.png" alt="Decorative Divider" width="700">
 </div>
+<br>
 
-**StudioFlow** is a practical, verifiable system for building products where the design you see in Figma is the code you ship. It’s not a library or a framework, but a set of rules and automated checks that create a durable, high-fidelity bridge between your design environment and your codebase.
+## The Core Idea: A Verifiable Loop
 
-It solves one of the most persistent problems in product development: **design-to-code drift**.
+The goal is to make the relationship between code and design explicit and testable. StudioFlow is built around a six-step loop that starts in code, moves to Figma for design refinement, and then returns to code for implementation.
 
 <div align="center">
   <img src="./assets/workflow-diagram.png" alt="StudioFlow Workflow Diagram: A circular loop showing BUILD → TOKENS → SYNC → DESIGN → REFINE → MERGE" width="500">
 </div>
 
-<div align="center">
-  <img src="./assets/divider.png" alt="Decorative Divider" width="700">
-</div>
+### How does it work?
 
-<div align="center">
-  <img src="./assets/rules-card.png" alt="The 5 Rules of StudioFlow: Whole-Page, Token-Only, Stable ID, UI Contract, Audit Trail" width="700">
-</div>
+1.  **BUILD:** You start by writing code. Build your UI using a shared set of design tokens (colors, spacing, etc.).
 
-<br>
+2.  **TOKENS:** Your design tokens are the single source of truth for style. They are defined in a format that both Figma and your code can read.
 
-| Rule | Description |
-|---|---|
-| 1. **Whole-Page** | Synchronization always happens on a complete, assembled page. No floating components. |
-| 2. **Token-Only** | All styling comes from a central token system. No hard-coded “magic numbers.” |
-| 3. **Stable ID** | Every important UI element has a unique, matching ID in both code and Figma. |
-| 4. **UI Contract** | A component’s visual structure is strictly separated from its business logic by a formal TypeScript contract. |
-| 5. **Audit Trail** | The design’s history is versioned alongside the code via structural “snapshots” committed to the repository. |
+3.  **SYNC:** This is the critical step. You use a tool to get your coded UI *into* Figma. **Yes, this requires code.** You can use an AI-powered editor with Figma access (like Cursor) to “send” your browser preview to a new Figma frame, or you can use a community plugin like `html.to.design`.
+
+4.  **DESIGN:** Now that you have a 1:1 copy of your code in Figma, designers can work their magic. They can explore layouts, refine details, and create variants, all while using the same design tokens.
+
+5.  **REFINE:** Once the design is approved in Figma, you bring those changes back into your codebase. Again, this can be done with an AI assistant that can read the Figma file and generate the updated code, or it can be done manually.
+
+6.  **MERGE:** You merge the new code, and run a suite of verification scripts to ensure nothing broke. These scripts check that you’re only using design tokens, that your layer names match your code, and that your UI contracts are still valid.
+
+This loop ensures that your Figma file is never just a picture of the app; it’s a direct, verifiable representation of the code itself.
 
 <br>
 <div align="center">
@@ -40,48 +40,24 @@ It solves one of the most persistent problems in product development: **design-t
 </div>
 <br>
 
-## Getting Started
+## What This Repo Gives You
 
-### Prerequisites
+This repository is a starter kit for implementing the StudioFlow workflow. It includes:
 
-- **Node.js** (v18+)
-- **Figma Desktop App** (Pro, Organization, or Enterprise seat)
-- **MCP-compatible Editor** (e.g., [Cursor](https://cursor.sh/), VS Code)
+*   **The full workflow documentation:** A detailed guide in `/docs/WORKFLOW.md`.
+*   **Verification Scripts:** A set of Node.js scripts in `/scripts` to check for hard-coded values, out-of-sync tokens, and mismatched IDs.
+*   **Example Component:** A sample `Hero` component that demonstrates the Layout/Logic/Contract pattern.
+*   **Boilerplate:** All the necessary configuration for a modern React + Vite + TypeScript project.
 
-### Installation
+### To get started:
 
-1.  **Clone the repository:**
-    ```bash
-    git clone https://github.com/alexanderbeck-studio/studioflow.git
-    cd studioflow
-    ```
+1.  Clone the repo: `git clone https://github.com/becktothefuture/studioflow.git`
+2.  Install dependencies: `npm install`
+3.  Run the dev server: `npm run dev`
+4.  Read the full guide: [`/docs/WORKFLOW.md`](./docs/WORKFLOW.md)
 
-2.  **Install dependencies:**
-    ```bash
-    npm install
-    ```
-
-3.  **Run the verification suite:**
-    ```bash
-    npm run check
-    ```
-
-4.  **Start the development server:**
-    ```bash
-    npm run dev
-    ```
-
-## The Workflow in Practice
-
-The full, detailed workflow is documented in [`/docs/WORKFLOW.md`](./docs/WORKFLOW.md). The high-level loop is:
-
-1.  **Foundation:** Build the initial UI in code, defining tokens and assigning stable IDs.
-2.  **Code → Design Sync:** Use an MCP client to send the live browser preview into Figma.
-3.  **Validation & Exploration:** Run a script to validate that all IDs are synced. Once validated, designers can refine the UI in Figma.
-4.  **Snapshot:** Commit a structural snapshot of the final Figma design to the repository.
-5.  **Design → Code Sync:** Use an MCP client to generate new UI code from the refined Figma design.
-6.  **Merge & Verify:** Merge the new code and run `npm run check` to type-check, validate invariants, and run visual regression tests.
-
+<br>
 <div align="center">
-  <img src="./assets/footer.png" alt="StudioFlow Footer: SF Monogram and Alexander Beck Studio · London">
+  <img src="./assets/divider.png" alt="Decorative Divider" width="700">
 </div>
+<br>
