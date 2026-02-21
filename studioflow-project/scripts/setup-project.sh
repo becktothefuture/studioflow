@@ -1013,7 +1013,7 @@ add_step "Running contract fixtures" "npm run test:contracts" "npm run test:cont
 add_step "Running quality gates" "npm run check" "npm run check" "fail"
 add_step "Generating canvas handoff" "npm run loop:code-to-canvas" "npm run loop:code-to-canvas" "fail"
 add_step "Validating MCP health" "npm run check:mcp" "claude mcp add --transport http figma https://mcp.figma.com/mcp --scope user && claude mcp list" "warn"
-add_step "Running deep bridge healthcheck" 'if [[ -n "${FIGMA_ACCESS_TOKEN:-}" && -n "${FIGMA_FILE_KEY:-}" ]]; then STUDIOFLOW_STRICT_FIGMA_BRIDGE=1 npm run check:figma-bridge; else npm run check:figma-bridge; fi' "FIGMA_ACCESS_TOKEN=... FIGMA_FILE_KEY=... STUDIOFLOW_STRICT_FIGMA_BRIDGE=1 npm run check:figma-bridge" "fail"
+add_step "Running deep bridge healthcheck" "npm run check:figma-bridge" "FIGMA_ACCESS_TOKEN=... FIGMA_FILE_KEY=... npm run check:figma-bridge" "warn"
 
 TOTAL_STEPS="${#STEP_NAMES[@]}"
 if [[ "${STUDIOFLOW_SETUP_SHOW_CHECKLIST:-0}" == "1" ]]; then
