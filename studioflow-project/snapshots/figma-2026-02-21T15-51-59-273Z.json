@@ -1,0 +1,14 @@
+{
+  "generatedAt": "2026-02-21T15:51:59.272Z",
+  "source": "code",
+  "sfids": [
+    "sfid:hero-actions",
+    "sfid:hero-body",
+    "sfid:hero-content",
+    "sfid:hero-kicker",
+    "sfid:hero-primary-cta",
+    "sfid:hero-root",
+    "sfid:hero-secondary-cta",
+    "sfid:hero-title"
+  ]
+}

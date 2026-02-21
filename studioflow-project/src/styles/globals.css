@@ -1,0 +1,84 @@
+@import "./tokens.css";
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-body);
+  color: var(--color-brand-text);
+  background:
+    radial-gradient(circle at 10% 10%, color-mix(in srgb, var(--color-brand-primary) 14%, white), transparent 40%),
+    radial-gradient(circle at 80% 20%, color-mix(in srgb, var(--color-brand-primary) 7%, white), transparent 44%),
+    linear-gradient(120deg, var(--color-brand-surface), white);
+}
+
+.hero-root {
+  display: grid;
+  place-items: center;
+  min-height: 100%;
+  padding: var(--space-xl);
+}
+
+.hero-content {
+  display: grid;
+  gap: var(--space-md);
+  max-width: 52ch;
+  background: color-mix(in srgb, var(--color-brand-surface) 90%, white);
+  border: var(--size-border-default) solid color-mix(in srgb, var(--color-brand-primary) 20%, white);
+  border-radius: var(--radius-md);
+  padding: var(--space-xl);
+  box-shadow: var(--shadow-card);
+}
+
+.hero-kicker {
+  margin: 0;
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--font-letter-spacing-kicker);
+  text-transform: uppercase;
+}
+
+.hero-title {
+  margin: 0;
+  font-size: var(--font-size-title);
+  line-height: 1.05;
+}
+
+.hero-body {
+  margin: 0;
+  line-height: 1.5;
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+.button {
+  border: var(--size-border-default) solid transparent;
+  border-radius: var(--radius-sm);
+  padding: var(--space-sm) var(--space-lg);
+  font: inherit;
+  font-weight: var(--font-weight-bold);
+  cursor: pointer;
+}
+
+.button-primary {
+  color: white;
+  background: var(--color-brand-primary);
+}
+
+.button-secondary {
+  color: var(--color-brand-text);
+  background: white;
+  border-color: color-mix(in srgb, var(--color-brand-primary) 40%, white);
+}

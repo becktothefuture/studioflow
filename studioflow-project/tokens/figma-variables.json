@@ -1,0 +1,46 @@
+{
+  "color": {
+    "brand": {
+      "primary": { "value": "#1A5BFF" },
+      "surface": { "value": "#F6F8FF" },
+      "text": { "value": "#0E1325" }
+    }
+  },
+  "space": {
+    "xs": { "value": "4px" },
+    "sm": { "value": "8px" },
+    "md": { "value": "16px" },
+    "lg": { "value": "24px" },
+    "xl": { "value": "40px" }
+  },
+  "size": {
+    "border": {
+      "default": { "value": "1px" }
+    }
+  },
+  "radius": {
+    "sm": { "value": "6px" },
+    "md": { "value": "12px" }
+  },
+  "shadow": {
+    "card": {
+      "value": "0 12px 32px color-mix(in srgb, var(--color-brand-primary) 18%, transparent)"
+    }
+  },
+  "font": {
+    "family": {
+      "base": { "value": "\"Space Grotesk\", \"Inter\", sans-serif" }
+    },
+    "size": {
+      "body": { "value": "16px" },
+      "title": { "value": "48px" }
+    },
+    "letter-spacing": {
+      "kicker": { "value": "0.03em" }
+    },
+    "weight": {
+      "regular": { "value": "400" },
+      "bold": { "value": "700" }
+    }
+  }
+}
