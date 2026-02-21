@@ -26,13 +26,16 @@ StudioFlow preserves intent through three controls:
 ## System Flow
 1. Generate canonical handoff from code.
    - `npm run loop:code-to-canvas`
-2. Apply updates in Figma and export canonical response payload.
+2. Export tokens for Figma variable import.
+   - `npm run export:tokens-studio`
+   - Import `tokens/tokens-studio-import.json` via Tokens Studio plugin (one-time, or when tokens change).
+3. Apply updates in Figma and export canonical response payload.
    - `handoff/canvas-to-code.json`
-3. Verify contract integrity before source mutation.
+4. Verify contract integrity before source mutation.
    - `npm run loop:verify-canvas`
-4. Apply verified updates into source artifacts.
+5. Apply verified updates into source artifacts.
    - `npm run loop:canvas-to-code`
-5. Enforce project gates and publish evidence.
+6. Enforce project gates and publish evidence.
    - `npm run check && npm run build && npm run loop:proof && npm run manifest:update`
 
 ## Entry Paths
@@ -79,7 +82,8 @@ Payloads from exploratory providers require full `loop:verify-canvas` pass befor
 ```bash
 npm run setup:project
 npm run loop:code-to-canvas
-# Figma operations and export
+npm run export:tokens-studio
+# Import tokens via Tokens Studio plugin if needed, then Figma operations and export
 npm run loop:verify-canvas
 npm run loop:canvas-to-code
 npm run check

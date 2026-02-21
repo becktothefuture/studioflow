@@ -15,11 +15,14 @@ npm run check
 npm run loop:code-to-canvas
 ```
 
-3. Bootstrap Figma variables (optional REST automation):
+3. Export tokens for Figma import:
 ```bash
-npm run figma:variables:plan
-FIGMA_ACCESS_TOKEN=... FIGMA_FILE_KEY=... npm run figma:variables:sync
+npm run export:tokens-studio
 ```
+
+Import into Figma (one-time, or when tokens change):
+- Plugins → Tokens Studio for Figma → load `tokens/tokens-studio-import.json`
+- Export to Figma → Variables
 
 4. Run deep bridge gate:
 ```bash

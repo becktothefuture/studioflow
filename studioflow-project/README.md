@@ -29,17 +29,20 @@ The guarantees below are enforceable and mapped to commands.
 ## Architecture Overview
 System flow:
 1. `npm run loop:code-to-canvas` generates canonical payloads.
-2. Figma returns approved updates in `handoff/canvas-to-code.json`.
-3. `npm run loop:verify-canvas` validates token/mode/screen/sfid coverage.
-4. `npm run loop:canvas-to-code` applies verified updates into source.
-5. `npm run check && npm run build` validates source integrity.
-6. `npm run loop:proof && npm run manifest:update` records evidence.
+2. `npm run export:tokens-studio` generates Tokens Studio import file.
+3. Figma receives tokens via Tokens Studio plugin (one-time) and returns approved updates in `handoff/canvas-to-code.json`.
+4. `npm run loop:verify-canvas` validates token/mode/screen/sfid coverage.
+5. `npm run loop:canvas-to-code` applies verified updates into source.
+6. `npm run check && npm run build` validates source integrity.
+7. `npm run loop:proof && npm run manifest:update` records evidence.
 
 ## Workflow Overview
 Code-first path:
 ```bash
 npm run setup:project
 npm run loop:code-to-canvas
+npm run export:tokens-studio
+# Import tokens/tokens-studio-import.json via Tokens Studio plugin in Figma (one-time)
 # Figma update + export handoff/canvas-to-code.json
 npm run loop:verify-canvas
 npm run loop:canvas-to-code

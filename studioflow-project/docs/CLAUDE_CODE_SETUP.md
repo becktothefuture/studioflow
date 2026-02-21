@@ -23,12 +23,10 @@ This command runs:
 - initial code-to-canvas payload generation.
 
 After checks pass, use the installer menu directly:
-- `1` live Figma flow,
-- `2` credentials setup (live validation + `SAVE`),
-- `3` strict bridge/API check,
-- `4` local proof only,
-- `5` full loop + proof,
-- `a` advanced actions.
+- `1` Send website to Figma (recommended),
+- `2` Create a local proof report,
+- `3` Advanced tools,
+- `q` Quit installer.
 
 ## 2) MCP readiness (hard checks)
 
@@ -97,8 +95,10 @@ If Claude can create/update content in your open Figma file, the bridge is live.
 - if `FIGMA_ACCESS_TOKEN` and `FIGMA_FILE_KEY` are present:
   - validates `/me`,
   - validates file access,
-  - validates variables endpoint access,
-  - writes/updates a real test variable collection (`StudioFlow Bridge Check`) and test variable (`bridge-check/ping`) for all four modes.
+  - validates variables endpoint access (Enterprise plan only),
+  - writes/updates a real test variable collection (`StudioFlow Bridge Check`) and test variable (`bridge-check/ping`) for all four modes (Enterprise plan only).
+
+Non-Enterprise users: skip strict mode. Variables are imported via Tokens Studio plugin instead (see section 2.3).
 
 Strict mode (require live write checks):
 
@@ -132,6 +132,34 @@ Optional cadence controls:
 
 ```bash
 STUDIOFLOW_MONITOR_INTERVAL=45 STUDIOFLOW_MONITOR_DEEP_EVERY=3 npm run monitor:figma-bridge:start
+```
+
+## 2.3) Tokens Studio variable import (any Figma plan)
+
+StudioFlow tokens are imported into Figma as variables using the free Tokens Studio plugin. This replaces the Enterprise-only Variables REST API for most users.
+
+Generate the import file:
+
+```bash
+npm run export:tokens-studio
+```
+
+This creates `tokens/tokens-studio-import.json` with all tokens across 4 breakpoint modes (mobile, tablet, laptop, desktop).
+
+Import steps (one-time, or when source tokens change):
+1. Open your Figma file.
+2. Plugins → **Tokens Studio for Figma** (install from Figma Community if needed).
+3. Load the JSON file from `tokens/tokens-studio-import.json`.
+4. Export to Figma → Variables.
+   - **Free tier**: export each token set individually.
+   - **Pro tier** ($5/mo): export from Themes → creates 1 collection with 4 modes (recommended).
+
+Once variables exist in Figma, they persist. Claude/MCP references them when pushing the design.
+
+Enterprise users with `file_variables` scopes can still use the fully automated path:
+
+```bash
+FIGMA_ACCESS_TOKEN=... FIGMA_FILE_KEY=... npm run figma:variables:sync
 ```
 
 ## 3) Manual setup path (full control)

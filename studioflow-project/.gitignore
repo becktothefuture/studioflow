@@ -23,6 +23,9 @@ snapshots/figma-*.json
 # Generated per-breakpoint export
 tokens/figma-breakpoint-variables.json
 
+# Generated Tokens Studio import file
+tokens/tokens-studio-import.json
+
 # Local scratch artifacts
 scripts/_*.txt
 scripts/*.tmp

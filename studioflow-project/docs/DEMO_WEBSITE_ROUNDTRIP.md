@@ -27,13 +27,17 @@ Generated files:
 - `handoff/code-to-canvas.json`
 - `handoff/canvas-to-code.template.json`
 
-### 2) (Optional) Plan and sync variables
-Plan-only:
+### 2) Import variables into Figma
+Generate Tokens Studio import file:
 ```bash
-npm run figma:variables:plan
+npm run export:tokens-studio
 ```
 
-Live sync path:
+Import via Tokens Studio plugin in Figma (one-time):
+1. Plugins → Tokens Studio for Figma → load `tokens/tokens-studio-import.json`
+2. Export to Figma → Variables
+
+Enterprise alternative (REST API, requires `file_variables` scopes):
 ```bash
 FIGMA_ACCESS_TOKEN=... FIGMA_FILE_KEY=... npm run figma:variables:sync
 ```
@@ -91,6 +95,7 @@ npm run demo:website:capture
 ## Expected Evidence After Apply
 - `tokens/figma-variables.json`
 - `tokens/figma-breakpoint-variables.json`
+- `tokens/tokens-studio-import.json`
 - `tokens/tokens.css`
 - `tokens/tokens.ts`
 - `src/styles/tokens.css`

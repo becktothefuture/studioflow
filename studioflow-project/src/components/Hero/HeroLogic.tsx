@@ -193,9 +193,9 @@ export function HeroLogic() {
           },
           {
             title: "Generate canonical payload",
-            detail: "Export code state into handoff/code-to-canvas.json for deterministic downstream processing.",
-            command: "npm run loop:code-to-canvas",
-            verification: "Evidence file: handoff/code-to-canvas.json."
+            detail: "Export code state into handoff/code-to-canvas.json and generate tokens/tokens-studio-import.json for Figma variable import.",
+            command: "npm run loop:code-to-canvas && npm run export:tokens-studio",
+            verification: "Evidence files: handoff/code-to-canvas.json, tokens/tokens-studio-import.json."
           },
           {
             title: "Enforce contract gates",

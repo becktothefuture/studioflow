@@ -67,6 +67,8 @@ Each guarantee maps to an executable command and an evidence path.
 cd studioflow-project
 npm run setup:project
 npm run loop:code-to-canvas
+npm run export:tokens-studio
+# Import tokens/tokens-studio-import.json via Tokens Studio plugin in Figma
 # Figma operations and export to handoff/canvas-to-code.json
 npm run loop:verify-canvas
 npm run loop:canvas-to-code
@@ -121,6 +123,7 @@ Successful first run criteria:
 - `sfid:*` values define stable component identity.
 - Breakpoint modes are fixed: `mobile`, `tablet`, `laptop`, `desktop`.
 - Token authority starts in `tokens/figma-variables.json`.
+- Token Studio import file is `tokens/tokens-studio-import.json`.
 - Canonical handoff files are `handoff/code-to-canvas.json` and `handoff/canvas-to-code.json`.
 
 Glossary:

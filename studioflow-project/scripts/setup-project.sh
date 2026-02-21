@@ -965,15 +965,19 @@ interactive_launch_menu() {
         if ! has_figma_credentials; then
           configure_figma_credentials || continue
         fi
-        run_interactive_action "Bridge + API gate test" "npm run check:figma-bridge" || continue
         run_interactive_action "Demo website -> Figma prep" "npm run demo:figma:prep" || continue
         if ! has_figma_credentials; then
           printf "%sCredentials are still missing. Open option 3 -> Status details to inspect.%s\n" "$YELLOW" "$RESET"
           continue
         fi
-        if ! run_interactive_action "Sync variables to Figma" "npm run figma:variables:sync"; then
-          printf "%sVariable sync skipped/failed (likely missing file_variables scopes). Continuing with code->design flow.%s\n" "$YELLOW" "$RESET"
-        fi
+        run_interactive_action "Export Tokens Studio import file" "npm run export:tokens-studio"
+        echo
+        printf "%sImport variables into Figma (one-time):%s\n" "$WHITE" "$RESET"
+        printf "  1. Open Figma → Plugins → Tokens Studio for Figma\n"
+        printf "  2. Load tokens/tokens-studio-import.json\n"
+        printf "  3. Export to Figma → Variables\n"
+        printf "  Once done, variables persist and Claude can reference them.\n"
+        echo
         read -r -p "Open Claude now for /mcp and push prompt? [Y/n]: " open_claude
         if [[ ! "$open_claude" =~ ^[Nn]$ ]]; then
           claude

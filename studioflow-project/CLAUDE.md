@@ -23,21 +23,26 @@ Keep the StudioFlow loop reliable:
 ```bash
 npm run loop:code-to-canvas
 ```
-2. Verify returned payload:
+2. Export tokens for Figma import (one-time, or when tokens change):
+```bash
+npm run export:tokens-studio
+```
+Import `tokens/tokens-studio-import.json` via Tokens Studio plugin in Figma.
+3. Verify returned payload:
 ```bash
 npm run loop:verify-canvas
 ```
-3. Apply approved payload:
+4. Apply approved payload:
 ```bash
 npm run loop:canvas-to-code
 ```
-4. Run quality gate:
+5. Run quality gate:
 ```bash
 npm run check
 npm run build
 npm run manifest:update
 ```
-5. Capture proof when needed:
+6. Capture proof when needed:
 ```bash
 npm run loop:proof
 ```

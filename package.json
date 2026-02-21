@@ -5,6 +5,7 @@
     "setup:project": "npm --prefix studioflow-project run setup:project",
     "demo:website:capture": "npm --prefix studioflow-project run demo:website:capture",
     "demo:figma:prep": "npm --prefix studioflow-project run demo:figma:prep",
+    "export:tokens-studio": "npm --prefix studioflow-project run export:tokens-studio",
     "check:figma-bridge": "npm --prefix studioflow-project run check:figma-bridge"
   }
 }

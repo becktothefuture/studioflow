@@ -33,6 +33,7 @@
     "loop:figma-to-code": "node scripts/loop-figma-to-code.mjs",
     "figma:variables:plan": "node scripts/figma-sync-variables.mjs --dry-run",
     "figma:variables:sync": "node scripts/figma-sync-variables.mjs",
+    "export:tokens-studio": "node scripts/export-tokens-studio.mjs",
     "loop:run": "npm run loop:code-to-canvas && npm run loop:verify-canvas && npm run loop:canvas-to-code && npm run check && npm run build && npm run manifest:update",
     "loop:proof": "node scripts/loop-proof.mjs",
     "setup:project": "bash scripts/setup-project.sh",
