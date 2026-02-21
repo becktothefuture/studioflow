@@ -22,6 +22,14 @@ This command runs:
 - token/contracts/check gates,
 - initial code-to-canvas payload generation.
 
+After checks pass, use the installer menu directly:
+- `1` live Figma flow,
+- `2` credentials setup (live validation + `SAVE`),
+- `3` strict bridge/API check,
+- `4` local proof only,
+- `5` full loop + proof,
+- `a` advanced actions.
+
 ## 2) MCP readiness (hard checks)
 
 Treat setup as complete only when all three checks pass.

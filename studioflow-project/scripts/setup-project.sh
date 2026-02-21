@@ -6,6 +6,7 @@ cd "$ROOT_DIR"
 ENV_LOCAL_FILE="$ROOT_DIR/.env.local"
 FIGMA_TOKEN_HELP_URL="https://help.figma.com/hc/en-us/articles/8085703771159-Manage-personal-access-tokens"
 FIGMA_SECURITY_SETTINGS_URL="https://www.figma.com/settings?tab=security"
+FIGMA_API_BASE="${STUDIOFLOW_FIGMA_API_BASE:-https://api.figma.com/v1}"
 MONITOR_INTERVAL_DEFAULT="${STUDIOFLOW_MONITOR_INTERVAL:-60}"
 MONITOR_DEEP_EVERY_DEFAULT="${STUDIOFLOW_MONITOR_DEEP_EVERY:-5}"
 
@@ -17,6 +18,7 @@ if [[ -t 1 ]]; then
   BRAND=$'\033[38;2;153;186;200m'
   BRAND_SOFT=$'\033[38;2;122;146;158m'
   WHITE=$'\033[97m'
+  GREEN=$'\033[92m'
   YELLOW=$'\033[93m'
   RED=$'\033[91m'
   RESET=$'\033[0m'
@@ -25,6 +27,7 @@ else
   BRAND=""
   BRAND_SOFT=""
   WHITE=""
+  GREEN=""
   YELLOW=""
   RED=""
   RESET=""
@@ -43,6 +46,7 @@ declare -a ISSUE_FIXES=()
 
 fail_count=0
 warn_count=0
+FIGMA_VALIDATION_SCOPE=""
 
 load_local_env_file() {
   if [[ -f "$ENV_LOCAL_FILE" ]]; then
@@ -109,6 +113,10 @@ normalize_figma_file_key() {
     printf '%s' "${BASH_REMATCH[2]}"
     return
   fi
+  if [[ "$trimmed" =~ figma\.com/integrations/claim/([^/?#]+) ]]; then
+    printf '%s' "${BASH_REMATCH[1]}"
+    return
+  fi
   printf '%s' "$trimmed"
 }
 
@@ -116,7 +124,7 @@ maybe_open_figma_token_page() {
   if [[ ! -t 0 || ! -t 1 ]]; then
     return
   fi
-  if ! command -v open >/dev/null 2>&1; then
+  if ! has_open_command; then
     return
   fi
   read -r -p "Open token page in browser now? [Y/n]: " open_now
@@ -127,20 +135,22 @@ maybe_open_figma_token_page() {
 
 prompt_token_value() {
   local existing="$1"
+  local force_new="${2:-0}"
   local token_input=""
   local keep_hint=""
 
-  if [[ -n "$existing" ]]; then
+  if [[ "$force_new" != "1" && -n "$existing" ]]; then
     keep_hint=" (press Enter to keep current)"
     printf "Current FIGMA_ACCESS_TOKEN: %s\n" "$(mask_token "$existing")"
+  elif [[ "$force_new" == "1" ]]; then
+    printf "%sPrevious token failed validation. Paste a new FIGMA_ACCESS_TOKEN.%s\n" "$YELLOW" "$RESET"
   fi
 
   while true; do
-    read -r -s -p "FIGMA_ACCESS_TOKEN$keep_hint: " token_input
-    echo
+    read -r -p "FIGMA_ACCESS_TOKEN$keep_hint: " token_input
 
     if [[ -z "$token_input" ]]; then
-      if [[ -n "$existing" ]]; then
+      if [[ "$force_new" != "1" && -n "$existing" ]]; then
         printf '%s' "$existing"
         return 0
       fi
@@ -150,6 +160,11 @@ prompt_token_value() {
 
     if [[ "$token_input" == "SKIP" ]]; then
       return 1
+    fi
+
+    if [[ "$token_input" =~ figma\.com/ ]]; then
+      printf "%sThat looks like a URL, not a token. Use your personal access token.%s\n" "$YELLOW" "$RESET"
+      continue
     fi
 
     if [[ -n "$token_input" ]]; then
@@ -185,12 +200,66 @@ prompt_file_key_value() {
       return 1
     fi
 
+    if [[ "$file_input" =~ ^figd_ ]]; then
+      printf "%sThat looks like a token. Paste a Figma file URL or file key.%s\n" "$YELLOW" "$RESET"
+      continue
+    fi
+
     normalized="$(normalize_figma_file_key "$file_input")"
     if [[ -n "$normalized" ]]; then
       printf '%s' "$normalized"
       return 0
     fi
   done
+}
+
+http_get_with_status() {
+  local url="$1"
+  local token="$2"
+  curl -sS -H "Authorization: Bearer $token" -w $'\n%{http_code}' "$url" 2>/dev/null || true
+}
+
+validate_figma_credentials_live() {
+  local token="$1"
+  local file_key="$2"
+  local response=""
+  local code=""
+  local body=""
+  local snippet=""
+
+  FIGMA_VALIDATION_SCOPE=""
+  printf "%sValidating Figma token and file access...%s\n" "$WHITE" "$RESET"
+
+  response="$(http_get_with_status "$FIGMA_API_BASE/me" "$token")"
+  code="${response##*$'\n'}"
+  body="${response%$'\n'*}"
+  if [[ "$code" != "200" ]]; then
+    FIGMA_VALIDATION_SCOPE="token"
+    snippet="$(printf '%s' "$body" | tr '\n' ' ' | cut -c1-160)"
+    printf "%sToken validation failed.%s HTTP %s\n" "$RED" "$RESET" "$code"
+    if [[ -n "$snippet" ]]; then
+      echo "Reason: $snippet"
+    fi
+    echo "Token help: $FIGMA_TOKEN_HELP_URL"
+    return 1
+  fi
+
+  response="$(http_get_with_status "$FIGMA_API_BASE/files/$file_key?depth=1" "$token")"
+  code="${response##*$'\n'}"
+  body="${response%$'\n'*}"
+  if [[ "$code" != "200" ]]; then
+    FIGMA_VALIDATION_SCOPE="file"
+    snippet="$(printf '%s' "$body" | tr '\n' ' ' | cut -c1-160)"
+    printf "%sFile key / URL validation failed.%s HTTP %s\n" "$RED" "$RESET" "$code"
+    if [[ -n "$snippet" ]]; then
+      echo "Reason: $snippet"
+    fi
+    echo "Check FIGMA_FILE_KEY or paste the full file URL again."
+    return 1
+  fi
+
+  printf "%sFigma credentials validated.%s\n" "$BRAND" "$RESET"
+  return 0
 }
 
 save_figma_credentials() {
@@ -232,6 +301,8 @@ configure_figma_credentials() {
 
   local token_value=""
   local file_key_value=""
+  local retry=""
+  local force_new_token="0"
 
   echo
   printf "%sFigma credentials setup%s\n" "$WHITE" "$RESET"
@@ -241,14 +312,30 @@ configure_figma_credentials() {
   echo
   maybe_open_figma_token_page
 
-  token_value="$(prompt_token_value "${FIGMA_ACCESS_TOKEN:-}")" || {
-    printf "%sCredential setup canceled. Live API checks will remain skipped.%s\n" "$YELLOW" "$RESET"
-    return 1
-  }
-  file_key_value="$(prompt_file_key_value "${FIGMA_FILE_KEY:-}")" || {
-    printf "%sCredential setup canceled. Live API checks will remain skipped.%s\n" "$YELLOW" "$RESET"
-    return 1
-  }
+  while true; do
+    token_value="$(prompt_token_value "${FIGMA_ACCESS_TOKEN:-}" "$force_new_token")" || {
+      printf "%sCredential setup canceled. Live API checks will remain skipped.%s\n" "$YELLOW" "$RESET"
+      return 1
+    }
+    file_key_value="$(prompt_file_key_value "${FIGMA_FILE_KEY:-}")" || {
+      printf "%sCredential setup canceled. Live API checks will remain skipped.%s\n" "$YELLOW" "$RESET"
+      return 1
+    }
+
+    if validate_figma_credentials_live "$token_value" "$file_key_value"; then
+      break
+    fi
+
+    if [[ "$FIGMA_VALIDATION_SCOPE" == "token" ]]; then
+      force_new_token="1"
+    fi
+
+    read -r -p "Try entering token/file key again? [Y/n]: " retry
+    if [[ "$retry" =~ ^[Nn]$ ]]; then
+      printf "%sCredential setup canceled. Live API checks will remain skipped.%s\n" "$YELLOW" "$RESET"
+      return 1
+    fi
+  done
 
   if ! save_figma_credentials "$token_value" "$file_key_value"; then
     printf "%sCredentials were not saved. Live API checks may be skipped.%s\n" "$YELLOW" "$RESET"
@@ -291,6 +378,125 @@ prompt_figma_credentials_if_missing() {
         ;;
     esac
   done
+}
+
+has_open_command() {
+  command -v open >/dev/null 2>&1
+}
+
+detect_mcp_figma_status() {
+  if ! command -v claude >/dev/null 2>&1; then
+    echo "missing (claude CLI not found)"
+    return
+  fi
+  if claude mcp list 2>/dev/null | grep -qi figma; then
+    echo "configured"
+  else
+    echo "missing"
+  fi
+}
+
+print_environment_status() {
+  local env_status="missing"
+  local creds_status="missing"
+  local mcp_status=""
+
+  if [[ -f "$ENV_LOCAL_FILE" ]]; then
+    env_status="present"
+  fi
+  if has_figma_credentials; then
+    creds_status="configured"
+  fi
+  mcp_status="$(detect_mcp_figma_status)"
+
+  echo
+  printf "%sEnvironment status%s\n" "$WHITE" "$RESET"
+  echo "Workspace: $ROOT_DIR"
+  echo ".env.local: $env_status"
+  echo "Figma credentials: $creds_status"
+  echo "Claude MCP figma: $mcp_status"
+}
+
+print_environment_status_compact() {
+  local creds_label=""
+  local mcp_label=""
+  local token_label=""
+
+  if has_figma_credentials; then
+    creds_label="${GREEN}configured${RESET}"
+  else
+    creds_label="${YELLOW}missing${RESET}"
+  fi
+
+  if command -v claude >/dev/null 2>&1 && claude mcp list 2>/dev/null | grep -qi figma; then
+    mcp_label="${GREEN}configured${RESET}"
+  else
+    mcp_label="${YELLOW}missing${RESET}"
+  fi
+
+  if [[ -n "${FIGMA_ACCESS_TOKEN:-}" ]]; then
+    token_label="${GREEN}present${RESET}"
+  else
+    token_label="${YELLOW}missing${RESET}"
+  fi
+
+  echo
+  printf "%sStatus%s  MCP: %b  Token: %b  File key: %b\n" \
+    "$WHITE" "$RESET" "$mcp_label" "$token_label" "$creds_label"
+}
+
+print_menu_item() {
+  local key="$1"
+  local title="$2"
+  local hint="$3"
+  local badge="${4:-}"
+  printf "  %s[%s]%s %s%s%s" "$BRAND" "$key" "$RESET" "$WHITE" "$title" "$RESET"
+  if [[ -n "$badge" ]]; then
+    printf " %s%s%s" "$GREEN" "$badge" "$RESET"
+  fi
+  printf "\n"
+  if [[ -n "$hint" ]]; then
+    printf "      %s%s%s\n" "$BRAND_SOFT" "$hint" "$RESET"
+  fi
+}
+
+print_menu_reference() {
+  echo
+  printf "%sWhat do you want to do next?%s\n" "$WHITE" "$RESET"
+  print_menu_item "1" "Live Figma flow now" "Generate payloads, run bridge checks, sync variables, then open Claude." "(recommended)"
+  print_menu_item "2" "Configure Figma credentials" "Validate token + file URL/key live before saving."
+  print_menu_item "3" "Strict bridge + API check" "Run strict MCP and Figma API validation."
+  print_menu_item "4" "Local proof only" "Capture website proof without live Figma."
+  print_menu_item "5" "Full loop + proof" "Run end-to-end loop and regenerate proof artifacts."
+  print_menu_item "a" "Advanced actions" "Apply approved Figma edits and monitor controls."
+  print_menu_item "s" "Status details" "Show workspace path, env status, and MCP state."
+  print_menu_item "q" "Quit installer" ""
+}
+
+confirm_default_yes() {
+  local prompt="$1"
+  local answer=""
+  read -r -p "$prompt [Y/n]: " answer
+  [[ ! "$answer" =~ ^[Nn]$ ]]
+}
+
+maybe_open_latest_proof() {
+  local proof_path="$ROOT_DIR/proof/latest/index.html"
+  local answer=""
+  if [[ ! -f "$proof_path" ]]; then
+    return
+  fi
+  if [[ ! -t 0 || ! -t 1 ]]; then
+    return
+  fi
+  if ! has_open_command; then
+    return
+  fi
+
+  read -r -p "Open latest proof in browser now? [Y/n]: " answer
+  if [[ ! "$answer" =~ ^[Nn]$ ]]; then
+    open "$proof_path" >/dev/null 2>&1 || true
+  fi
 }
 
 slugify() {
@@ -405,34 +611,64 @@ print_summary() {
     printf "Logs: %s/\n" "${LOG_DIR#$ROOT_DIR/}"
   fi
 
+  print_environment_status_compact
+  print_menu_reference
+}
+
+print_step_checklist() {
+  local total="${#STEP_NAMES[@]}"
+  local i
   echo
-  printf "%sLaunch Menu (6 options)%s\n" "$WHITE" "$RESET"
-  echo "Type one number in the interactive launcher below."
-  echo "1) Demo website -> Figma now (recommended)"
-  echo "   Generates payloads, runs bridge checks, syncs variables (if creds exist), then offers to open Claude."
+  printf "%sSetup checklist%s\n" "$WHITE" "$RESET"
+  for ((i = 0; i < total; i++)); do
+    local tag="required"
+    if [[ "${STEP_SEVERITIES[$i]}" == "warn" ]]; then
+      tag="optional"
+    fi
+    printf "%2d) [%s] %s\n" "$((i + 1))" "$tag" "${STEP_NAMES[$i]}"
+  done
+}
+
+print_advanced_menu() {
   echo
-  echo "2) Local proof only (no live Figma needed)"
-  echo "   Runs demo capture and generates proof/latest/index.html."
-  echo
-  echo "3) Strict bridge + API gate test"
-  echo "   Requires credentials and runs strict MCP + API checks."
-  echo
-  echo "4) Apply approved Figma edits back to code"
-  echo "   Verifies handoff, applies canvas edits, then runs check/build/manifest update."
-  echo
-  echo "5) Full loop with proof artifact"
-  echo "   Runs end-to-end loop and regenerates proof."
-  echo
-  echo "6) Start always-on bridge monitor"
-  echo "   Starts detached monitor for MCP + deep bridge checks."
-  echo
-  echo "Monitor commands:"
-  echo "  npm run monitor:figma-bridge:start"
-  echo "  npm run monitor:figma-bridge:status"
-  echo "  npm run monitor:figma-bridge:stop"
-  echo
-  echo "Full plan and Claude playbook setup:"
-  echo "  docs/ON_YOUR_MARKS_SET_GO.md"
+  printf "%sAdvanced actions%s\n" "$WHITE" "$RESET"
+  print_menu_item "1" "Apply approved Figma edits back to code" "loop:verify-canvas -> loop:canvas-to-code -> check/build/manifest"
+  print_menu_item "2" "Start bridge monitor" "Detached MCP + deep bridge health monitor."
+  print_menu_item "3" "Bridge monitor status" "Show monitor PID and last check state."
+  print_menu_item "4" "Stop bridge monitor" "Stop detached monitor."
+  print_menu_item "b" "Back to main menu" ""
+}
+
+interactive_advanced_menu() {
+  local advanced_choice=""
+  while true; do
+    print_advanced_menu
+    echo
+    printf "%sSelect advanced option%s [1-4, b]: " "$WHITE" "$RESET"
+    read -r advanced_choice || return
+    case "$advanced_choice" in
+      1)
+        run_interactive_action "Apply approved Figma edits back to code" \
+          "npm run loop:verify-canvas && npm run loop:canvas-to-code && npm run check && npm run build && npm run manifest:update"
+        ;;
+      2)
+        run_interactive_action "Start always-on bridge monitor" \
+          "npm run monitor:figma-bridge:start -- --interval $MONITOR_INTERVAL_DEFAULT --deep-every $MONITOR_DEEP_EVERY_DEFAULT"
+        ;;
+      3)
+        run_interactive_action "Bridge monitor status" "npm run monitor:figma-bridge:status"
+        ;;
+      4)
+        run_interactive_action "Stop bridge monitor" "npm run monitor:figma-bridge:stop"
+        ;;
+      b | B)
+        return
+        ;;
+      *)
+        printf "%sPlease choose 1, 2, 3, 4, or b.%s\n" "$YELLOW" "$RESET"
+        ;;
+    esac
+  done
 }
 
 run_interactive_action() {
@@ -489,14 +725,19 @@ interactive_launch_menu() {
   fi
 
   prompt_figma_credentials_if_missing
+  print_environment_status_compact
+  print_menu_reference
 
   while true; do
     echo
-    printf "%sChoose next action%s [1-6, c=configure Figma creds, q=quit]: " "$WHITE" "$RESET"
+    printf "%sSelect option%s [1-5, a, s, q]: " "$WHITE" "$RESET"
     read -r choice || return
 
     case "$choice" in
       1)
+        if ! confirm_default_yes "Run demo website -> Figma flow now?"; then
+          continue
+        fi
         run_interactive_action "Demo website -> Figma prep" "npm run demo:figma:prep" || continue
         if has_figma_credentials; then
           run_interactive_action "Sync variables to Figma" "npm run figma:variables:sync" || continue
@@ -508,8 +749,9 @@ interactive_launch_menu() {
           claude
         fi
         ;;
-      2)
-        run_interactive_action "Local proof capture" "npm run demo:website:capture"
+      2 | c | C)
+        configure_figma_credentials
+        print_environment_status_compact
         ;;
       3)
         prompt_figma_credentials_if_missing
@@ -520,24 +762,25 @@ interactive_launch_menu() {
         run_interactive_action "Strict bridge + API gate test" "STUDIOFLOW_STRICT_FIGMA_BRIDGE=1 npm run check:figma-bridge"
         ;;
       4)
-        run_interactive_action "Apply approved Figma edits back to code" \
-          "npm run loop:verify-canvas && npm run loop:canvas-to-code && npm run check && npm run build && npm run manifest:update"
+        run_interactive_action "Local proof capture" "npm run demo:website:capture"
+        maybe_open_latest_proof
         ;;
       5)
         run_interactive_action "Full loop with proof artifact" "npm run loop:run && npm run loop:proof"
+        maybe_open_latest_proof
         ;;
-      6)
-        run_interactive_action "Start always-on bridge monitor" \
-          "npm run monitor:figma-bridge:start -- --interval $MONITOR_INTERVAL_DEFAULT --deep-every $MONITOR_DEEP_EVERY_DEFAULT"
+      a | A)
+        interactive_advanced_menu
         ;;
-      c | C)
-        configure_figma_credentials
+      s | S)
+        print_environment_status
+        print_environment_status_compact
         ;;
       q | Q)
         return
         ;;
       *)
-        printf "%sPlease choose 1, 2, 3, 4, 5, 6, c, or q.%s\n" "$YELLOW" "$RESET"
+        printf "%sPlease choose 1, 2, 3, 4, 5, a, s, or q.%s\n" "$YELLOW" "$RESET"
         ;;
     esac
   done
@@ -563,6 +806,12 @@ add_step "Validating MCP health" "npm run check:mcp" "claude mcp add --transport
 add_step "Running deep bridge healthcheck" 'if [[ -n "${FIGMA_ACCESS_TOKEN:-}" && -n "${FIGMA_FILE_KEY:-}" ]]; then STUDIOFLOW_STRICT_FIGMA_BRIDGE=1 npm run check:figma-bridge; else npm run check:figma-bridge; fi' "FIGMA_ACCESS_TOKEN=... FIGMA_FILE_KEY=... STUDIOFLOW_STRICT_FIGMA_BRIDGE=1 npm run check:figma-bridge" "fail"
 
 TOTAL_STEPS="${#STEP_NAMES[@]}"
+if [[ "${STUDIOFLOW_SETUP_SHOW_CHECKLIST:-0}" == "1" ]]; then
+  print_step_checklist
+else
+  printf "%sRunning %d setup checks%s (set STUDIOFLOW_SETUP_SHOW_CHECKLIST=1 for full list)\n" \
+    "$BRAND_SOFT" "$TOTAL_STEPS" "$RESET"
+fi
 
 for ((i = 0; i < TOTAL_STEPS; i++)); do
   STEP_STATUSES+=("pending")
@@ -588,7 +837,10 @@ if (( fail_count > 0 )); then
   exit 1
 fi
 
-maybe_spawn_bridge_monitor_from_installer
+# Only auto-start monitor when explicitly requested by env var.
+if [[ "${STUDIOFLOW_SPAWN_BRIDGE_MONITOR:-0}" == "1" ]]; then
+  maybe_spawn_bridge_monitor_from_installer
+fi
 interactive_launch_menu
 
 exit 0

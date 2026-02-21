@@ -20,7 +20,7 @@ This installs and checks:
 - deep bridge gate (`check:figma-bridge`).
 
 When setup passes, the installer now stays open with an interactive launcher.
-Select `1`-`5` (or `c` to configure Figma credentials) directly in the installer.
+Use the simplified menu directly in the installer.
 
 ## Set
 
@@ -56,15 +56,15 @@ Use these local playbooks as repeatable skills:
 STUDIOFLOW_STRICT_FIGMA_BRIDGE=1 FIGMA_ACCESS_TOKEN=... FIGMA_FILE_KEY=... npm run check:figma-bridge
 ```
 
-## Go: 5-Option Menu
+## Go: Main Menu
 
 In the installer prompt:
 
 ```text
-Choose next action [1-5, c=configure Figma creds, q=quit]:
+Select option [1-5, a, s, q]:
 ```
 
-### 1) Demo website -> Figma now (recommended)
+### 1) Live Figma flow now (recommended)
 
 ```bash
 npm run demo:figma:prep
@@ -88,10 +88,11 @@ Preserve all sfid IDs.
 Keep the design token-driven using the StudioFlow variable modes.
 ```
 
-### 2) Local proof only (no live Figma)
+### 2) Configure Figma credentials
 
 ```bash
-npm run demo:website:capture
+# in installer, choose option 2
+# token + file key are validated live before SAVE
 ```
 
 ### 3) Strict bridge/API validation
@@ -100,14 +101,10 @@ npm run demo:website:capture
 STUDIOFLOW_STRICT_FIGMA_BRIDGE=1 FIGMA_ACCESS_TOKEN=... FIGMA_FILE_KEY=... npm run check:figma-bridge
 ```
 
-### 4) Pull approved Figma changes back to code
+### 4) Local proof only (no live Figma)
 
 ```bash
-npm run loop:verify-canvas
-npm run loop:canvas-to-code
-npm run check
-npm run build
-npm run manifest:update
+npm run demo:website:capture
 ```
 
 ### 5) Full loop with proof artifact
@@ -116,6 +113,11 @@ npm run manifest:update
 npm run loop:run
 npm run loop:proof
 ```
+
+### a) Advanced actions
+
+- apply approved Figma edits back to code,
+- start/stop/status for bridge monitor.
 
 ## Required Files In This Pipeline
 
