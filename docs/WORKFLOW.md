@@ -1,6 +1,6 @@
 # The StudioFlow Workflow
 
-**Version 1.2** | A Design Engineering System by **Alexander Beck Studio**
+**Version 1.3** | A Design Engineering System by **Alexander Beck Studio**
 
 ---
 
@@ -23,6 +23,25 @@ These aren’t suggestions. They are the core principles of the workflow, enforc
 4.  **The UI Contract Rule:** A component’s visual structure (the “Layout”) is strictly separated from its business logic (the “Logic”). They communicate through a formal TypeScript contract, which prevents design changes from accidentally breaking functionality.
 
 5.  **The Audit Trail Rule:** The design’s history is versioned alongside the code. After every design change, a structural “snapshot” of the Figma file is saved to the repository, creating a permanent, diff-able record of every visual decision.
+
+---
+
+## Process Decision (Updated)
+
+To remove ambiguity, StudioFlow now uses a **single default path**:
+
+*   **Default:** **CodeCode from Figma** for implementation and re-implementation work.
+*   **Secondary/Fallback:** **HTML → Figma** only for initial bootstrap, legacy imports, or MCP outages.
+
+### Why this decision?
+
+For teams already designing and approving in Figma, CodeCode keeps the strongest contract with the approved frame, variables, and `sfid` mapping. HTML → Figma remains useful, but it should not be the default decision point every loop.
+
+### Practical policy
+
+1.  If the frame is approved in Figma, generate/update code from Figma (CodeCode).
+2.  If no approved frame exists yet, build in code and import to Figma once.
+3.  If MCP tooling is degraded, use `html.to.design` as a temporary bridge and return to the default flow next loop.
 
 ---
 
@@ -85,10 +104,10 @@ This is a disciplined process with verification gates to ensure nothing is left 
 3.  Run `npm run build:tokens` to compile them into CSS and TypeScript.
 4.  Commit the results. This is your single source of truth for style.
 
-### **Phase 2: Sync to Design**
+### **Phase 2: Sync to Design (Bootstrap or Exception Path)**
 
 **Step C: Code-to-Figma Capture**
-1.  With your page running in a browser, use an MCP tool like Claude Code to send it to Figma (`“Send this to Figma”`).
+1.  With your page running in a browser, use an MCP tool like Claude Code to send it to Figma (`“Send this to Figma”`) **only when seeding a new frame or recovering from drift**.
 2.  This creates a new, full-page frame in your Figma workspace.
 3.  **Practical Fallback:** If the MCP tool fails, don’t get stuck. Use a plugin like `html.to.design` to get your UI into Figma and keep moving.
 
@@ -105,11 +124,11 @@ This is a disciplined process with verification gates to ensure nothing is left 
 1.  Once the design is approved, run `npm run snapshot:figma`.
 2.  This script exports the structure of the final Figma frame into the `snapshots/` directory and commits it. Your design change is now a permanent part of the project’s history.
 
-### **Phase 3: Sync Back to Code**
+### **Phase 3: Figma-to-Code (Default Path)**
 
 **Step G: Figma-to-Code Generation**
 1.  Select the final, approved frame in the Figma desktop app.
-2.  In your editor, prompt the AI to regenerate the UI, referencing the design and your rules.
+2.  In your editor, run the CodeCode workflow to regenerate the UI from the selected frame, referencing StudioFlow rules.
     > **Example Prompt:** *"Regenerate the `HeroLayout.tsx` component from the selected Figma frame. Use our design tokens, match the `sfid:` layer names to `data-sfid` attributes, and ensure the code still satisfies the `Hero.contract.ts` interface."
 
 **Step H: Merge & Full Verification**
@@ -131,3 +150,18 @@ This is a disciplined process with verification gates to ensure nothing is left 
 *   **ID Sanitization:** The `verify-id-sync` script automatically strips any non-standard characters from IDs to prevent prompt injection.
 *   **Loop Locking:** For teams, use a simple `studioflow.lock` file in your repo. Before starting a loop, a developer “claims” the components they’re working on to prevent edit conflicts.
 *   **Safe Tooling:** Only use trusted MCP servers and keep them enabled only when needed. Be mindful of your Figma plan’s rate limits.
+
+---
+
+## MCP Update Gate (Last-2-Weeks Check)
+
+Before each loop planning session, quickly review Figma-related MCP server changes from the last 14 days and record the result in your task notes.
+
+Use this lightweight checklist:
+
+1.  **Registry parity:** Confirm your chosen Figma MCP server entry/version matches the current registry listing.
+2.  **Breaking surface scan:** Check release notes/commits for renamed tools, auth changes, and node export schema changes.
+3.  **Prompt alignment:** Update your generation prompts if new capabilities or constraints were introduced.
+4.  **Fallback readiness:** Verify `html.to.design` (or equivalent) still works in case MCP is temporarily unavailable.
+
+If any breaking change appears, pause loop execution, patch scripts/prompts, and re-run `npm run check` before continuing.
