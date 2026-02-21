@@ -12,6 +12,18 @@ npm run check
 npm run dev
 ```
 
+## Claude Quick Start
+
+```bash
+npm run setup:claude
+npm run check:mcp
+```
+
+Then:
+1. start Claude with `claude`,
+2. run `/mcp` and complete Figma auth,
+3. use playbooks in `.claude/commands/`.
+
 ## Baseline Workflow
 
 ```bash
@@ -78,6 +90,8 @@ Generated assets:
 - `docs/FIGMA_EXCHANGE_CONTRACT.md`
 - `docs/CLAUDE_CODE_SETUP.md`
 - `docs/DEMO_WEBSITE_ROUNDTRIP.md`
+- `CLAUDE.md`
+- `.claude/commands/README.md`
 
 ## Demo Capture
 

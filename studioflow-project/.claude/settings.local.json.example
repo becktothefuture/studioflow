@@ -1,0 +1,9 @@
+{
+  "model": "opus",
+  "modelFallback": "sonnet",
+  "smallModel": "haiku",
+  "env": {
+    "STUDIOFLOW_CANVAS_PROVIDER": "figma-sites",
+    "STUDIOFLOW_CANONICAL_MODE": "desktop"
+  }
+}

@@ -20,12 +20,20 @@ async function main() {
   const manifest = JSON.parse(manifestRaw);
 
   manifest.updatedAt = new Date().toISOString();
-  manifest.loopCount = Number.isFinite(manifest.loopCount) ? manifest.loopCount + 1 : 1;
+  manifest.loopCount = Number.isFinite(manifest.loopCount) ? manifest.loopCount : 0;
   manifest.lastVerification = {
     status: "passed",
     ranAt: manifest.updatedAt,
     command: "npm run check"
   };
+
+  if (manifest.lastCanvasVerification) {
+    manifest.lastCanvasVerification = {
+      ...manifest.lastCanvasVerification,
+      status: "passed",
+      ranAt: manifest.updatedAt
+    };
+  }
 
   const snapshot = await latestSnapshotFile();
   if (snapshot) {

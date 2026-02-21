@@ -1,0 +1,43 @@
+name: studioflow-loop
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: studioflow-project
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: studioflow-project/package-lock.json
+
+      - name: Install
+        run: npm ci
+
+      - name: Build token artifacts
+        run: npm run build:tokens
+
+      - name: Contract fixture tests
+        run: npm run test:contracts
+
+      - name: Validate canonical canvas fixture
+        run: STUDIOFLOW_INPUT=tests/fixtures/canvas/valid-canvas-to-code.json STUDIOFLOW_NO_MANIFEST=1 npm run loop:verify-canvas
+
+      - name: Core checks
+        run: npm run check
+
+      - name: Build
+        run: npm run build

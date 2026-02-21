@@ -3,3 +3,25 @@ dist/
 .vite/
 *.log
 .DS_Store
+.mcp.json
+.claude/settings.local.json
+
+# Generated handoff payloads
+handoff/*.json
+!handoff/.gitkeep
+
+# Generated proof artifacts
+proof/history/
+proof/latest/
+!proof/.gitkeep
+
+# Generated snapshot artifacts
+snapshots/figma-*.json
+!snapshots/.gitkeep
+
+# Generated per-breakpoint export
+tokens/figma-breakpoint-variables.json
+
+# Local scratch artifacts
+scripts/_*.txt
+scripts/*.tmp

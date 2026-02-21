@@ -1,73 +1,108 @@
-# The StudioFlow Workflow
+# StudioFlow Workflow (v3)
 
-**Version 1.2** | A Design Engineering System by **Alexander Beck Studio**
+## Overview
 
----
+StudioFlow v3 is a **Code ↔ Canvas ↔ Code** workflow.
 
-## The Philosophy
+Central integration point:
+- Figma Code-to-Canvas (Sites canonical, Make exploratory)
 
-Design and code drift apart on busy projects. **StudioFlow** is a practical, verifiable workflow for building products where the design in Figma is the code you ship.
+Preserved guarantees:
+- existing token system remains unchanged,
+- tokens roundtrip code -> Figma -> code,
+- stable IDs remain enforced.
 
-This is not a framework or library. It is a set of rules and automated checks that create a durable bridge between design and code.
+## Dual Track
 
-## The 5 Rules of StudioFlow
+1. Canonical track: `figma-sites`
+   - production-grade source for approved roundtrips.
+2. Exploratory track: `figma-make`
+   - rapid experimentation; must pass validation before promotion.
 
-1. **Whole-Page Rule:** Synchronization between code and design happens on complete, assembled pages.
-2. **Token-Only Rule:** All style values come from tokens. Hard-coded magic numbers fail verification.
-3. **Stable ID Rule:** Important UI elements use stable, shared IDs (`sfid:*`) in both code and Figma.
-4. **UI Contract Rule:** Layout and logic are separated and connected by typed contracts.
-5. **Audit Trail Rule:** Figma snapshots are versioned with code for traceable visual history.
+## Entry Path A: Code-first
 
-## Repository & Architecture
+1. Build/update rough structure in code with token-only styles and `sfid` IDs.
+2. Run:
+   ```bash
+   npm run loop:code-to-canvas
+   ```
+3. Claude Code + Figma MCP applies the payload in Figma.
+4. Save approved response to `handoff/canvas-to-code.json`.
+5. Run:
+   ```bash
+   npm run loop:verify-canvas
+   npm run loop:canvas-to-code
+   npm run check
+   npm run build
+   npm run manifest:update
+   ```
 
-```text
-studioflow-project/
-├── docs/STUDIOFLOW_WORKFLOW.md
-├── tokens/figma-variables.json
-├── tokens/tokens.css
-├── tokens/tokens.ts
-├── scripts/build-tokens.mjs
-├── scripts/verify-no-hardcoded.mjs
-├── scripts/verify-id-sync.mjs
-├── scripts/verify-tokens-sync.mjs
-├── scripts/snapshot-figma.mjs
-├── scripts/manifest-update.mjs
-├── src/components/Hero/Hero.contract.ts
-├── src/components/Hero/HeroLayout.tsx
-├── src/components/Hero/HeroLogic.tsx
-├── snapshots/
-└── studioflow.manifest.json
+## Entry Path B: Design-first
+
+1. Begin in Figma Sites or Figma Make.
+2. Claude Code emits `handoff/canvas-to-code.json` from approved design state.
+3. Run:
+   ```bash
+   npm run loop:verify-canvas
+   npm run loop:canvas-to-code
+   npm run check
+   npm run build
+   npm run manifest:update
+   ```
+
+## Required Files
+
+- Workflow config: `studioflow.workflow.json`
+- Token source: `tokens/figma-variables.json`
+- Canonical handoff files:
+  - `handoff/code-to-canvas.json`
+  - `handoff/canvas-to-code.json`
+  - `handoff/canvas-to-code.template.json`
+- Compatibility handoff files:
+  - `handoff/code-to-figma.json`
+  - `handoff/figma-to-code.json`
+  - `handoff/figma-to-code.template.json`
+- Breakpoint token export: `tokens/figma-breakpoint-variables.json`
+- Audit snapshots: `snapshots/figma-*.json`
+- Loop metadata: `studioflow.manifest.json`
+
+## Invariants Enforced
+
+1. Token-only style values.
+2. Stable `sfid` parity between code and canvas payload.
+3. Complete token frame coverage.
+4. Complete mode coverage for `mobile/tablet/laptop/desktop`.
+5. Complete screen coverage for all 4 breakpoints.
+
+## Scripts
+
+- `loop:code-to-canvas`: generate canonical code->canvas payload and template.
+- `loop:verify-canvas`: validate canonical canvas contract and update manifest status.
+- `loop:canvas-to-code`: apply approved values back into token source and artifacts.
+- `loop:proof`: generate visual/token/sfid proof report (`proof/latest/index.html`) plus share card (`proof/latest/summary-card.png`).
+- `loop:run`: full happy-path chain.
+- `loop:*figma*`: compatibility wrappers.
+
+## Promotion Rule
+
+If provider is `figma-make`, payload must pass `loop:verify-canvas` before it is treated as canonical for sync-back.
+
+## Suggested Daily Flow
+
+```bash
+npm run setup:project
+npm run loop:code-to-canvas
+# Claude Code + MCP + Figma work
+npm run loop:verify-canvas
+npm run loop:canvas-to-code
+npm run check
+npm run build
+npm run loop:proof
+npm run manifest:update
 ```
 
-## Practical Loop
+## Demo Walkthrough
 
-### 1) Foundation
+Use the live website in this repo as the example design roundtrip:
 
-1. Define variables in Figma.
-2. Export DTCG JSON into `tokens/figma-variables.json`.
-3. Run `npm run build:tokens`.
-4. Build pages using `data-sfid` attributes on meaningful elements.
-
-### 2) Sync To Design
-
-1. Push the complete rendered page into Figma.
-2. Ensure layers are named to align with `sfid:*` IDs.
-3. Run `npm run verify:id-sync` and resolve mismatches.
-
-### 3) Explore & Approve
-
-1. Designers iterate in Figma using variables.
-2. Once approved, run `npm run snapshot:figma`.
-3. Commit the snapshot to preserve an audit trail.
-
-### 4) Sync Back To Code
-
-1. Regenerate layout code from approved Figma frames.
-2. Keep business logic in `*Logic.tsx` and types in `*.contract.ts`.
-3. Run `npm run check` and `npm run build` before merge.
-
-## Security & Reliability Notes
-
-- ID validation sanitizes non-standard characters to reduce injection risk.
-- Token verification catches hard-coded colors and spacing patterns, including `calc(...)` and Tailwind arbitrary values.
-- Manifest updates store loop metadata (`lastSnapshot`, `lastVerification`, and matched IDs).
+- `docs/DEMO_WEBSITE_ROUNDTRIP.md`

@@ -19,7 +19,7 @@ export function flattenTokens(input, prefix = []) {
   for (const [key, value] of Object.entries(input)) {
     const next = [...prefix, key];
     if (isTokenLeaf(value)) {
-      rows.push({ name: next.join("-"), value: String(value.value) });
+      rows.push({ name: next.join("-"), value: String(value.value), path: next });
       continue;
     }
     if (value && typeof value === "object") {

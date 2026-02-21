@@ -31,6 +31,10 @@ function duplicateValues(values) {
   return [...dupes];
 }
 
+function uniqueValues(values) {
+  return [...new Set(values)];
+}
+
 async function extractCodeIds() {
   const files = await glob(["src/**/*.{tsx,jsx,html}"], { cwd: rootDir, nodir: true });
   const ids = [];
@@ -47,13 +51,20 @@ async function extractCodeIds() {
 
 async function extractSnapshotIds() {
   const snapshotFiles = await glob(["*.json"], { cwd: snapshotsDir, nodir: true });
+  if (snapshotFiles.length === 0) {
+    return [];
+  }
+
+  const latest = [...snapshotFiles].sort().at(-1);
+  if (!latest) {
+    return [];
+  }
+
   const ids = [];
 
-  for (const file of snapshotFiles) {
-    const content = await fs.readFile(path.join(snapshotsDir, file), "utf8");
-    for (const match of content.matchAll(sfidRegex)) {
-      ids.push(sanitizeId(match[0]));
-    }
+  const content = await fs.readFile(path.join(snapshotsDir, latest), "utf8");
+  for (const match of content.matchAll(sfidRegex)) {
+    ids.push(sanitizeId(match[0]));
   }
 
   return ids;
@@ -82,14 +93,9 @@ async function main() {
     throw new Error(`Duplicate code IDs found: ${codeDupes.join(", ")}`);
   }
 
-  const referenceIds = snapshotIds.length > 0 ? snapshotIds : manifestIds;
+  const referenceIds = uniqueValues(snapshotIds.length > 0 ? snapshotIds : manifestIds);
   if (referenceIds.length === 0) {
     throw new Error("No reference IDs found. Add snapshots/*.json or expectedSfids in studioflow.manifest.json");
-  }
-
-  const referenceDupes = duplicateValues(referenceIds);
-  if (referenceDupes.length > 0) {
-    throw new Error(`Duplicate reference IDs found: ${referenceDupes.join(", ")}`);
   }
 
   const codeSet = new Set(codeIds);

@@ -76,7 +76,7 @@ Design drift appears fast in high-velocity teams. StudioFlow makes each loop mea
 
 | Agent | Operational note |
 | --- | --- |
-| Claude Code | Keep orchestration prompts in `CLAUDE.md`. |
+| Claude Code | Use `studioflow-project/CLAUDE.md` plus `.claude/commands/*` playbooks. |
 | OpenAI Codex | Keep run policy in `AGENTS.md`. |
 | Cursor | Keep guardrails in project rules. |
 | GitHub Copilot | Mirror gate expectations in repo instructions. |
@@ -110,11 +110,9 @@ Use the same loop commands in pipeline jobs and gate merges on pass state.
 
 ```bash
 cd studioflow-project
-npm install
-npm run assets:brand
-npm run build:tokens
-npm run check
-npm run dev
+npm run setup:project
+npm run setup:claude
+npm run check:mcp
 ```
 
 ## Proof
@@ -130,4 +128,7 @@ npm run dev
 - `studioflow-project/docs/STUDIOFLOW_WORKFLOW.md`
 - `studioflow-project/docs/CANVAS_EXCHANGE_CONTRACT.md`
 - `studioflow-project/docs/FIGMA_EXCHANGE_CONTRACT.md`
+- `studioflow-project/docs/CLAUDE_CODE_SETUP.md`
 - `studioflow-project/docs/DEMO_WEBSITE_ROUNDTRIP.md`
+- `studioflow-project/CLAUDE.md`
+- `studioflow-project/.claude/commands/README.md`
