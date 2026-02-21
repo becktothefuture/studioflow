@@ -481,13 +481,9 @@ print_menu_item() {
 print_menu_reference() {
   echo
   printf "%sWhat do you want to do next?%s\n" "$WHITE" "$RESET"
-  print_menu_item "1" "Live Figma flow now" "Generate payloads, run bridge checks, sync variables, then open Claude." "(recommended)"
-  print_menu_item "2" "Configure Figma credentials" "Validate token + file URL/key live before saving."
-  print_menu_item "3" "Strict bridge + API check" "Run strict MCP and Figma API validation."
-  print_menu_item "4" "Local proof only" "Capture website proof without live Figma."
-  print_menu_item "5" "Full loop + proof" "Run end-to-end loop and regenerate proof artifacts."
-  print_menu_item "a" "Advanced actions" "Apply approved Figma edits and monitor controls."
-  print_menu_item "s" "Status details" "Show workspace path, env status, and MCP state."
+  print_menu_item "1" "Send website to Figma" "Checks login, validates token + file, prepares payloads, syncs variables, then opens Claude." "(recommended)"
+  print_menu_item "2" "Create a local proof report" "Builds a visual report on this computer only (no Figma write)."
+  print_menu_item "3" "Advanced tools" "Strict API test, apply approved Figma edits back to code, monitor controls, detailed status."
   print_menu_item "q" "Quit installer" ""
 }
 
@@ -748,57 +744,41 @@ interactive_launch_menu() {
 
   while true; do
     echo
-    printf "%sSelect option%s [1-5, a, s, q]: " "$WHITE" "$RESET"
+    printf "%sSelect option%s [1-3, q]: " "$WHITE" "$RESET"
     read -r choice || return
 
     case "$choice" in
       1)
-        if ! confirm_default_yes "Run demo website -> Figma flow now?"; then
+        if ! confirm_default_yes "Run 'Send website to Figma' now?"; then
           continue
         fi
-        run_interactive_action "Demo website -> Figma prep" "npm run demo:figma:prep" || continue
-        if has_figma_credentials; then
-          run_interactive_action "Sync variables to Figma" "npm run figma:variables:sync" || continue
-        else
-          printf "%sSkipping variable sync (FIGMA_ACCESS_TOKEN / FIGMA_FILE_KEY missing).%s\n" "$YELLOW" "$RESET"
+        if ! has_figma_credentials; then
+          configure_figma_credentials || continue
         fi
+        run_interactive_action "Strict bridge + API gate test" "STUDIOFLOW_STRICT_FIGMA_BRIDGE=1 npm run check:figma-bridge" || continue
+        run_interactive_action "Demo website -> Figma prep" "npm run demo:figma:prep" || continue
+        if ! has_figma_credentials; then
+          printf "%sCredentials are still missing. Open option 3 -> Status details to inspect.%s\n" "$YELLOW" "$RESET"
+          continue
+        fi
+        run_interactive_action "Sync variables to Figma" "npm run figma:variables:sync" || continue
         read -r -p "Open Claude now for /mcp and push prompt? [Y/n]: " open_claude
         if [[ ! "$open_claude" =~ ^[Nn]$ ]]; then
           claude
         fi
         ;;
-      2 | c | C)
-        configure_figma_credentials
-        print_environment_status_compact
+      2)
+        run_interactive_action "Create local proof report (no Figma write)" "npm run demo:website:capture"
+        maybe_open_latest_proof
         ;;
       3)
-        prompt_figma_credentials_if_missing
-        if ! has_figma_credentials; then
-          printf "%sCannot run strict gate without FIGMA_ACCESS_TOKEN and FIGMA_FILE_KEY.%s\n" "$YELLOW" "$RESET"
-          continue
-        fi
-        run_interactive_action "Strict bridge + API gate test" "STUDIOFLOW_STRICT_FIGMA_BRIDGE=1 npm run check:figma-bridge"
-        ;;
-      4)
-        run_interactive_action "Local proof capture" "npm run demo:website:capture"
-        maybe_open_latest_proof
-        ;;
-      5)
-        run_interactive_action "Full loop with proof artifact" "npm run loop:run && npm run loop:proof"
-        maybe_open_latest_proof
-        ;;
-      a | A)
         interactive_advanced_menu
-        ;;
-      s | S)
-        print_environment_status
-        print_environment_status_compact
         ;;
       q | Q)
         return
         ;;
       *)
-        printf "%sPlease choose 1, 2, 3, 4, 5, a, s, or q.%s\n" "$YELLOW" "$RESET"
+        printf "%sPlease choose 1, 2, 3, or q.%s\n" "$YELLOW" "$RESET"
         ;;
     esac
   done
