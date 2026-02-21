@@ -1,0 +1,34 @@
+{
+  "color": {
+    "brand": {
+      "primary": {
+        "coral": {
+          "$value": "#FF6B6B",
+          "$type": "color"
+        },
+        "cyan": {
+          "$value": "#00E5FF",
+          "$type": "color"
+        },
+        "magenta": {
+          "$value": "#E040FB",
+          "$type": "color"
+        }
+      }
+    },
+    "neutral": {
+      "charcoal": {
+        "$value": "#2A2A2A",
+        "$type": "color"
+      },
+      "warm-grey": {
+        "$value": "#C8C0B8",
+        "$type": "color"
+      },
+      "white": {
+        "$value": "#FFFFFF",
+        "$type": "color"
+      }
+    }
+  }
+}
