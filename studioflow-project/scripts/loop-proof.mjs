@@ -176,6 +176,7 @@ async function captureScreenshots(workflow, destinationDir) {
   try {
     for (const breakpoint of workflow.breakpoints) {
       const context = await browser.newContext({
+        deviceScaleFactor: 1,
         viewport: {
           width: Number(breakpoint.width),
           height: Number(process.env.STUDIOFLOW_PROOF_HEIGHT || 900)
@@ -501,11 +502,17 @@ function renderHtmlReport({
 <section class="bp-panel" data-breakpoint-panel="${htmlEscape(bp.name)}">
   <div class="pair">
     <article class="shot-card">
-      <h4>Before</h4>
+      <div class="shot-head">
+        <h4>Before</h4>
+        <p class="shot-meta">Native size pending...</p>
+      </div>
       <div class="shot-frame">${before}</div>
     </article>
     <article class="shot-card">
-      <h4>After</h4>
+      <div class="shot-head">
+        <h4>After</h4>
+        <p class="shot-meta">Native size pending...</p>
+      </div>
       <div class="shot-frame">${after}</div>
     </article>
   </div>
@@ -520,16 +527,30 @@ function renderHtmlReport({
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>StudioFlow Loop Proof</title>
   <style>
+    @import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Xanh+Mono:ital@0;1&display=swap");
+
     :root {
-      --bg: #070a13;
-      --panel: #0e171f;
-      --panel-soft: #121f2c;
-      --signal: #99bac8;
-      --signal-soft: #c6d9e1;
-      --text: #f7fffd;
-      --muted: #bed2db;
-      --stroke: #35515d;
-      --fail: #ff86a8;
+      --color-brand-ink: #070A13;
+      --color-brand-signal: #88AEBF;
+      --color-brand-bg: color-mix(in srgb, var(--color-brand-ink) 94%, var(--color-brand-signal));
+      --color-brand-surface: color-mix(in srgb, var(--color-brand-ink) 88%, var(--color-brand-signal));
+      --color-brand-panel: color-mix(in srgb, var(--color-brand-ink) 82%, var(--color-brand-signal));
+      --color-brand-text: color-mix(in srgb, var(--color-brand-signal) 86%, white);
+      --color-brand-muted: color-mix(in srgb, var(--color-brand-signal) 64%, var(--color-brand-ink));
+      --color-brand-stroke: color-mix(in srgb, var(--color-brand-signal) 42%, var(--color-brand-ink));
+      --color-brand-stroke-strong: color-mix(in srgb, var(--color-brand-signal) 70%, var(--color-brand-ink));
+      --color-brand-primary: #7A8DFF;
+      --color-brand-fail: #ff789f;
+
+      --bg: var(--color-brand-bg);
+      --panel: var(--color-brand-panel);
+      --panel-soft: var(--color-brand-surface);
+      --signal: var(--color-brand-signal);
+      --text: var(--color-brand-text);
+      --muted: var(--color-brand-muted);
+      --stroke: var(--color-brand-stroke);
+      --stroke-strong: var(--color-brand-stroke-strong);
+      --fail: var(--color-brand-fail);
     }
 
     * { box-sizing: border-box; }
@@ -538,24 +559,25 @@ function renderHtmlReport({
       font-family: "Space Grotesk", "Inter", system-ui, sans-serif;
       color: var(--text);
       background:
-        radial-gradient(circle at 12% 10%, rgba(153, 186, 200, 0.28), transparent 42%),
-        radial-gradient(circle at 88% 86%, rgba(153, 186, 200, 0.18), transparent 48%),
+        radial-gradient(circle at 10% 8%, color-mix(in srgb, var(--color-brand-primary) 24%, transparent), transparent 42%),
+        radial-gradient(circle at 88% 86%, color-mix(in srgb, var(--signal) 18%, transparent), transparent 46%),
         var(--bg);
-      padding: 16px;
+      padding: 12px;
     }
 
     .page {
-      max-width: 1500px;
+      max-width: 1680px;
       margin: 0 auto;
-      min-height: calc(100vh - 32px);
+      height: calc(100vh - 24px);
       display: grid;
-      grid-template-rows: auto auto minmax(0, 1fr) auto;
-      gap: 12px;
+      grid-template-rows: auto auto minmax(0, 1fr);
+      gap: 10px;
       border: 1px solid var(--stroke);
       border-radius: 16px;
-      background: color-mix(in srgb, var(--panel) 94%, black);
-      box-shadow: 0 26px 48px rgba(1, 4, 10, 0.45);
-      padding: 16px;
+      background: color-mix(in srgb, var(--panel) 92%, black);
+      box-shadow: 0 22px 42px rgba(1, 4, 10, 0.42);
+      padding: 12px;
+      overflow: hidden;
     }
 
     h1, h2, h3, h4 { margin: 0; }
@@ -570,65 +592,77 @@ function renderHtmlReport({
     }
 
     .title {
-      font-size: clamp(1.4rem, 2.1vw, 1.95rem);
-      letter-spacing: -0.02em;
+      font-family: "Xanh Mono", "Space Grotesk", monospace;
+      font-size: clamp(1.2rem, 1.8vw, 1.7rem);
+      letter-spacing: -0.03em;
+      line-height: 1.02;
     }
 
     .subtitle {
       color: var(--muted);
-      margin-top: 4px;
-      font-size: 0.9rem;
+      margin-top: 3px;
+      font-size: 0.82rem;
     }
 
     .path {
-      background: rgba(153, 186, 200, 0.18);
+      background: color-mix(in srgb, var(--signal) 12%, transparent);
       border: 1px solid var(--stroke);
       border-radius: 999px;
-      padding: 6px 10px;
-      font-size: 0.78rem;
+      padding: 4px 9px;
+      font-size: 0.74rem;
       color: var(--signal);
+      max-width: 100%;
       white-space: nowrap;
+      overflow: auto;
+      scrollbar-width: thin;
     }
 
     .signal-strip {
       display: grid;
       grid-template-columns: repeat(5, minmax(0, 1fr));
-      gap: 8px;
+      gap: 7px;
     }
 
     .chip {
       border: 1px solid var(--stroke);
-      border-radius: 12px;
-      background: color-mix(in srgb, var(--panel-soft) 86%, black);
-      padding: 10px;
-      min-height: 64px;
+      border-radius: 10px;
+      background: color-mix(in srgb, var(--panel-soft) 84%, black);
+      padding: 8px 9px;
+      min-height: 56px;
     }
 
     .chip-label {
-      font-size: 0.72rem;
+      font-size: 0.68rem;
       letter-spacing: 0.08em;
       text-transform: uppercase;
       color: var(--muted);
     }
 
     .chip-value {
-      margin-top: 6px;
-      font-size: 1.1rem;
+      margin-top: 4px;
+      font-size: 1rem;
       font-weight: 700;
     }
 
     .chip-value.pass { color: var(--signal); }
     .chip-value.fail { color: var(--fail); }
 
+    .workbench {
+      min-height: 0;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(290px, 340px);
+      gap: 10px;
+    }
+
     .proof-stage {
       min-height: 0;
       border: 1px solid var(--stroke);
-      border-radius: 14px;
+      border-radius: 12px;
       background: color-mix(in srgb, var(--panel-soft) 88%, black);
-      padding: 10px;
+      padding: 8px;
       display: grid;
       grid-template-rows: auto auto minmax(0, 1fr);
-      gap: 10px;
+      gap: 8px;
     }
 
     .stage-header {
@@ -641,12 +675,13 @@ function renderHtmlReport({
 
     .stage-note {
       color: var(--muted);
-      font-size: 0.85rem;
+      font-size: 0.8rem;
+      letter-spacing: 0.01em;
     }
 
     .tab-list {
       display: flex;
-      gap: 8px;
+      gap: 6px;
       flex-wrap: wrap;
     }
 
@@ -655,18 +690,18 @@ function renderHtmlReport({
       background: rgba(10, 20, 30, 0.8);
       color: var(--text);
       border-radius: 999px;
-      padding: 7px 12px;
+      padding: 6px 10px;
       font-weight: 600;
-      font-size: 0.84rem;
+      font-size: 0.8rem;
       cursor: pointer;
       display: inline-flex;
-      gap: 8px;
+      gap: 6px;
       align-items: center;
     }
 
     .bp-tab span {
       color: var(--muted);
-      font-size: 0.72rem;
+      font-size: 0.68rem;
       font-weight: 500;
     }
 
@@ -685,7 +720,7 @@ function renderHtmlReport({
       height: 100%;
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 10px;
+      gap: 8px;
       min-height: 0;
     }
 
@@ -695,28 +730,41 @@ function renderHtmlReport({
       display: grid;
       grid-template-rows: auto minmax(0, 1fr);
       border: 1px solid var(--stroke);
-      border-radius: 12px;
+      border-radius: 10px;
       background: color-mix(in srgb, var(--panel-soft) 80%, black);
-      padding: 8px;
+      padding: 7px;
+    }
+
+    .shot-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 8px;
+      margin-bottom: 4px;
     }
 
     .shot-card h4 {
-      font-size: 0.86rem;
+      font-size: 0.74rem;
       color: var(--signal);
-      margin-bottom: 6px;
       text-transform: uppercase;
-      letter-spacing: 0.06em;
+      letter-spacing: 0.1em;
+    }
+
+    .shot-meta {
+      font-size: 0.72rem;
+      color: var(--muted);
+      white-space: nowrap;
     }
 
     .shot-frame {
-      border: 1px solid var(--stroke);
-      border-radius: 10px;
+      border: 1px solid color-mix(in srgb, var(--stroke-strong) 80%, black);
+      border-radius: 8px;
       background: #03070f;
       overflow: auto;
       min-height: 0;
-      max-height: 48vh;
-      padding: 8px;
-      scrollbar-color: rgba(153, 186, 200, 0.7) rgba(4, 10, 18, 0.8);
+      height: 100%;
+      padding: 7px;
+      scrollbar-color: color-mix(in srgb, var(--signal) 60%, transparent) rgba(4, 10, 18, 0.8);
     }
 
     .shot-frame img {
@@ -725,57 +773,64 @@ function renderHtmlReport({
       height: auto;
       max-width: none;
       max-height: none;
-      border-radius: 8px;
-      border: 1px solid color-mix(in srgb, var(--signal-soft) 32%, black);
-      box-shadow: 0 14px 28px rgba(0, 0, 0, 0.35);
-      image-rendering: auto;
+      object-fit: none;
+      border-radius: 6px;
+      border: 1px solid color-mix(in srgb, var(--signal) 26%, black);
+      box-shadow: 0 10px 18px rgba(0, 0, 0, 0.32);
+      image-rendering: crisp-edges;
     }
 
     .shot-frame p {
       color: var(--muted);
-      font-size: 0.9rem;
+      font-size: 0.84rem;
       margin: 0;
     }
 
     .deep-data {
       display: grid;
-      gap: 8px;
+      grid-template-rows: repeat(3, minmax(0, 1fr));
+      gap: 7px;
+      min-height: 0;
+      overflow: auto;
+      padding-right: 2px;
     }
 
     details {
       border: 1px solid var(--stroke);
-      border-radius: 12px;
+      border-radius: 10px;
       background: color-mix(in srgb, var(--panel) 88%, black);
       overflow: hidden;
+      min-height: 0;
     }
 
     summary {
       cursor: pointer;
-      padding: 10px 12px;
+      padding: 8px 10px;
       font-weight: 600;
       color: var(--signal);
       letter-spacing: 0.02em;
       list-style: none;
+      font-size: 0.82rem;
     }
 
     summary::-webkit-details-marker { display: none; }
 
     .detail-body {
       border-top: 1px solid var(--stroke);
-      padding: 10px;
-      max-height: 36vh;
+      padding: 8px;
+      max-height: 28vh;
       overflow: auto;
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 0.84rem;
+      font-size: 0.78rem;
     }
 
     th, td {
       border: 1px solid var(--stroke);
-      padding: 8px;
+      padding: 6px;
       vertical-align: top;
       text-align: left;
     }
@@ -796,7 +851,7 @@ function renderHtmlReport({
       white-space: pre-wrap;
       word-break: break-word;
       color: var(--muted);
-      font-size: 0.8rem;
+      font-size: 0.75rem;
     }
 
     code {
@@ -805,7 +860,16 @@ function renderHtmlReport({
       border: 1px solid var(--stroke);
       border-radius: 6px;
       padding: 2px 6px;
-      font-size: 0.8rem;
+      font-size: 0.74rem;
+    }
+
+    @media (max-width: 1380px) {
+      .workbench { grid-template-columns: 1fr; }
+      .deep-data {
+        overflow: visible;
+        grid-template-rows: none;
+      }
+      .detail-body { max-height: 34vh; }
     }
 
     @media (max-width: 1140px) {
@@ -816,7 +880,9 @@ function renderHtmlReport({
       }
       .signal-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .pair { grid-template-columns: 1fr; }
+      .proof-stage { min-height: 60vh; }
       .shot-frame { max-height: 56vh; }
+      .path { border-radius: 10px; }
     }
   </style>
 </head>
@@ -853,45 +919,47 @@ function renderHtmlReport({
       </article>
     </section>
 
-    <section class="proof-stage">
-      <div class="stage-header">
-        <h2>Breakpoint Capture</h2>
-        <p class="stage-note">Images render at native pixels. Scroll inside each frame to inspect details.</p>
-      </div>
-      <div class="tab-list">${breakpointTabs}</div>
-      <div class="bp-panels">${screenPanels}</div>
-    </section>
-
-    <section class="deep-data">
-      <details>
-        <summary>Gate Results</summary>
-        <div class="detail-body">
-          <table>
-            <thead><tr><th>Gate</th><th>Status</th><th>Output</th></tr></thead>
-            <tbody>${gatesRows}</tbody>
-          </table>
+    <section class="workbench">
+      <section class="proof-stage">
+        <div class="stage-header">
+          <h2>Breakpoint Capture</h2>
+          <p class="stage-note">Native 1:1 pixels. Scroll inside each frame to inspect.</p>
         </div>
-      </details>
+        <div class="tab-list">${breakpointTabs}</div>
+        <div class="bp-panels">${screenPanels}</div>
+      </section>
 
-      <details>
-        <summary>Token Diff (before vs after)</summary>
-        <div class="detail-body">
-          <table>
-            <thead><tr><th>Token</th><th>Before</th><th>After</th></tr></thead>
-            <tbody>${tokenRows}</tbody>
-          </table>
-        </div>
-      </details>
+      <aside class="deep-data">
+        <details>
+          <summary>Gate Results</summary>
+          <div class="detail-body">
+            <table>
+              <thead><tr><th>Gate</th><th>Status</th><th>Output</th></tr></thead>
+              <tbody>${gatesRows}</tbody>
+            </table>
+          </div>
+        </details>
 
-      <details>
-        <summary>SFID Delta</summary>
-        <div class="detail-body">
-          <p><strong>Code sfids:</strong> ${sfidSummary.codeCount}</p>
-          <p><strong>Payload sfids:</strong> ${sfidSummary.payloadCount}</p>
-          <p><strong>Missing in payload:</strong> ${htmlEscape(sfidSummary.missingInPayload.join(", ") || "none")}</p>
-          <p><strong>Missing in code:</strong> ${htmlEscape(sfidSummary.missingInCode.join(", ") || "none")}</p>
-        </div>
-      </details>
+        <details>
+          <summary>Token Diff (before vs after)</summary>
+          <div class="detail-body">
+            <table>
+              <thead><tr><th>Token</th><th>Before</th><th>After</th></tr></thead>
+              <tbody>${tokenRows}</tbody>
+            </table>
+          </div>
+        </details>
+
+        <details>
+          <summary>SFID Delta</summary>
+          <div class="detail-body">
+            <p><strong>Code sfids:</strong> ${sfidSummary.codeCount}</p>
+            <p><strong>Payload sfids:</strong> ${sfidSummary.payloadCount}</p>
+            <p><strong>Missing in payload:</strong> ${htmlEscape(sfidSummary.missingInPayload.join(", ") || "none")}</p>
+            <p><strong>Missing in code:</strong> ${htmlEscape(sfidSummary.missingInCode.join(", ") || "none")}</p>
+          </div>
+        </details>
+      </aside>
     </section>
   </main>
 
@@ -899,10 +967,37 @@ function renderHtmlReport({
     (() => {
       const tabs = Array.from(document.querySelectorAll(".bp-tab"));
       const panels = Array.from(document.querySelectorAll(".bp-panel"));
+      const shotCards = Array.from(document.querySelectorAll(".shot-card"));
 
       const activate = (name) => {
         tabs.forEach((tab) => tab.classList.toggle("active", tab.dataset.breakpoint === name));
         panels.forEach((panel) => panel.classList.toggle("active", panel.dataset.breakpointPanel === name));
+      };
+
+      const lockNativeShotSize = () => {
+        shotCards.forEach((card) => {
+          const image = card.querySelector("img");
+          const meta = card.querySelector(".shot-meta");
+
+          if (!image) {
+            if (meta) meta.textContent = "No capture";
+            return;
+          }
+
+          const applyNativeSize = () => {
+            if (!image.naturalWidth || !image.naturalHeight) return;
+            image.style.width = image.naturalWidth + "px";
+            image.style.height = image.naturalHeight + "px";
+            if (meta) meta.textContent = image.naturalWidth + " x " + image.naturalHeight + "px";
+          };
+
+          if (image.complete) {
+            applyNativeSize();
+            return;
+          }
+
+          image.addEventListener("load", applyNativeSize, { once: true });
+        });
       };
 
       tabs.forEach((tab) => {
@@ -912,6 +1007,8 @@ function renderHtmlReport({
       if (tabs.length > 0) {
         activate(tabs[0].dataset.breakpoint || "");
       }
+
+      lockNativeShotSize();
     })();
   </script>
 </body>

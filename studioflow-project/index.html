@@ -9,6 +9,14 @@
       content="StudioFlow Workflow: a kinetic 2026 design-to-code loop with token discipline, stable IDs, and contract-driven verification."
     />
     <title>StudioFlow Workflow | 2026</title>
+    <script>
+      if (window.location.hash.includes("figmacapture=")) {
+        const script = document.createElement("script");
+        script.src = "https://mcp.figma.com/mcp/html-to-design/capture.js";
+        script.async = true;
+        document.head.appendChild(script);
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>

@@ -1,0 +1,10 @@
+{
+  "name": "studioflow-workflow-workspace",
+  "private": true,
+  "scripts": {
+    "setup:project": "npm --prefix studioflow-project run setup:project",
+    "demo:website:capture": "npm --prefix studioflow-project run demo:website:capture",
+    "demo:figma:prep": "npm --prefix studioflow-project run demo:figma:prep",
+    "check:figma-bridge": "npm --prefix studioflow-project run check:figma-bridge"
+  }
+}

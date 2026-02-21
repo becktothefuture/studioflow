@@ -79,6 +79,18 @@ First successful run criteria:
 - `npm run check` passes.
 - `npm run build` passes.
 
+Always-on bridge monitor:
+```bash
+npm run monitor:figma-bridge:start
+npm run monitor:figma-bridge:status
+npm run monitor:figma-bridge:stop
+```
+
+Foreground mode (single terminal):
+```bash
+npm run monitor:figma-bridge
+```
+
 ## Naming & Semantic Conventions
 Canonical naming policy:
 - `sfid:*` values preserve stable component identity.

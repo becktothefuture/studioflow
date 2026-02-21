@@ -6,14 +6,24 @@
   "canvasProvider": "figma-sites",
   "claudeModelUsed": "opus",
   "loopCount": 0,
-  "updatedAt": "2026-02-21T20:10:06.094Z",
+  "updatedAt": "2026-02-21T22:14:44.535Z",
   "publicMicrositeUrl": "https://<owner>.github.io/<repo>/",
   "lastSnapshot": null,
   "lastSnapshotAt": null,
-  "lastCodeToCanvas": null,
+  "lastCodeToCanvas": {
+    "ranAt": "2026-02-21T22:14:44.535Z",
+    "tokenCount": 64,
+    "sfidCount": 8,
+    "handoffFile": "handoff/code-to-canvas.json"
+  },
   "lastCanvasSync": null,
   "lastCanvasVerification": null,
-  "lastCodeToFigma": null,
+  "lastCodeToFigma": {
+    "ranAt": "2026-02-21T22:14:44.535Z",
+    "tokenCount": 64,
+    "sfidCount": 8,
+    "handoffFile": "handoff/code-to-figma.json"
+  },
   "lastFigmaToCode": null,
   "lastVerification": {
     "status": "passed",

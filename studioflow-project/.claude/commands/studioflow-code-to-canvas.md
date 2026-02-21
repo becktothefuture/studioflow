@@ -15,12 +15,23 @@ npm run check
 npm run loop:code-to-canvas
 ```
 
-3. In Figma (via MCP), update token frames, modes, and screens from `handoff/code-to-canvas.json`.
+3. Bootstrap Figma variables (optional REST automation):
+```bash
+npm run figma:variables:plan
+FIGMA_ACCESS_TOKEN=... FIGMA_FILE_KEY=... npm run figma:variables:sync
+```
 
-4. Save approved payload to:
+4. Run deep bridge gate:
+```bash
+npm run check:figma-bridge
+```
+
+5. In Figma (via MCP), update token frames, modes, and screens from `handoff/code-to-canvas.json`.
+
+6. Save approved payload to:
 - `handoff/canvas-to-code.json`
 
-5. Validate and apply:
+7. Validate and apply:
 ```bash
 npm run loop:verify-canvas
 npm run loop:canvas-to-code

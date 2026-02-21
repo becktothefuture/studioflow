@@ -5,6 +5,7 @@ dist/
 .DS_Store
 .mcp.json
 .claude/settings.local.json
+.env.local
 
 # Generated handoff payloads
 handoff/*.json
@@ -25,3 +26,6 @@ tokens/figma-breakpoint-variables.json
 # Local scratch artifacts
 scripts/_*.txt
 scripts/*.tmp
+
+# Bridge monitor runtime
+.bridge-monitor/

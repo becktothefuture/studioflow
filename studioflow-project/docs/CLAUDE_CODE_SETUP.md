@@ -1,6 +1,11 @@
 # Claude Code Setup (Fresh 2026)
 
 This guide sets up Claude Code for StudioFlow with a reliable Code -> Canvas -> Code loop.
+It mirrors the official Figma guide for Claude Code to Figma:
+- https://www.figma.com/blog/introducing-claude-code-to-figma/
+
+Quick-launch menu and full run plan:
+- `docs/ON_YOUR_MARKS_SET_GO.md`
 
 ## 1) One-command setup
 
@@ -40,7 +45,7 @@ Expected: output includes `figma`.
 If output is `No MCP servers configured`, run:
 
 ```bash
-claude mcp add --scope project --transport http figma https://mcp.figma.com/mcp
+claude mcp add --transport http figma https://mcp.figma.com/mcp --scope user
 claude mcp list
 ```
 
@@ -60,6 +65,65 @@ Complete Figma auth flow. Then run:
 
 ```bash
 npm run check:mcp
+npm run check:figma-bridge
+```
+
+Bridge smoke test (official flow):
+
+1. Keep Claude open.
+2. In a Figma file, run a simple prompt like:
+
+```text
+Capture this UI in Figma.
+```
+
+If Claude can create/update content in your open Figma file, the bridge is live.
+
+## 2.1) Deep bridge gate (automated)
+
+`check:figma-bridge` performs all of these:
+- runs MCP health validation,
+- regenerates code-to-canvas payload,
+- validates token/mode/screen payload completeness,
+- generates variable upsert plan,
+- if `FIGMA_ACCESS_TOKEN` and `FIGMA_FILE_KEY` are present:
+  - validates `/me`,
+  - validates file access,
+  - validates variables endpoint access,
+  - writes/updates a real test variable collection (`StudioFlow Bridge Check`) and test variable (`bridge-check/ping`) for all four modes.
+
+Strict mode (require live write checks):
+
+```bash
+STUDIOFLOW_STRICT_FIGMA_BRIDGE=1 FIGMA_ACCESS_TOKEN=... FIGMA_FILE_KEY=... npm run check:figma-bridge
+```
+
+## 2.2) Always-on bridge monitor (terminal)
+
+Foreground mode:
+
+```bash
+npm run monitor:figma-bridge
+```
+
+Detached mode:
+
+```bash
+npm run monitor:figma-bridge:start
+npm run monitor:figma-bridge:status
+npm run monitor:figma-bridge:stop
+```
+
+Spawn directly from installer:
+
+```bash
+STUDIOFLOW_SPAWN_BRIDGE_MONITOR=1 npm run setup:project
+```
+
+Optional cadence controls:
+
+```bash
+STUDIOFLOW_MONITOR_INTERVAL=45 STUDIOFLOW_MONITOR_DEEP_EVERY=3 npm run monitor:figma-bridge:start
 ```
 
 ## 3) Manual setup path (full control)
@@ -79,7 +143,7 @@ npm run setup:claude
 3. Add and verify Figma MCP:
 
 ```bash
-claude mcp add --scope project --transport http figma https://mcp.figma.com/mcp
+claude mcp add --transport http figma https://mcp.figma.com/mcp --scope user
 claude mcp list
 npm run check:mcp
 ```
