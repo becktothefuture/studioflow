@@ -183,7 +183,7 @@ async function figmaRequest({ method, pathname, token, body }) {
   const response = await fetch(`${apiBase}${pathname}`, {
     method,
     headers: {
-      Authorization: `Bearer ${token}`,
+      "X-Figma-Token": token,
       ...(body ? { "Content-Type": "application/json" } : {})
     },
     body: body ? JSON.stringify(body) : undefined
@@ -260,11 +260,22 @@ async function verifyLiveFigmaGates(workflow) {
   });
   assertStep(Boolean(file?.document?.id), "Figma file is reachable");
 
-  const localVariables = await figmaRequest({
-    method: "GET",
-    pathname: `/files/${encodeURIComponent(fileKey)}/variables/local`,
-    token
-  });
+  let localVariables;
+  try {
+    localVariables = await figmaRequest({
+      method: "GET",
+      pathname: `/files/${encodeURIComponent(fileKey)}/variables/local`,
+      token
+    });
+  } catch (error) {
+    const message = String(error?.message ?? "");
+    const missingScope = message.includes("file_variables:read") || message.includes("Invalid scope");
+    if (!strictMode && missingScope) {
+      console.log("WARN variables/local endpoint unavailable for this token scopes; skipping live variable checks");
+      return;
+    }
+    throw error;
+  }
   assertStep(Boolean(localVariables?.meta), "variables/local endpoint is reachable");
 
   const existingMeta = localVariables.meta;
@@ -282,12 +293,22 @@ async function verifyLiveFigmaGates(workflow) {
     (request.variableModeValues?.length ?? 0);
   assertStep(opCount > 0, "healthcheck write request has operations");
 
-  await figmaRequest({
-    method: "POST",
-    pathname: `/files/${encodeURIComponent(fileKey)}/variables`,
-    token,
-    body: request
-  });
+  try {
+    await figmaRequest({
+      method: "POST",
+      pathname: `/files/${encodeURIComponent(fileKey)}/variables`,
+      token,
+      body: request
+    });
+  } catch (error) {
+    const message = String(error?.message ?? "");
+    const missingScope = message.includes("file_variables:write") || message.includes("Invalid scope");
+    if (!strictMode && missingScope) {
+      console.log("WARN variables write endpoint unavailable for this token scopes; skipping live variable checks");
+      return;
+    }
+    throw error;
+  }
   assertStep(true, "healthcheck variable write succeeded");
 
   const verifyVariables = await figmaRequest({

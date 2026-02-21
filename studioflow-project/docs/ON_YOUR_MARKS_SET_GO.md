@@ -61,16 +61,25 @@ STUDIOFLOW_STRICT_FIGMA_BRIDGE=1 FIGMA_ACCESS_TOKEN=... FIGMA_FILE_KEY=... npm r
 In the installer prompt:
 
 ```text
-Select option [1-5, a, s, q]:
+Select option [1-3, q]:
 ```
 
-### 1) Live Figma flow now (recommended)
+### 1) Send website to Figma (recommended)
 
 ```bash
 npm run demo:figma:prep
 FIGMA_ACCESS_TOKEN=... FIGMA_FILE_KEY=... npm run figma:variables:sync
 claude
 ```
+
+Credential setup now validates in strict order:
+- Step 1: enter token, token is validated immediately against `/v1/me`
+- Step 2: enter file URL/key, file access is validated against `/v1/files/{key}`
+
+If token validation fails, the installer re-prompts token only.
+If file validation fails, the installer re-prompts file key/URL only.
+If you accidentally paste `Authorization: Bearer ...` or hidden characters, the installer sanitizes it and asks again.
+Normal setup checks token + file access only. Variable API scope checks remain available via strict mode.
 
 Inside Claude:
 - run `/mcp`,
@@ -88,36 +97,21 @@ Preserve all sfid IDs.
 Keep the design token-driven using the StudioFlow variable modes.
 ```
 
-### 2) Configure Figma credentials
-
-```bash
-# in installer, choose option 2
-# token + file key are validated live before SAVE
-```
-
-### 3) Strict bridge/API validation
-
-```bash
-STUDIOFLOW_STRICT_FIGMA_BRIDGE=1 FIGMA_ACCESS_TOKEN=... FIGMA_FILE_KEY=... npm run check:figma-bridge
-```
-
-### 4) Local proof only (no live Figma)
+### 2) Create local proof report
 
 ```bash
 npm run demo:website:capture
 ```
 
-### 5) Full loop with proof artifact
+### 3) Advanced tools
 
 ```bash
+# strict bridge/API validation
+STUDIOFLOW_STRICT_FIGMA_BRIDGE=1 FIGMA_ACCESS_TOKEN=... FIGMA_FILE_KEY=... npm run check:figma-bridge
+# full loop with proof artifact
 npm run loop:run
 npm run loop:proof
 ```
-
-### a) Advanced actions
-
-- apply approved Figma edits back to code,
-- start/stop/status for bridge monitor.
 
 ## Required Files In This Pipeline
 

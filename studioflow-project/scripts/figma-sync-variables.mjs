@@ -328,7 +328,7 @@ async function figmaApiRequest({ method, apiBase, accessToken, pathname, body })
   const response = await fetch(url, {
     method,
     headers: {
-      Authorization: `Bearer ${accessToken}`,
+      "X-Figma-Token": accessToken,
       ...(body ? { "Content-Type": "application/json" } : {})
     },
     body: body ? JSON.stringify(body) : undefined

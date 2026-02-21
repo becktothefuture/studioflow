@@ -47,6 +47,14 @@ declare -a ISSUE_FIXES=()
 fail_count=0
 warn_count=0
 FIGMA_VALIDATION_SCOPE=""
+FIGMA_VALIDATION_KIND=""
+FIGMA_VALIDATION_HTTP_CODE=""
+FIGMA_VALIDATION_CURL_EXIT=""
+FIGMA_VALIDATION_ERROR_SNIPPET=""
+FIGMA_HTTP_CODE=""
+FIGMA_HTTP_BODY=""
+FIGMA_CURL_EXIT=0
+FIGMA_CURL_ERROR=""
 
 load_local_env_file() {
   if [[ -f "$ENV_LOCAL_FILE" ]]; then
@@ -93,6 +101,48 @@ upsert_env_value() {
 
 has_figma_credentials() {
   [[ -n "${FIGMA_ACCESS_TOKEN:-}" && -n "${FIGMA_FILE_KEY:-}" ]]
+}
+
+trim_ws() {
+  local value="$1"
+  value="${value#"${value%%[![:space:]]*}"}"
+  value="${value%"${value##*[![:space:]]}"}"
+  printf '%s' "$value"
+}
+
+strip_control_chars() {
+  local value="$1"
+  printf '%s' "$value" | tr -d '\r\n\t'
+}
+
+sanitize_token_input() {
+  local value="$1"
+  value="$(strip_control_chars "$value")"
+  value="$(trim_ws "$value")"
+  value="${value#Authorization: Bearer }"
+  value="${value#Bearer }"
+  value="${value#X-Figma-Token: }"
+  if [[ "$value" == \"*\" && "$value" == *\" ]]; then
+    value="${value:1:${#value}-2}"
+  fi
+  if [[ "$value" == \'*\' && "$value" == *\' ]]; then
+    value="${value:1:${#value}-2}"
+  fi
+  value="$(printf '%s' "$value" | tr -d '[:space:]')"
+  value="$(printf '%s' "$value" | LC_ALL=C tr -cd '\41-\176')"
+  printf '%s' "$value"
+}
+
+sanitize_file_input() {
+  local value="$1"
+  value="$(strip_control_chars "$value")"
+  value="$(trim_ws "$value")"
+  printf '%s' "$value"
+}
+
+response_snippet() {
+  local text="$1"
+  printf '%s' "$text" | tr '\n' ' ' | sed -E 's/[[:space:]]+/ /g' | cut -c1-160
 }
 
 mask_token() {
@@ -148,14 +198,16 @@ prompt_token_value() {
 
   while true; do
     read -r -p "FIGMA_ACCESS_TOKEN$keep_hint: " token_input
+    token_input="$(sanitize_token_input "$token_input")"
 
     if [[ -z "$token_input" ]]; then
       if [[ "$force_new" != "1" && -n "$existing" ]]; then
-        printf '%s' "$existing"
+        printf '%s' "$(sanitize_token_input "$existing")"
         return 0
       fi
       printf "%sToken is required for live Figma API. Paste token or type SKIP to cancel setup.%s\n" "$YELLOW" "$RESET"
       read -r -p "Type value or SKIP: " token_input
+      token_input="$(sanitize_token_input "$token_input")"
     fi
 
     if [[ "$token_input" == "SKIP" ]]; then
@@ -164,6 +216,11 @@ prompt_token_value() {
 
     if [[ "$token_input" =~ figma\.com/ ]]; then
       printf "%sThat looks like a URL, not a token. Use your personal access token.%s\n" "$YELLOW" "$RESET"
+      continue
+    fi
+
+    if [[ "$token_input" != figd_* ]]; then
+      printf "%sToken format looks unusual. Paste a personal access token that starts with figd_.%s\n" "$YELLOW" "$RESET"
       continue
     fi
 
@@ -187,13 +244,15 @@ prompt_file_key_value() {
 
   while true; do
     read -r -p "FIGMA_FILE_KEY or full Figma URL$keep_hint: " file_input
+    file_input="$(sanitize_file_input "$file_input")"
     if [[ -z "$file_input" ]]; then
       if [[ -n "$existing" ]]; then
-        printf '%s' "$existing"
+        printf '%s' "$(sanitize_file_input "$existing")"
         return 0
       fi
       printf "%sFile key is required for live Figma API. Paste key/URL or type SKIP to cancel setup.%s\n" "$YELLOW" "$RESET"
       read -r -p "Type value or SKIP: " file_input
+      file_input="$(sanitize_file_input "$file_input")"
     fi
 
     if [[ "$file_input" == "SKIP" ]]; then
@@ -206,6 +265,7 @@ prompt_file_key_value() {
     fi
 
     normalized="$(normalize_figma_file_key "$file_input")"
+    normalized="$(sanitize_file_input "$normalized")"
     if [[ -n "$normalized" ]]; then
       printf '%s' "$normalized"
       return 0
@@ -213,30 +273,85 @@ prompt_file_key_value() {
   done
 }
 
-http_get_with_status() {
+http_request_json() {
   local url="$1"
   local token="$2"
-  curl -sS -H "Authorization: Bearer $token" -w $'\n%{http_code}' "$url" 2>/dev/null || true
+  local body_file=""
+  local err_file=""
+  local code=""
+
+  body_file="$(mktemp)"
+  err_file="$(mktemp)"
+
+  code="$(curl -sS --connect-timeout 10 --max-time 20 -H "X-Figma-Token: $token" -w '%{http_code}' "$url" -o "$body_file" 2>"$err_file")"
+  FIGMA_CURL_EXIT=$?
+  FIGMA_HTTP_CODE="${code:-000}"
+  FIGMA_HTTP_BODY="$(cat "$body_file" 2>/dev/null || true)"
+  FIGMA_CURL_ERROR="$(response_snippet "$(cat "$err_file" 2>/dev/null || true)")"
+
+  rm -f "$body_file" "$err_file"
 }
 
-validate_figma_credentials_live() {
+record_validation_failure() {
+  local scope="$1"
+  local kind="$2"
+  local http_code="$3"
+  local curl_exit="$4"
+  local snippet="$5"
+
+  FIGMA_VALIDATION_SCOPE="$scope"
+  FIGMA_VALIDATION_KIND="$kind"
+  FIGMA_VALIDATION_HTTP_CODE="$http_code"
+  FIGMA_VALIDATION_CURL_EXIT="$curl_exit"
+  FIGMA_VALIDATION_ERROR_SNIPPET="$snippet"
+}
+
+print_transport_failure() {
+  local scope_label="$1"
+
+  printf "%sCould not reach Figma API (connection/request error).%s %s\n" "$RED" "$RESET" "$scope_label"
+  echo "curl exit code: ${FIGMA_CURL_EXIT:-unknown}"
+  if [[ -n "${FIGMA_CURL_ERROR:-}" ]]; then
+    echo "curl error: $FIGMA_CURL_ERROR"
+  fi
+  if [[ -n "${FIGMA_HTTP_CODE:-}" && "${FIGMA_HTTP_CODE:-}" != "000" ]]; then
+    echo "HTTP code: $FIGMA_HTTP_CODE"
+  fi
+  if [[ "${FIGMA_CURL_EXIT:-}" == "43" ]]; then
+    echo "Hint: token input likely contains unsupported characters. Re-paste only the raw figd_ token."
+  fi
+  echo "Check network/VPN/proxy/firewall and retry."
+}
+
+validate_figma_token_live() {
   local token="$1"
-  local file_key="$2"
-  local response=""
-  local code=""
-  local body=""
   local snippet=""
 
-  FIGMA_VALIDATION_SCOPE=""
-  printf "%sValidating Figma token and file access...%s\n" "$WHITE" "$RESET"
+  FIGMA_VALIDATION_SCOPE="token"
+  FIGMA_VALIDATION_KIND=""
+  FIGMA_VALIDATION_HTTP_CODE=""
+  FIGMA_VALIDATION_CURL_EXIT=""
+  FIGMA_VALIDATION_ERROR_SNIPPET=""
 
-  response="$(http_get_with_status "$FIGMA_API_BASE/me" "$token")"
-  code="${response##*$'\n'}"
-  body="${response%$'\n'*}"
-  if [[ "$code" != "200" ]]; then
-    FIGMA_VALIDATION_SCOPE="token"
-    snippet="$(printf '%s' "$body" | tr '\n' ' ' | cut -c1-160)"
-    printf "%sToken validation failed.%s HTTP %s\n" "$RED" "$RESET" "$code"
+  printf "%sValidating Figma token...%s\n" "$WHITE" "$RESET"
+  http_request_json "$FIGMA_API_BASE/me" "$token"
+
+  if [[ "${FIGMA_CURL_EXIT:-1}" -ne 0 || "${FIGMA_HTTP_CODE:-000}" == "000" ]]; then
+    snippet="$FIGMA_CURL_ERROR"
+    record_validation_failure "token" "token_transport" "${FIGMA_HTTP_CODE:-000}" "${FIGMA_CURL_EXIT:-1}" "$snippet"
+    print_transport_failure "(token check)"
+    return 1
+  fi
+
+  if [[ "${FIGMA_HTTP_CODE:-000}" == "200" ]]; then
+    printf "%sToken validated.%s\n" "$GREEN" "$RESET"
+    return 0
+  fi
+
+  snippet="$(response_snippet "${FIGMA_HTTP_BODY:-}")"
+  if [[ "${FIGMA_HTTP_CODE:-000}" == "401" || "${FIGMA_HTTP_CODE:-000}" == "403" ]]; then
+    record_validation_failure "token" "token_invalid" "${FIGMA_HTTP_CODE:-000}" "${FIGMA_CURL_EXIT:-0}" "$snippet"
+    printf "%sToken validation failed.%s HTTP %s\n" "$RED" "$RESET" "${FIGMA_HTTP_CODE:-000}"
     if [[ -n "$snippet" ]]; then
       echo "Reason: $snippet"
     fi
@@ -244,17 +359,91 @@ validate_figma_credentials_live() {
     return 1
   fi
 
-  response="$(http_get_with_status "$FIGMA_API_BASE/files/$file_key?depth=1" "$token")"
-  code="${response##*$'\n'}"
-  body="${response%$'\n'*}"
-  if [[ "$code" != "200" ]]; then
-    FIGMA_VALIDATION_SCOPE="file"
-    snippet="$(printf '%s' "$body" | tr '\n' ' ' | cut -c1-160)"
-    printf "%sFile key / URL validation failed.%s HTTP %s\n" "$RED" "$RESET" "$code"
-    if [[ -n "$snippet" ]]; then
-      echo "Reason: $snippet"
-    fi
-    echo "Check FIGMA_FILE_KEY or paste the full file URL again."
+  record_validation_failure "token" "token_unknown_http" "${FIGMA_HTTP_CODE:-000}" "${FIGMA_CURL_EXIT:-0}" "$snippet"
+  printf "%sToken validation failed.%s HTTP %s\n" "$RED" "$RESET" "${FIGMA_HTTP_CODE:-000}"
+  if [[ -n "$snippet" ]]; then
+    echo "Reason: $snippet"
+  fi
+  echo "Token help: $FIGMA_TOKEN_HELP_URL"
+  return 1
+}
+
+validate_figma_file_access_live() {
+  local token="$1"
+  local file_key="$2"
+  local snippet=""
+
+  FIGMA_VALIDATION_SCOPE="file"
+  FIGMA_VALIDATION_KIND=""
+  FIGMA_VALIDATION_HTTP_CODE=""
+  FIGMA_VALIDATION_CURL_EXIT=""
+  FIGMA_VALIDATION_ERROR_SNIPPET=""
+
+  printf "%sValidating Figma file access...%s\n" "$WHITE" "$RESET"
+  http_request_json "$FIGMA_API_BASE/files/$file_key?depth=1" "$token"
+
+  if [[ "${FIGMA_CURL_EXIT:-1}" -ne 0 || "${FIGMA_HTTP_CODE:-000}" == "000" ]]; then
+    snippet="$FIGMA_CURL_ERROR"
+    record_validation_failure "file" "file_transport" "${FIGMA_HTTP_CODE:-000}" "${FIGMA_CURL_EXIT:-1}" "$snippet"
+    print_transport_failure "(file access check)"
+    return 1
+  fi
+
+  if [[ "${FIGMA_HTTP_CODE:-000}" == "200" ]]; then
+    printf "%sFile key validated.%s\n" "$GREEN" "$RESET"
+    return 0
+  fi
+
+  snippet="$(response_snippet "${FIGMA_HTTP_BODY:-}")"
+  case "${FIGMA_HTTP_CODE:-000}" in
+    401)
+      record_validation_failure "file" "file_token_invalid" "${FIGMA_HTTP_CODE:-000}" "${FIGMA_CURL_EXIT:-0}" "$snippet"
+      printf "%sFile validation failed.%s HTTP %s\n" "$RED" "$RESET" "${FIGMA_HTTP_CODE:-000}"
+      if [[ -n "$snippet" ]]; then
+        echo "Reason: $snippet"
+      fi
+      echo "Token is no longer valid. Re-enter FIGMA_ACCESS_TOKEN."
+      return 1
+      ;;
+    403)
+      record_validation_failure "file" "file_forbidden" "${FIGMA_HTTP_CODE:-000}" "${FIGMA_CURL_EXIT:-0}" "$snippet"
+      printf "%sFile access denied.%s HTTP %s\n" "$RED" "$RESET" "${FIGMA_HTTP_CODE:-000}"
+      if [[ -n "$snippet" ]]; then
+        echo "Reason: $snippet"
+      fi
+      echo "Token is valid, but this file is not accessible to this account/token."
+      echo "Check file permissions in Figma and confirm the file key/URL."
+      return 1
+      ;;
+    404)
+      record_validation_failure "file" "file_not_found" "${FIGMA_HTTP_CODE:-000}" "${FIGMA_CURL_EXIT:-0}" "$snippet"
+      printf "%sFile key / URL validation failed.%s HTTP %s\n" "$RED" "$RESET" "${FIGMA_HTTP_CODE:-000}"
+      if [[ -n "$snippet" ]]; then
+        echo "Reason: $snippet"
+      fi
+      echo "File key not found. Paste the full Figma file URL again."
+      return 1
+      ;;
+    *)
+      record_validation_failure "file" "file_unknown_http" "${FIGMA_HTTP_CODE:-000}" "${FIGMA_CURL_EXIT:-0}" "$snippet"
+      printf "%sFile key / URL validation failed.%s HTTP %s\n" "$RED" "$RESET" "${FIGMA_HTTP_CODE:-000}"
+      if [[ -n "$snippet" ]]; then
+        echo "Reason: $snippet"
+      fi
+      echo "Check FIGMA_FILE_KEY or paste the full file URL again."
+      return 1
+      ;;
+  esac
+}
+
+validate_figma_credentials_live() {
+  local token="$1"
+  local file_key="$2"
+
+  if ! validate_figma_token_live "$token"; then
+    return 1
+  fi
+  if ! validate_figma_file_access_live "$token" "$file_key"; then
     return 1
   fi
 
@@ -301,8 +490,8 @@ configure_figma_credentials() {
 
   local token_value=""
   local file_key_value=""
-  local retry=""
   local force_new_token="0"
+  local retry=""
   local existing_token="${FIGMA_ACCESS_TOKEN:-}"
   local existing_file_key="${FIGMA_FILE_KEY:-}"
 
@@ -317,50 +506,71 @@ configure_figma_credentials() {
   if [[ -n "$existing_token" && -n "$existing_file_key" ]]; then
     echo
     printf "%sChecking existing saved credentials first...%s\n" "$WHITE" "$RESET"
-    if validate_figma_credentials_live "$existing_token" "$existing_file_key"; then
-      printf "%sExisting credentials are valid.%s\n" "$GREEN" "$RESET"
-    else
-      if [[ "$FIGMA_VALIDATION_SCOPE" == "token" ]]; then
-        force_new_token="1"
-        printf "%sSaved token is invalid. You must paste a new token now.%s\n" "$YELLOW" "$RESET"
+    if validate_figma_token_live "$existing_token"; then
+      if validate_figma_file_access_live "$existing_token" "$existing_file_key"; then
+        printf "%sExisting credentials are valid.%s\n" "$GREEN" "$RESET"
       fi
+    fi
+    if [[ "$FIGMA_VALIDATION_KIND" == "token_invalid" ]]; then
+      force_new_token="1"
+      printf "%sSaved token is invalid. You must paste a new token now.%s\n" "$YELLOW" "$RESET"
     fi
   fi
 
   while true; do
-    echo
-    printf "%sStep 1/2:%s Enter Figma token\n" "$WHITE" "$RESET"
-    token_value="$(prompt_token_value "${FIGMA_ACCESS_TOKEN:-}" "$force_new_token")" || {
-      printf "%sCredential setup canceled. Live API checks will remain skipped.%s\n" "$YELLOW" "$RESET"
-      return 1
-    }
-    printf "%sStep 2/2:%s Enter Figma file URL or key\n" "$WHITE" "$RESET"
-    file_key_value="$(prompt_file_key_value "${FIGMA_FILE_KEY:-}")" || {
-      printf "%sCredential setup canceled. Live API checks will remain skipped.%s\n" "$YELLOW" "$RESET"
-      return 1
-    }
+    while true; do
+      echo
+      printf "%sStep 1/2:%s Enter Figma token\n" "$WHITE" "$RESET"
+      token_value="$(prompt_token_value "${FIGMA_ACCESS_TOKEN:-}" "$force_new_token")" || {
+        printf "%sCredential setup canceled. Live API checks will remain skipped.%s\n" "$YELLOW" "$RESET"
+        return 1
+      }
 
-    if validate_figma_credentials_live "$token_value" "$file_key_value"; then
-      break
-    fi
+      if validate_figma_token_live "$token_value"; then
+        break
+      fi
 
-    if [[ "$FIGMA_VALIDATION_SCOPE" == "token" ]]; then
-      force_new_token="1"
-    fi
+      if [[ "$FIGMA_VALIDATION_KIND" == "token_invalid" ]]; then
+        force_new_token="1"
+      fi
 
-    read -r -p "Try entering token/file key again? [Y/n]: " retry
-    if [[ "$retry" =~ ^[Nn]$ ]]; then
-      printf "%sCredential setup canceled. Live API checks will remain skipped.%s\n" "$YELLOW" "$RESET"
-      return 1
-    fi
+      read -r -p "Try entering token again? [Y/n]: " retry
+      if [[ "$retry" =~ ^[Nn]$ ]]; then
+        printf "%sCredential setup canceled. Live API checks will remain skipped.%s\n" "$YELLOW" "$RESET"
+        return 1
+      fi
+    done
+
+    while true; do
+      echo
+      printf "%sStep 2/2:%s Enter Figma file URL or key\n" "$WHITE" "$RESET"
+      file_key_value="$(prompt_file_key_value "${FIGMA_FILE_KEY:-}")" || {
+        printf "%sCredential setup canceled. Live API checks will remain skipped.%s\n" "$YELLOW" "$RESET"
+        return 1
+      }
+
+      if validate_figma_file_access_live "$token_value" "$file_key_value"; then
+        printf "%sFigma credentials validated.%s\n" "$BRAND" "$RESET"
+        if ! save_figma_credentials "$token_value" "$file_key_value"; then
+          printf "%sCredentials were not saved. Live API checks may be skipped.%s\n" "$YELLOW" "$RESET"
+          return 1
+        fi
+        return 0
+      fi
+
+      if [[ "$FIGMA_VALIDATION_KIND" == "file_token_invalid" ]]; then
+        force_new_token="1"
+        printf "%sToken became invalid during file check. Re-enter token.%s\n" "$YELLOW" "$RESET"
+        break
+      fi
+
+      read -r -p "Try entering file key/URL again? [Y/n]: " retry
+      if [[ "$retry" =~ ^[Nn]$ ]]; then
+        printf "%sCredential setup canceled. Live API checks will remain skipped.%s\n" "$YELLOW" "$RESET"
+        return 1
+      fi
+    done
   done
-
-  if ! save_figma_credentials "$token_value" "$file_key_value"; then
-    printf "%sCredentials were not saved. Live API checks may be skipped.%s\n" "$YELLOW" "$RESET"
-    return 1
-  fi
-
-  return 0
 }
 
 prompt_figma_credentials_if_missing() {
@@ -755,13 +965,15 @@ interactive_launch_menu() {
         if ! has_figma_credentials; then
           configure_figma_credentials || continue
         fi
-        run_interactive_action "Strict bridge + API gate test" "STUDIOFLOW_STRICT_FIGMA_BRIDGE=1 npm run check:figma-bridge" || continue
+        run_interactive_action "Bridge + API gate test" "npm run check:figma-bridge" || continue
         run_interactive_action "Demo website -> Figma prep" "npm run demo:figma:prep" || continue
         if ! has_figma_credentials; then
           printf "%sCredentials are still missing. Open option 3 -> Status details to inspect.%s\n" "$YELLOW" "$RESET"
           continue
         fi
-        run_interactive_action "Sync variables to Figma" "npm run figma:variables:sync" || continue
+        if ! run_interactive_action "Sync variables to Figma" "npm run figma:variables:sync"; then
+          printf "%sVariable sync skipped/failed (likely missing file_variables scopes). Continuing with code->design flow.%s\n" "$YELLOW" "$RESET"
+        fi
         read -r -p "Open Claude now for /mcp and push prompt? [Y/n]: " open_claude
         if [[ ! "$open_claude" =~ ^[Nn]$ ]]; then
           claude
