@@ -237,14 +237,14 @@ function renderSummaryCardHtml({
   <title>StudioFlow Summary Card</title>
   <style>
     :root {
-      --bg: #040916;
-      --panel: #0b1733;
-      --text: #eaf1ff;
-      --muted: #9eb3da;
-      --stroke: #2e4f90;
-      --good: #62f9f1;
+      --bg: #050912;
+      --panel: #0d1620;
+      --text: #f6fbfd;
+      --muted: #c0d2da;
+      --stroke: #35515d;
+      --good: #99bac8;
       --danger: #ff6a93;
-      --accent: #4f70ff;
+      --accent: #d6e5eb;
     }
 
     * { box-sizing: border-box; }
@@ -253,8 +253,8 @@ function renderSummaryCardHtml({
       font-family: "Space Grotesk", "Inter", system-ui, sans-serif;
       color: var(--text);
       background:
-        radial-gradient(circle at 10% 20%, rgba(98, 249, 241, 0.16), transparent 45%),
-        radial-gradient(circle at 90% 80%, rgba(79, 112, 255, 0.24), transparent 50%),
+        radial-gradient(circle at 10% 20%, rgba(153, 186, 200, 0.25), transparent 45%),
+        radial-gradient(circle at 90% 80%, rgba(153, 186, 200, 0.14), transparent 50%),
         var(--bg);
       padding: 36px;
     }
@@ -455,10 +455,16 @@ function renderHtmlReport({
   screenshotsAvailable,
   reportPath
 }) {
+  const passCount = gateResults.filter((gate) => gate.ok).length;
+  const totalCount = gateResults.length;
+  const overallStatus = overallGateStatus(gateResults);
+
   const gatesRows = gateResults
     .map((gate) => {
       const status = gate.ok ? "PASS" : "FAIL";
-      return `<tr><td>${htmlEscape(gate.command)}</td><td>${status}</td><td><pre>${htmlEscape(gate.stderr || gate.stdout || "-")}</pre></td></tr>`;
+      return `<tr><td>${htmlEscape(gate.command)}</td><td class="${gate.ok ? "pass" : "fail"}">${status}</td><td><pre>${htmlEscape(
+        gate.stderr || gate.stdout || "-"
+      )}</pre></td></tr>`;
     })
     .join("\n");
 
@@ -474,20 +480,34 @@ function renderHtmlReport({
         .join("\n")
     : `<tr><td colspan="3">No token changes vs previous proof baseline.</td></tr>`;
 
-  const screenBlocks = breakpoints
+  const breakpointTabs = breakpoints
+    .map(
+      (bp, index) =>
+        `<button type="button" class="bp-tab${index === 0 ? " active" : ""}" data-breakpoint="${htmlEscape(bp.name)}">${htmlEscape(
+          bp.label
+        )} <span>${bp.width}px</span></button>`
+    )
+    .join("\n");
+
+  const screenPanels = breakpoints
     .map((bp) => {
       const before = screenshotsAvailable
-        ? `<img src="./before-${bp.name}.png" alt="before ${bp.name}" />`
+        ? `<img src="./before-${bp.name}.png" alt="before ${bp.name}" loading="lazy" decoding="async" />`
         : `<p>Before screenshot unavailable (first run baseline).</p>`;
       const after = screenshotsAvailable
-        ? `<img src="./after-${bp.name}.png" alt="after ${bp.name}" />`
+        ? `<img src="./after-${bp.name}.png" alt="after ${bp.name}" loading="lazy" decoding="async" />`
         : `<p>After screenshot unavailable.</p>`;
       return `
-<section>
-  <h3>${htmlEscape(bp.label)} (${bp.width}px)</h3>
+<section class="bp-panel" data-breakpoint-panel="${htmlEscape(bp.name)}">
   <div class="pair">
-    <div><h4>Before</h4>${before}</div>
-    <div><h4>After</h4>${after}</div>
+    <article class="shot-card">
+      <h4>Before</h4>
+      <div class="shot-frame">${before}</div>
+    </article>
+    <article class="shot-card">
+      <h4>After</h4>
+      <div class="shot-frame">${after}</div>
+    </article>
   </div>
 </section>`;
     })
@@ -500,46 +520,400 @@ function renderHtmlReport({
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>StudioFlow Loop Proof</title>
   <style>
-    body { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin: 24px; color: #111827; }
-    h1, h2, h3, h4 { margin: 0 0 8px; }
-    .meta, .summary { margin-bottom: 24px; }
-    table { width: 100%; border-collapse: collapse; margin-bottom: 24px; }
-    th, td { border: 1px solid #d1d5db; padding: 8px; vertical-align: top; }
-    pre { margin: 0; white-space: pre-wrap; word-break: break-word; }
-    img { width: 100%; border: 1px solid #d1d5db; border-radius: 8px; }
-    .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
-    code { background: #f3f4f6; padding: 2px 6px; border-radius: 4px; }
+    :root {
+      --bg: #070a13;
+      --panel: #0e171f;
+      --panel-soft: #121f2c;
+      --signal: #99bac8;
+      --signal-soft: #c6d9e1;
+      --text: #f7fffd;
+      --muted: #bed2db;
+      --stroke: #35515d;
+      --fail: #ff86a8;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; }
+    body {
+      font-family: "Space Grotesk", "Inter", system-ui, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 12% 10%, rgba(153, 186, 200, 0.28), transparent 42%),
+        radial-gradient(circle at 88% 86%, rgba(153, 186, 200, 0.18), transparent 48%),
+        var(--bg);
+      padding: 16px;
+    }
+
+    .page {
+      max-width: 1500px;
+      margin: 0 auto;
+      min-height: calc(100vh - 32px);
+      display: grid;
+      grid-template-rows: auto auto minmax(0, 1fr) auto;
+      gap: 12px;
+      border: 1px solid var(--stroke);
+      border-radius: 16px;
+      background: color-mix(in srgb, var(--panel) 94%, black);
+      box-shadow: 0 26px 48px rgba(1, 4, 10, 0.45);
+      padding: 16px;
+    }
+
+    h1, h2, h3, h4 { margin: 0; }
+    p { margin: 0; }
+
+    .header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .title {
+      font-size: clamp(1.4rem, 2.1vw, 1.95rem);
+      letter-spacing: -0.02em;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      margin-top: 4px;
+      font-size: 0.9rem;
+    }
+
+    .path {
+      background: rgba(153, 186, 200, 0.18);
+      border: 1px solid var(--stroke);
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 0.78rem;
+      color: var(--signal);
+      white-space: nowrap;
+    }
+
+    .signal-strip {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .chip {
+      border: 1px solid var(--stroke);
+      border-radius: 12px;
+      background: color-mix(in srgb, var(--panel-soft) 86%, black);
+      padding: 10px;
+      min-height: 64px;
+    }
+
+    .chip-label {
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .chip-value {
+      margin-top: 6px;
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+
+    .chip-value.pass { color: var(--signal); }
+    .chip-value.fail { color: var(--fail); }
+
+    .proof-stage {
+      min-height: 0;
+      border: 1px solid var(--stroke);
+      border-radius: 14px;
+      background: color-mix(in srgb, var(--panel-soft) 88%, black);
+      padding: 10px;
+      display: grid;
+      grid-template-rows: auto auto minmax(0, 1fr);
+      gap: 10px;
+    }
+
+    .stage-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .stage-note {
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    .tab-list {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .bp-tab {
+      border: 1px solid var(--stroke);
+      background: rgba(10, 20, 30, 0.8);
+      color: var(--text);
+      border-radius: 999px;
+      padding: 7px 12px;
+      font-weight: 600;
+      font-size: 0.84rem;
+      cursor: pointer;
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .bp-tab span {
+      color: var(--muted);
+      font-size: 0.72rem;
+      font-weight: 500;
+    }
+
+    .bp-tab.active {
+      color: var(--bg);
+      background: var(--signal);
+      border-color: color-mix(in srgb, var(--signal) 70%, black);
+    }
+
+    .bp-tab.active span { color: #0b1a22; }
+    .bp-panels { min-height: 0; }
+    .bp-panel { display: none; height: 100%; }
+    .bp-panel.active { display: block; }
+
+    .pair {
+      height: 100%;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      min-height: 0;
+    }
+
+    .shot-card {
+      min-width: 0;
+      min-height: 0;
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+      border: 1px solid var(--stroke);
+      border-radius: 12px;
+      background: color-mix(in srgb, var(--panel-soft) 80%, black);
+      padding: 8px;
+    }
+
+    .shot-card h4 {
+      font-size: 0.86rem;
+      color: var(--signal);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .shot-frame {
+      border: 1px solid var(--stroke);
+      border-radius: 10px;
+      background: #03070f;
+      overflow: auto;
+      min-height: 0;
+      max-height: 48vh;
+      padding: 8px;
+      scrollbar-color: rgba(153, 186, 200, 0.7) rgba(4, 10, 18, 0.8);
+    }
+
+    .shot-frame img {
+      display: block;
+      width: auto;
+      height: auto;
+      max-width: none;
+      max-height: none;
+      border-radius: 8px;
+      border: 1px solid color-mix(in srgb, var(--signal-soft) 32%, black);
+      box-shadow: 0 14px 28px rgba(0, 0, 0, 0.35);
+      image-rendering: auto;
+    }
+
+    .shot-frame p {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin: 0;
+    }
+
+    .deep-data {
+      display: grid;
+      gap: 8px;
+    }
+
+    details {
+      border: 1px solid var(--stroke);
+      border-radius: 12px;
+      background: color-mix(in srgb, var(--panel) 88%, black);
+      overflow: hidden;
+    }
+
+    summary {
+      cursor: pointer;
+      padding: 10px 12px;
+      font-weight: 600;
+      color: var(--signal);
+      letter-spacing: 0.02em;
+      list-style: none;
+    }
+
+    summary::-webkit-details-marker { display: none; }
+
+    .detail-body {
+      border-top: 1px solid var(--stroke);
+      padding: 10px;
+      max-height: 36vh;
+      overflow: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.84rem;
+    }
+
+    th, td {
+      border: 1px solid var(--stroke);
+      padding: 8px;
+      vertical-align: top;
+      text-align: left;
+    }
+
+    th {
+      color: var(--signal);
+      background: rgba(153, 186, 200, 0.18);
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    td.pass { color: var(--signal); font-weight: 700; }
+    td.fail { color: var(--fail); font-weight: 700; }
+
+    pre {
+      margin: 0;
+      white-space: pre-wrap;
+      word-break: break-word;
+      color: var(--muted);
+      font-size: 0.8rem;
+    }
+
+    code {
+      background: rgba(153, 186, 200, 0.18);
+      color: var(--signal);
+      border: 1px solid var(--stroke);
+      border-radius: 6px;
+      padding: 2px 6px;
+      font-size: 0.8rem;
+    }
+
+    @media (max-width: 1140px) {
+      body { padding: 10px; }
+      .page {
+        min-height: unset;
+        height: auto;
+      }
+      .signal-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .pair { grid-template-columns: 1fr; }
+      .shot-frame { max-height: 56vh; }
+    }
   </style>
 </head>
 <body>
-  <h1>StudioFlow Loop Proof</h1>
-  <div class="meta">
-    <p><strong>Generated:</strong> ${htmlEscape(generatedAt)}</p>
-    <p><strong>Report Path:</strong> <code>${htmlEscape(reportPath)}</code></p>
-  </div>
+  <main class="page">
+    <header class="header">
+      <div>
+        <h1 class="title">StudioFlow Loop Proof</h1>
+        <p class="subtitle">Generated ${htmlEscape(generatedAt)}</p>
+      </div>
+      <p class="path"><code>${htmlEscape(reportPath)}</code></p>
+    </header>
 
-  <div class="summary">
-    <h2>SFID Parity Summary</h2>
-    <p><strong>Code sfids:</strong> ${sfidSummary.codeCount}</p>
-    <p><strong>Payload sfids:</strong> ${sfidSummary.payloadCount}</p>
-    <p><strong>Missing in payload:</strong> ${sfidSummary.missingInPayload.join(", ") || "none"}</p>
-    <p><strong>Missing in code:</strong> ${sfidSummary.missingInCode.join(", ") || "none"}</p>
-  </div>
+    <section class="signal-strip">
+      <article class="chip">
+        <p class="chip-label">Overall Status</p>
+        <p class="chip-value ${overallStatus === "PASS" ? "pass" : "fail"}">${overallStatus}</p>
+      </article>
+      <article class="chip">
+        <p class="chip-label">Gates</p>
+        <p class="chip-value">${passCount}/${totalCount}</p>
+      </article>
+      <article class="chip">
+        <p class="chip-label">Token Diff</p>
+        <p class="chip-value">${tokenDiff.length}</p>
+      </article>
+      <article class="chip">
+        <p class="chip-label">SFID Parity</p>
+        <p class="chip-value">${sfidSummary.codeCount - sfidSummary.missingInPayload.length}/${sfidSummary.codeCount}</p>
+      </article>
+      <article class="chip">
+        <p class="chip-label">Missing IDs</p>
+        <p class="chip-value">${sfidSummary.missingInPayload.length + sfidSummary.missingInCode.length}</p>
+      </article>
+    </section>
 
-  <h2>Gate Results</h2>
-  <table>
-    <thead><tr><th>Gate</th><th>Status</th><th>Output</th></tr></thead>
-    <tbody>${gatesRows}</tbody>
-  </table>
+    <section class="proof-stage">
+      <div class="stage-header">
+        <h2>Breakpoint Capture</h2>
+        <p class="stage-note">Images render at native pixels. Scroll inside each frame to inspect details.</p>
+      </div>
+      <div class="tab-list">${breakpointTabs}</div>
+      <div class="bp-panels">${screenPanels}</div>
+    </section>
 
-  <h2>Token Diff (before vs after)</h2>
-  <table>
-    <thead><tr><th>Token</th><th>Before</th><th>After</th></tr></thead>
-    <tbody>${tokenRows}</tbody>
-  </table>
+    <section class="deep-data">
+      <details>
+        <summary>Gate Results</summary>
+        <div class="detail-body">
+          <table>
+            <thead><tr><th>Gate</th><th>Status</th><th>Output</th></tr></thead>
+            <tbody>${gatesRows}</tbody>
+          </table>
+        </div>
+      </details>
 
-  <h2>Before/After Screenshots</h2>
-  ${screenBlocks}
+      <details>
+        <summary>Token Diff (before vs after)</summary>
+        <div class="detail-body">
+          <table>
+            <thead><tr><th>Token</th><th>Before</th><th>After</th></tr></thead>
+            <tbody>${tokenRows}</tbody>
+          </table>
+        </div>
+      </details>
+
+      <details>
+        <summary>SFID Delta</summary>
+        <div class="detail-body">
+          <p><strong>Code sfids:</strong> ${sfidSummary.codeCount}</p>
+          <p><strong>Payload sfids:</strong> ${sfidSummary.payloadCount}</p>
+          <p><strong>Missing in payload:</strong> ${htmlEscape(sfidSummary.missingInPayload.join(", ") || "none")}</p>
+          <p><strong>Missing in code:</strong> ${htmlEscape(sfidSummary.missingInCode.join(", ") || "none")}</p>
+        </div>
+      </details>
+    </section>
+  </main>
+
+  <script>
+    (() => {
+      const tabs = Array.from(document.querySelectorAll(".bp-tab"));
+      const panels = Array.from(document.querySelectorAll(".bp-panel"));
+
+      const activate = (name) => {
+        tabs.forEach((tab) => tab.classList.toggle("active", tab.dataset.breakpoint === name));
+        panels.forEach((panel) => panel.classList.toggle("active", panel.dataset.breakpointPanel === name));
+      };
+
+      tabs.forEach((tab) => {
+        tab.addEventListener("click", () => activate(tab.dataset.breakpoint || ""));
+      });
+
+      if (tabs.length > 0) {
+        activate(tabs[0].dataset.breakpoint || "");
+      }
+    })();
+  </script>
 </body>
 </html>`;
 }

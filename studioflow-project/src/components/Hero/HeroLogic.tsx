@@ -106,84 +106,90 @@ export function HeroLogic() {
   const content = useMemo<LandingContent>(
     () => ({
       brandName: "StudioFlow",
-      announcement: "LATEST // Website baseline remap live",
-      kicker: "StudioFlow Workflow / Prism Channel",
-      heading: "Design signal stays coherent from canvas idea to merged code.",
-      body: "StudioFlow packages intent, identifiers, tokens, and verification into one rhythm your team can repeat under pressure.",
-      commandLine: "$ npm run loop:run",
-      commandHint: "Runs handoff, verification, sync, check, build, and manifest refresh.",
-      primaryActionLabel: "Start Workflow Sequence",
-      secondaryActionLabel: "Open Proof Layer",
+      announcement: "START FAST // 10-minute value proof",
+      kicker: "StudioFlow Workflow / Code -> Canvas -> Code",
+      heading: "Get your first design-engineering win in 10 minutes.",
+      body: "Run one command, generate a proof report, then step into the real Figma roundtrip using the same contract gates.",
+      commandLine: "$ npm run setup:project",
+      commandHint: "Then run npm run demo:website:capture to generate your first proof report.",
+      primaryActionLabel: "Start 10-Minute Win",
+      secondaryActionLabel: "Jump to Proof + FAQ",
       topLinks: [
-        { label: "Proof", href: "#proof" },
+        { label: "10-Min Win", href: "#how-to-use" },
         { label: "Workflow", href: "#how-to-use" },
+        { label: "Proof", href: "#proof" },
         { label: "Docs", href: "#docs" },
         { label: "Repo", href: "./README.md" }
       ],
-      whyTitle: "Why teams keep this loop in production",
-      whyBody: "Drift creeps in through tiny decisions. StudioFlow captures those moments and turns them into visible checks your team can trust.",
-      supportTitle: "Support Matrix",
+      whyTitle: "Why design engineers keep this loop close",
+      whyBody: "StudioFlow keeps design intent, sfids, tokens, and verification inside one operating rhythm. Teams move quickly and keep control.",
+      supportTitle: "First-run readiness",
       supportMatrix: [
-        { label: "Code to Canvas", status: "LIVE" },
-        { label: "Canvas Verification", status: "LIVE" },
-        { label: "Token Sync", status: "LIVE" },
-        { label: "Proof Strip", status: "LIVE" }
+        { label: "10-minute local proof path", status: "READY" },
+        { label: "4-breakpoint contract", status: "READY" },
+        { label: "Token and sfid gates", status: "READY" },
+        { label: "Proof artifacts per run", status: "READY" }
       ],
-      offerTitle: "What the workflow offers",
+      offerTitle: "What this workflow gives you",
       offerCards: [
-        { icon: "◉", title: "Semantic handoff payloads", body: "Each run exports intent-rich payloads agents can act on immediately." },
-        { icon: "◎", title: "Stable sfid anchoring", body: "Meaningful nodes keep their identity across screen variants and sync rounds." },
-        { icon: "◍", title: "Token-first rendering", body: "Design tokens drive every surface and keep style decisions auditable." },
-        { icon: "◌", title: "Manifest lineage", body: "Loop history stays local in git with timestamped proof entries." },
-        { icon: "◐", title: "Multi-agent alignment", body: "Claude, Codex, and editor agents share the same operational contract." },
-        { icon: "◑", title: "Breakpoint fidelity", body: "Mobile through desktop mode values travel with the same canonical schema." },
-        { icon: "◒", title: "Fast confidence gates", body: "Verification scripts fail loudly before fragile changes reach release branches." },
-        { icon: "◓", title: "Creative control", body: "Brand expression evolves while structural integrity stays measurable." }
+        { icon: "◉", title: "10-minute value demonstration", body: "Track A runs locally and writes before and after proof files on the first pass." },
+        { icon: "◎", title: "Modeled 28-46% faster loop time", body: "One payload contract and scripted gates reduce coordination overhead during iteration." },
+        { icon: "◍", title: "Modeled 70-90% lower breakpoint drift", body: "Validation requires mobile, tablet, laptop, and desktop modes plus matching screens." },
+        { icon: "◌", title: "Modeled 95%+ token consistency", body: "Token sync checks keep style values aligned with canonical token sources." },
+        { icon: "◐", title: "Modeled 25-40% lower handoff rework", body: "Stable sfid anchors preserve identity through canvas and code sync passes." },
+        { icon: "◑", title: "Proof by default", body: "Each serious loop can produce report artifacts reviewers can open immediately." },
+        { icon: "◒", title: "Tooling alignment", body: "Claude, Codex, and editor agents operate with the same contract vocabulary." },
+        { icon: "◓", title: "Future-ready operating model", body: "The same workflow supports code-first and design-first entry with shared gates." }
       ],
-      howToTitle: "How to use StudioFlow",
+      howToTitle: "12-minute timer plan",
       howToSteps: [
         {
-          title: "Generate the handoff",
-          detail: "Produce canonical canvas instructions and the response template.",
+          title: "Minute 0-4: Bootstrap and local proof",
+          detail: "Install dependencies, prepare Claude config, run checks, and produce initial proof output.",
+          command: "npm run setup:project && npm run demo:website:capture"
+        },
+        {
+          title: "Minute 4-6: Authenticate in Claude",
+          detail: "Start Claude, run /mcp, and complete Figma auth for the active session.",
+          command: "claude"
+        },
+        {
+          title: "Minute 6-8: Generate canvas handoff",
+          detail: "Create the payload that mirrors your current website structure for Figma.",
           command: "npm run loop:code-to-canvas"
         },
         {
-          title: "Verify the returned payload",
-          detail: "Check frame coverage, token usage, and sfid parity before apply.",
-          command: "npm run loop:verify-canvas"
-        },
-        {
-          title: "Apply and lock proof",
-          detail: "Sync approved values into tokens, then refresh manifest and proof strip.",
-          command: "npm run loop:canvas-to-code && npm run manifest:update"
+          title: "Minute 8-12: Real roundtrip",
+          detail: "Generate handoff, push in Figma, export canvas-to-code payload, verify, apply, and refresh manifest.",
+          command: "npm run loop:verify-canvas && npm run loop:canvas-to-code && npm run check && npm run build && npm run manifest:update"
         }
       ],
-      agentTitle: "Agent support",
+      agentTitle: "Operator support",
       agentSupport: [
-        { name: "Claude Code", instruction: "Add workflow prompts in CLAUDE.md" },
-        { name: "OpenAI Codex", instruction: "Keep AGENTS.md aligned with command gates" },
-        { name: "Cursor", instruction: "Pin token and sfid guardrails in project rules" },
-        { name: "GitHub Copilot", instruction: "Mirror enforcement notes in copilot instructions" }
+        { name: "Claude Code", instruction: "Use .claude/commands playbooks for repeatable loop actions." },
+        { name: "OpenAI Codex", instruction: "Keep AGENTS.md aligned with token and sfid gate policy." },
+        { name: "Cursor", instruction: "Pin contract and token guidance in project rules." },
+        { name: "GitHub Copilot", instruction: "Mirror workflow command gates in instruction files." }
       ],
       useCaseTitle: "Use cases",
       useCases: [
         {
           id: "coding-agents",
           label: "Coding Agents",
-          title: "Agent-generated UI stays on-policy",
-          body: "Teams run fast patch cycles while the workflow keeps style, IDs, and payload shape coherent."
+          title: "Generated UI stays policy-aligned",
+          body: "Teams ship quickly while the workflow keeps style values, IDs, and payload shape coherent."
         },
         {
           id: "design-systems",
           label: "Design Systems",
-          title: "Token programs stay stable through growth",
-          body: "Design system stewards push updates once and get traceable propagation across breakpoints and docs."
+          title: "Token systems stay stable through growth",
+          body: "Design system stewards push updates once and track propagation across breakpoints and docs."
         },
         {
           id: "product-teams",
           label: "Product Teams",
-          title: "Roadmap pressure keeps velocity and craft",
-          body: "Feature squads move with confidence because each release carries proof artifacts with the code changes."
+          title: "Roadmap pressure keeps quality visible",
+          body: "Feature squads move with confidence since each release carries proof artifacts beside code changes."
         }
       ],
       tierTitle: "Adoption tiers",
@@ -211,23 +217,23 @@ export function HeroLogic() {
           ctaHref: "./docs/CANVAS_EXCHANGE_CONTRACT.md"
         }
       ],
-      faqTitle: "FAQ",
+      faqTitle: "Proof + FAQ",
       faqItems: [
         {
-          question: "What keeps IDs stable during redesign passes?",
-          answer: "Every meaningful node keeps an sfid anchor and verification scripts compare code against the latest snapshot set."
+          question: "How fast can I see value from this repo?",
+          answer: "Run npm run setup:project and npm run demo:website:capture. This writes proof/latest/index.html and a share card in the first local run."
         },
         {
-          question: "How does the loop handle fast brand experiments?",
-          answer: "The workflow permits visual exploration through tokens while validation gates keep contract structure and sync artifacts intact."
+          question: "What confirms roundtrip integrity?",
+          answer: "loop:verify-canvas checks token frames, four variable modes, four screens, token coverage, and sfid parity before apply."
         },
         {
-          question: "Where does proof live for reviewers?",
-          answer: "Proof lives in manifest metadata, snapshots, and the README strip, all committed beside source updates."
+          question: "What if Claude says no MCP servers are configured?",
+          answer: "Run claude mcp add --scope project --transport http figma https://mcp.figma.com/mcp, then run claude mcp list again."
         },
         {
-          question: "Can this fit CI pipelines?",
-          answer: "Yes. The same loop commands run in automation and expose pass or fail outcomes before merge."
+          question: "Can this workflow run in CI pipelines?",
+          answer: "Yes. Use the same loop commands in automation and gate merges on check, build, and verify outcomes."
         }
       ],
       footerGroups: [

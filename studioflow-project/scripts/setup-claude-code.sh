@@ -15,19 +15,11 @@ fi
 
 mkdir -p .claude .claude/commands handoff
 
-if [[ ! -f .mcp.json ]]; then
-  cp .mcp.json.example .mcp.json
-  echo "Created .mcp.json from template."
-else
-  echo ".mcp.json already exists. Leaving as is."
-fi
+cp -f .mcp.json.example .mcp.json
+echo "Refreshed .mcp.json from template."
 
-if [[ ! -f .claude/settings.local.json ]]; then
-  cp .claude/settings.local.json.example .claude/settings.local.json
-  echo "Created .claude/settings.local.json from template."
-else
-  echo ".claude/settings.local.json already exists. Leaving as is."
-fi
+cp -f .claude/settings.local.json.example .claude/settings.local.json
+echo "Refreshed .claude/settings.local.json from template."
 
 if [[ -f CLAUDE.md ]]; then
   echo "Found CLAUDE.md repo instruction contract."

@@ -1,8 +1,8 @@
 # Claude Code Setup (Fresh 2026)
 
-This guide sets up Claude Code for StudioFlow with Figma MCP, contract gates, and a reliable Code -> Canvas -> Code loop.
+This guide sets up Claude Code for StudioFlow with a reliable Code -> Canvas -> Code loop.
 
-## 1) Quick Start (Recommended)
+## 1) One-command setup
 
 From `studioflow-project`:
 
@@ -10,120 +10,88 @@ From `studioflow-project`:
 npm run setup:project
 ```
 
-What this does:
-- installs dependencies,
-- prepares Claude templates and local command playbooks,
-- installs Playwright Chromium for proof screenshots,
-- runs contract/tests/checks,
-- generates initial handoff payloads.
+This command runs:
+- dependency install,
+- Claude local config prep,
+- Playwright Chromium install,
+- token/contracts/check gates,
+- initial code-to-canvas payload generation.
 
-Then open Claude and complete Figma auth:
+## 2) MCP readiness (hard checks)
+
+Treat setup as complete only when all three checks pass.
+
+### Check A: config exists
 
 ```bash
-claude
+cat .mcp.json
 ```
 
-Inside Claude, run:
-```text
-/mcp
-```
+Expected: a `figma` server entry with `https://mcp.figma.com/mcp`.
 
-Then run one of the repo playbooks in `.claude/commands/`.
+### Check B: Claude registers the server
 
-## 2) Manual Setup (If you want full control)
-
-1. Install Claude Code globally:
 ```bash
-npm install -g @anthropic-ai/claude-code
+claude mcp list
 ```
 
-2. Prepare repo-local config:
-```bash
-npm run setup:claude
-```
+Expected: output includes `figma`.
 
-3. Add Figma MCP server (project scope):
+If output is `No MCP servers configured`, run:
+
 ```bash
 claude mcp add --scope project --transport http figma https://mcp.figma.com/mcp
 claude mcp list
 ```
 
-4. Validate local setup:
+### Check C: auth is active in session
+
+```bash
+claude
+```
+
+Inside Claude:
+
+```text
+/mcp
+```
+
+Complete Figma auth flow. Then run:
+
 ```bash
 npm run check:mcp
-npm run test:contracts
-npm run check
 ```
 
-5. Optional, if you want asset regeneration from brand tokens:
+## 3) Manual setup path (full control)
+
+1. Install Claude CLI:
+
 ```bash
-npm run assets:brand
+npm install -g @anthropic-ai/claude-code
 ```
 
-## 3) Custom Instructions That Strengthen the Link
+2. Create local Claude config files:
 
-StudioFlow already includes custom instructions for Claude Code here:
-- `CLAUDE.md`
-
-This file defines:
-- the loop mission,
-- non-negotiable invariants,
-- standard operating sequence,
-- how to handle failures,
-- expected communication style.
-
-Keep `CLAUDE.md` short, strict, and operational.
-
-### Recommended custom instruction block
-
-Use this pattern when extending `CLAUDE.md`:
-
-```md
-## Session Policy
-1. Verify before apply: run `npm run loop:verify-canvas` before `npm run loop:canvas-to-code`.
-2. Keep tokens canonical: only update token values through approved payloads.
-3. Preserve sfids: do not remove `data-sfid="sfid:*"` anchors unless migration is intentional and verified.
-4. Fail loud: if any gate fails, stop and report command + cause + minimal fix.
+```bash
+npm run setup:claude
 ```
 
-## 4) Repo "Skills" for Claude Code
+3. Add and verify Figma MCP:
 
-Claude Code does not use Codex-style skill packages directly.
-In this repo, the practical equivalent is:
-- `.claude/commands/studioflow-code-to-canvas.md`
-- `.claude/commands/studioflow-design-to-code.md`
-- `.claude/commands/studioflow-loop-verify.md`
-- `.claude/commands/README.md`
+```bash
+claude mcp add --scope project --transport http figma https://mcp.figma.com/mcp
+claude mcp list
+npm run check:mcp
+```
 
-Think of these as reusable command playbooks for common loops.
+4. Optional Code Connect setup:
 
-This means: yes, the repo already includes the Claude-side skill equivalents needed to operate this workflow.
+```bash
+npm install --save-dev @figma/code-connect
+npx figma connect create
+```
 
-## 5) Best Practices (High Impact)
-
-1. Always run `loop:verify-canvas` before `loop:canvas-to-code`.
-2. Keep `tokens/figma-variables.json` as canonical token source.
-3. Preserve all `data-sfid="sfid:*"` anchors unless intentionally migrated.
-4. Use small PRs that isolate one loop change at a time.
-5. Run `test:contracts`, `check`, and `build` before merge.
-6. Use `demo:website:capture` for stakeholder-ready proof output.
-7. Keep exploratory canvas work in `figma-make`, promote via verification.
-8. Prefer `loop:run` for disciplined end-to-end updates.
-9. Keep generated artifacts out of commits unless intentionally sharing evidence.
-
-## 6) Suggested Model Policy
-
-- Primary reasoning / architecture: `opus`
-- High-volume mechanical patching fallback: `sonnet`
-- Lightweight triage/checks: `haiku`
-
-Set in:
-- `.claude/settings.local.json`
-
-Template is provided at:
-- `.claude/settings.local.json.example`
-
-## 7) First-Day Commands
+## 4) First-day loop commands
 
 ```bash
 npm run loop:code-to-canvas
@@ -132,22 +100,39 @@ npm run loop:canvas-to-code
 npm run check
 npm run build
 npm run loop:proof
+npm run manifest:update
 ```
 
 Proof outputs:
 - `proof/latest/index.html`
 - `proof/latest/summary-card.png`
 
-## 8) Core vs Optional Commands
+## 5) Fast failure policy
 
-Core loop commands:
-- `loop:code-to-canvas`
-- `loop:verify-canvas`
-- `loop:canvas-to-code`
-- `check`
-- `build`
-- `manifest:update`
+Stop the loop immediately on any failing gate and report:
+- failing command,
+- exact error,
+- smallest safe fix.
 
-Optional support commands:
-- `assets:brand` (refresh generated media assets from brand token values)
-- `verify:copy-tone` (checks public copy phrasing rules)
+Core gates:
+- `npm run test:contracts`
+- `npm run loop:verify-canvas`
+- `npm run check`
+- `npm run build`
+
+## 6) Claude playbooks in this repo
+
+Use these command playbooks for repeatable operation:
+- `.claude/commands/studioflow-code-to-canvas.md`
+- `.claude/commands/studioflow-design-to-code.md`
+- `.claude/commands/studioflow-loop-verify.md`
+
+## 7) Suggested model policy
+
+- primary: `opus`
+- execution fallback: `sonnet`
+- lightweight triage: `haiku`
+
+Configured via:
+- `.claude/settings.local.json`
+- `.claude/settings.local.json.example`
