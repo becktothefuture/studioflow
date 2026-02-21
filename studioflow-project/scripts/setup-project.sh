@@ -303,6 +303,8 @@ configure_figma_credentials() {
   local file_key_value=""
   local retry=""
   local force_new_token="0"
+  local existing_token="${FIGMA_ACCESS_TOKEN:-}"
+  local existing_file_key="${FIGMA_FILE_KEY:-}"
 
   echo
   printf "%sFigma credentials setup%s\n" "$WHITE" "$RESET"
@@ -312,11 +314,27 @@ configure_figma_credentials() {
   echo
   maybe_open_figma_token_page
 
+  if [[ -n "$existing_token" && -n "$existing_file_key" ]]; then
+    echo
+    printf "%sChecking existing saved credentials first...%s\n" "$WHITE" "$RESET"
+    if validate_figma_credentials_live "$existing_token" "$existing_file_key"; then
+      printf "%sExisting credentials are valid.%s\n" "$GREEN" "$RESET"
+    else
+      if [[ "$FIGMA_VALIDATION_SCOPE" == "token" ]]; then
+        force_new_token="1"
+        printf "%sSaved token is invalid. You must paste a new token now.%s\n" "$YELLOW" "$RESET"
+      fi
+    fi
+  fi
+
   while true; do
+    echo
+    printf "%sStep 1/2:%s Enter Figma token\n" "$WHITE" "$RESET"
     token_value="$(prompt_token_value "${FIGMA_ACCESS_TOKEN:-}" "$force_new_token")" || {
       printf "%sCredential setup canceled. Live API checks will remain skipped.%s\n" "$YELLOW" "$RESET"
       return 1
     }
+    printf "%sStep 2/2:%s Enter Figma file URL or key\n" "$WHITE" "$RESET"
     file_key_value="$(prompt_file_key_value "${FIGMA_FILE_KEY:-}")" || {
       printf "%sCredential setup canceled. Live API checks will remain skipped.%s\n" "$YELLOW" "$RESET"
       return 1
