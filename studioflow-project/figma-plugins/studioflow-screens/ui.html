@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink:    #070A13;
+    --bg:     #0F141D;
+    --surf:   #161E28;
+    --panel:  #1E2832;
+    --text:   #99B9C8;
+    --muted:  #5A7381;
+    --stroke: #3D4F5B;
+    --strstr: #617D8B;
+    --pri:    #7A8DFF;
+    --sec:    #7EF7F0;
+    --warn:   #C8A46A;
+    --err:    #FF6B6B;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Inter", system-ui, sans-serif;
+    font-size: 12px;
+    line-height: 1.5;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* Header */
+  header {
+    background: var(--ink);
+    border-bottom: 1px solid var(--stroke);
+    padding: 10px 14px 8px;
+    flex-shrink: 0;
+  }
+  .wordmark { font-size: 13px; font-weight: 600; color: #fff; letter-spacing: -0.02em; }
+  .wordmark em { color: var(--sec); font-style: normal; }
+  .sub { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-top: 1px; }
+
+  /* Screens */
+  .screens { padding: 8px 14px; border-bottom: 1px solid var(--stroke); flex-shrink: 0; }
+  .label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 5px; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
+  .chip {
+    background: var(--surf);
+    border: 1px solid var(--stroke);
+    border-radius: 5px;
+    padding: 5px 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .chip-name { font-size: 11px; color: var(--text); }
+  .chip-w    { font-size: 10px; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+  /* Actions */
+  .actions { padding: 8px 14px; border-bottom: 1px solid var(--stroke); flex-shrink: 0; display: flex; flex-direction: column; gap: 5px; }
+  button {
+    cursor: pointer;
+    border: none;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 7px 12px;
+    transition: opacity .15s;
+  }
+  button:disabled { opacity: .4; cursor: not-allowed; }
+  .row { display: flex; gap: 5px; }
+  .btn-run  { background: var(--sec); color: var(--ink); font-weight: 700; width: 100%; }
+  .btn-sec  { background: var(--surf); color: var(--text); border: 1px solid var(--stroke); flex: 1; }
+
+  /* Log */
+  .log {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    font-family: "SF Mono", "Fira Mono", monospace;
+    font-size: 10px;
+  }
+  .e        { color: var(--muted); }
+  .e.info   { color: var(--text); }
+  .e.warn   { color: var(--warn); }
+  .e.success{ color: var(--sec); }
+  .e.error  { color: var(--err); }
+
+  /* Status bar */
+  footer {
+    padding: 5px 14px;
+    background: var(--ink);
+    border-top: 1px solid var(--stroke);
+    font-size: 10px;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--muted);
+    display: inline-block; margin-right: 5px;
+    transition: background .2s;
+  }
+  .dot.ready   { background: var(--sec); }
+  .dot.running { background: var(--pri); animation: pulse 1s infinite; }
+  .dot.error   { background: var(--err); }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wordmark">Studio<em>Flow</em></div>
+  <div class="sub">Screen Frames · Token Binding</div>
+</header>
+
+<div class="screens">
+  <div class="label">Breakpoints</div>
+  <div class="grid">
+    <div class="chip"><span class="chip-name">Mobile</span><span class="chip-w">390 px</span></div>
+    <div class="chip"><span class="chip-name">Tablet</span><span class="chip-w">768 px</span></div>
+    <div class="chip"><span class="chip-name">Laptop</span><span class="chip-w">1280 px</span></div>
+    <div class="chip"><span class="chip-name">Desktop</span><span class="chip-w">1440 px</span></div>
+  </div>
+</div>
+
+<div class="actions">
+  <button class="btn-run" id="runAll">▶  Run All — Create Frames + Bind Tokens</button>
+  <div class="row">
+    <button class="btn-sec" id="createBtn">Create / Update Frames</button>
+    <button class="btn-sec" id="bindBtn">Bind Token Variables</button>
+  </div>
+</div>
+
+<div class="log" id="log"><div class="e">Ready.</div></div>
+
+<footer>
+  <div><span class="dot ready" id="dot"></span><span id="status">Ready</span></div>
+  <span>StudioFlow v3.0.0</span>
+</footer>
+
+<script>
+  const logEl     = document.getElementById('log');
+  const statusEl  = document.getElementById('status');
+  const dotEl     = document.getElementById('dot');
+  const runAllBtn = document.getElementById('runAll');
+  const createBtn = document.getElementById('createBtn');
+  const bindBtn   = document.getElementById('bindBtn');
+  const allBtns   = [runAllBtn, createBtn, bindBtn];
+
+  function addLog(text, level = 'info') {
+    const d = document.createElement('div');
+    d.className = 'e ' + level;
+    d.textContent = text;
+    logEl.appendChild(d);
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+
+  function setRunning(msg) {
+    allBtns.forEach(b => b.disabled = true);
+    dotEl.className = 'dot running';
+    statusEl.textContent = msg;
+    addLog('▶ ' + msg);
+  }
+
+  function setDone(msg) {
+    allBtns.forEach(b => b.disabled = false);
+    dotEl.className = 'dot ready';
+    statusEl.textContent = msg;
+    addLog('✓ ' + msg, 'success');
+  }
+
+  function setError(msg) {
+    allBtns.forEach(b => b.disabled = false);
+    dotEl.className = 'dot error';
+    statusEl.textContent = 'Error';
+    addLog('✗ ' + msg, 'error');
+  }
+
+  runAllBtn.addEventListener('click', () => {
+    setRunning('Running all…');
+    parent.postMessage({ pluginMessage: { type: 'run-all' } }, '*');
+  });
+  createBtn.addEventListener('click', () => {
+    setRunning('Creating frames…');
+    parent.postMessage({ pluginMessage: { type: 'create-frames' } }, '*');
+  });
+  bindBtn.addEventListener('click', () => {
+    setRunning('Binding variables…');
+    parent.postMessage({ pluginMessage: { type: 'bind-variables' } }, '*');
+  });
+
+  window.onmessage = (event) => {
+    const msg = event.data.pluginMessage;
+    if (!msg) return;
+
+    switch (msg.type) {
+      case 'log':
+        addLog(msg.text, msg.level || 'info');
+        break;
+
+      case 'frames-done':
+        for (const r of (msg.results || [])) {
+          addLog(`  "${r.name}"  ${r.width}px  →  ${r.id}`, 'success');
+        }
+        setDone('Frames created');
+        break;
+
+      case 'bind-done':
+        addLog(`  ${msg.stats.bound} bindings · ${msg.stats.visited} nodes`, 'success');
+        setDone('Variables bound');
+        break;
+
+      case 'all-done':
+        for (const r of (msg.results || [])) {
+          addLog(`  "${r.name}"  ${r.width}px  →  ${r.id}`, 'success');
+        }
+        if (msg.stats) addLog(`  ${msg.stats.bound} variable bindings`, 'success');
+        setDone('All done');
+        break;
+
+      case 'error':
+        setError(msg.text);
+        break;
+    }
+  };
+</script>
+</body>
+</html>

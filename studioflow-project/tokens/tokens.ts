@@ -62,8 +62,7 @@ export const tokens = {
   "motion-easing-standard": "var(--motion-easing-standard)",
   "motion-easing-entrance": "var(--motion-easing-entrance)",
   "opacity-full": "var(--opacity-full)",
-  "opacity-bg-fallback": "var(--opacity-bg-fallback)",
-  "mix-bg-strong": "var(--mix-bg-strong)"
+  "opacity-bg-fallback": "var(--opacity-bg-fallback)"
 } as const;
 
 export type TokenName = keyof typeof tokens;
@@ -131,6 +130,5 @@ export const tokenNames: readonly TokenName[] = [
   "motion-easing-standard",
   "motion-easing-entrance",
   "opacity-full",
-  "opacity-bg-fallback",
-  "mix-bg-strong"
+  "opacity-bg-fallback"
 ] as const;

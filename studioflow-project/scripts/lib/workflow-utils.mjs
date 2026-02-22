@@ -108,15 +108,6 @@ export function uniqueValues(values) {
   return [...new Set(values)];
 }
 
-export function toFigmaAliasPayload(canvasPayload, workflow) {
-  const alias = structuredClone(canvasPayload);
-  if (alias.source === "figma-canvas") {
-    alias.source = "figma";
-  }
-  alias.canvasProvider ||= workflow?.canvas?.canonicalProvider ?? "figma-sites";
-  return alias;
-}
-
 export function normalizeCanvasPayload(input, workflow) {
   const payload = structuredClone(input);
   payload.integration ||= workflow.integration;
@@ -126,7 +117,7 @@ export function normalizeCanvasPayload(input, workflow) {
     payload.source = "figma-canvas";
   }
 
-  payload.canvasProvider ||= workflow?.canvas?.canonicalProvider ?? "figma-sites";
+  payload.canvasProvider ||= "figma";
   payload.integrationMode ||= "code-first";
   payload.sfids ||= [];
 

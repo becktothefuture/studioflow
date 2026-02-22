@@ -13,7 +13,6 @@ import {
   setTokenValueByPath,
   snapshotsDir,
   tokenInputPath,
-  toFigmaAliasPayload,
   utcStamp,
   writeJson
 } from "./lib/workflow-utils.mjs";
@@ -72,17 +71,6 @@ export async function runLoopCanvasToCode(options = {}) {
   }
 
   await writeJson(tokenInputPath, tokenJson);
-  await writeJson(exchangePath(workflow, "breakpointVariables"), {
-    generatedAt: new Date().toISOString(),
-    source: "figma-canvas",
-    canvasProvider: payload.canvasProvider,
-    modes: asModesMap(payload)
-  });
-
-  if (workflow.compatibility?.enableFigmaAliases) {
-    await writeJson(exchangePath(workflow, "figmaToCode"), toFigmaAliasPayload(payload, workflow));
-  }
-
   await buildArtifacts();
 
   const snapshotGeneratedAt = new Date().toISOString();
@@ -107,7 +95,7 @@ export async function runLoopCanvasToCode(options = {}) {
   manifest.lastSnapshotAt = snapshotGeneratedAt;
   manifest.expectedSfids = payload.sfids;
   manifest.canvasProvider = payload.canvasProvider;
-  manifest.claudeModelUsed = payload.claudeSession?.model ?? workflow.modelPolicy.defaultModel;
+  manifest.claudeModelUsed = payload.claudeSession?.model ?? "claude-code";
   manifest.lastCanvasSync = {
     ranAt: snapshotGeneratedAt,
     sourceFile: path.relative(rootDir, inputPath),
@@ -123,14 +111,6 @@ export async function runLoopCanvasToCode(options = {}) {
     canvasProvider: payload.canvasProvider,
     errorsCount: 0
   };
-  if (workflow.compatibility?.enableFigmaAliases) {
-    manifest.lastFigmaToCode = {
-      ranAt: snapshotGeneratedAt,
-      sourceFile: workflow.exchangeFiles.figmaToCode,
-      canonicalMode,
-      updatedTokenCount
-    };
-  }
   manifest.lastVerification = {
     status: "pending",
     ranAt: null,
@@ -138,7 +118,6 @@ export async function runLoopCanvasToCode(options = {}) {
   };
   await writeJson(manifestPath, manifest);
 
-  console.log(`Updated ${workflow.exchangeFiles.breakpointVariables}`);
   console.log(`Updated tokens/figma-variables.json with mode "${canonicalMode}" values.`);
   console.log(`Created snapshots/${snapshotFilename}`);
   console.log("Next: run `npm run check && npm run build && npm run manifest:update`.");

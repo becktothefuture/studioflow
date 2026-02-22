@@ -11,7 +11,6 @@ import {
   readWorkflowConfig,
   rootDir,
   screenNameForBreakpoint,
-  toFigmaAliasPayload,
   tokenInputPath,
   writeJson
 } from "./lib/workflow-utils.mjs";
@@ -35,11 +34,8 @@ export function validateCanvasPayload(payload, { workflow, tokenNames, codeSfids
 
   const sourceIsCanvas = payload.source === "figma-canvas";
   if (sourceIsCanvas) {
-    const providers = workflow?.canvas?.providers ?? [];
     if (!payload.canvasProvider) {
       errors.push("Missing canvasProvider on canvas payload.");
-    } else if (!providers.includes(payload.canvasProvider)) {
-      errors.push(`Unsupported canvasProvider "${payload.canvasProvider}". Allowed: ${providers.join(", ")}`);
     }
 
     if (!["code-first", "design-first"].includes(payload.integrationMode)) {
@@ -178,7 +174,7 @@ export async function runLoopVerifyCanvas(options = {}) {
       status: errors.length === 0 ? "passed" : "failed",
       ranAt,
       sourceFile: path.relative(rootDir, inputPath),
-      canvasProvider: payload.canvasProvider ?? workflow.canvas.canonicalProvider,
+      canvasProvider: payload.canvasProvider ?? "figma",
       errorsCount: errors.length
     };
     manifest.updatedAt = ranAt;
@@ -189,10 +185,6 @@ export async function runLoopVerifyCanvas(options = {}) {
     const error = new Error(errors.join("\n"));
     error.name = "CanvasContractValidationError";
     throw error;
-  }
-
-  if (workflow.compatibility?.enableFigmaAliases && inputPath === exchangePath(workflow, "canvasToCode")) {
-    await writeJson(exchangePath(workflow, "figmaToCode"), toFigmaAliasPayload(payload, workflow));
   }
 
   console.log(

@@ -1,23 +1,18 @@
-# Claude Command Playbooks
+# StudioFlow Commands
 
-These files are the StudioFlow "skills" equivalent for Claude Code.
+Repeatable workflows for Claude Code sessions.
 
-Use them as repeatable runbooks when operating the loop.
+## Available Commands
 
-## Available Playbooks
+- **studioflow-sync-to-figma** — Push code state to Figma via Talk-to-Figma MCP
+- **studioflow-apply-from-figma** — Apply verified Figma edits back to code
+- **studioflow-verify** — Run all quality gates
 
-- `studioflow-code-to-canvas.md`
-  - Use when code is the starting point.
-- `studioflow-design-to-code.md`
-  - Use when Figma is the starting point.
-- `studioflow-loop-verify.md`
-  - Use when you need full gate validation.
+## Token Rules
 
-## Usage Pattern
-
-1. Open Claude in `studioflow-project`.
-2. Load the relevant playbook.
-3. Follow the runbook commands exactly.
-4. Stop on failed gates and fix minimal scope.
-
-These playbooks are intentionally concise, operational, and strict.
+1. **No CSS functions in token values.** No `color-mix()`, `clamp()`, `calc()`, or `var()` references.
+2. **Colors are hex.** All 14 color tokens are literal hex values. Derived colors are pre-computed.
+3. **Dimensions keep `px` units.** Spacing, sizing, radius, font-size values include `px` (valid CSS, Figma strips the unit via `parseFloat()`).
+4. **Unitless numbers are plain.** Weights, line-heights, opacities have no unit.
+5. **Responsive behavior lives in CSS, not tokens.** Use `clamp()` in the stylesheet with the token as a bound (e.g., `clamp(56px, 6vw, var(--font-size-title))`).
+6. **Strings stay as strings.** Font families, letter-spacing (em), motion (ms, cubic-bezier) are STRING type in Figma.

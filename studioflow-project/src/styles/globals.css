@@ -180,7 +180,7 @@ code {
 .hero-title {
   margin: 0;
   font-family: var(--font-family-display);
-  font-size: var(--font-size-title);
+  font-size: clamp(56px, 6vw, var(--font-size-title));
   line-height: var(--font-line-height-title);
   letter-spacing: var(--font-letter-spacing-tight);
   max-width: var(--size-content-max);
@@ -319,7 +319,7 @@ code {
 .section-title {
   margin: 0 0 var(--space-sm) 0;
   font-family: var(--font-family-display);
-  font-size: var(--font-size-h2);
+  font-size: clamp(26px, 4vw, var(--font-size-h2));
   letter-spacing: var(--font-letter-spacing-tight);
 }
 
@@ -508,7 +508,7 @@ code {
   padding: var(--space-lg);
   display: grid;
   place-items: center;
-  background: color-mix(in srgb, var(--color-brand-bg) var(--mix-bg-strong), transparent);
+  background: color-mix(in srgb, var(--color-brand-bg) 92%, transparent);
   backdrop-filter: blur(var(--size-blur-strong));
   animation: intro-hide var(--motion-duration-intro) var(--motion-easing-entrance) forwards;
 }
@@ -537,7 +537,7 @@ code {
 .intro-title {
   margin: 0;
   font-family: var(--font-family-display);
-  font-size: var(--font-size-h2);
+  font-size: clamp(26px, 4vw, var(--font-size-h2));
   letter-spacing: var(--font-letter-spacing-tight);
 }
 

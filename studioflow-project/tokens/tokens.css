@@ -2,18 +2,18 @@
 :root {
   --color-brand-ink: #070A13;
   --color-brand-signal: #88AEBF;
-  --color-brand-bg: color-mix(in srgb, var(--color-brand-ink) 94%, var(--color-brand-signal));
-  --color-brand-surface: color-mix(in srgb, var(--color-brand-ink) 88%, var(--color-brand-signal));
-  --color-brand-panel: color-mix(in srgb, var(--color-brand-ink) 82%, var(--color-brand-signal));
-  --color-brand-text: color-mix(in srgb, var(--color-brand-signal) 86%, white);
-  --color-brand-muted: color-mix(in srgb, var(--color-brand-signal) 64%, var(--color-brand-ink));
-  --color-brand-stroke: color-mix(in srgb, var(--color-brand-signal) 42%, var(--color-brand-ink));
-  --color-brand-stroke-strong: color-mix(in srgb, var(--color-brand-signal) 70%, var(--color-brand-ink));
+  --color-brand-bg: #0F141D;
+  --color-brand-surface: #161E28;
+  --color-brand-panel: #1E2832;
+  --color-brand-text: #99B9C8;
+  --color-brand-muted: #5A7381;
+  --color-brand-stroke: #3D4F5B;
+  --color-brand-stroke-strong: #617D8B;
   --color-brand-primary: #7A8DFF;
   --color-brand-secondary: #7EF7F0;
-  --color-brand-accent: color-mix(in srgb, var(--color-brand-signal) 92%, white);
-  --color-brand-good: color-mix(in srgb, var(--color-brand-signal) 96%, white);
-  --color-brand-danger: color-mix(in srgb, var(--color-brand-signal) 52%, var(--color-brand-ink));
+  --color-brand-accent: #92B4C4;
+  --color-brand-good: #8DB1C2;
+  --color-brand-danger: #4A5F6C;
   --space-xxs: 2px;
   --space-xs: 4px;
   --space-sm: 8px;
@@ -38,13 +38,13 @@
   --radius-lg: 20px;
   --radius-xl: 28px;
   --radius-pill: 999px;
-  --shadow-card: 0 18px 42px color-mix(in srgb, var(--color-brand-ink) 76%, transparent);
-  --shadow-glow: 0 0 34px color-mix(in srgb, var(--color-brand-signal) 34%, transparent);
+  --shadow-card: 0 18px 42px rgba(7, 10, 19, 0.76);
+  --shadow-glow: 0 0 34px rgba(136, 174, 191, 0.34);
   --font-family-base: "Space Grotesk", "Inter", sans-serif;
   --font-family-display: "Xanh Mono", "Space Grotesk", monospace;
   --font-size-body: 16px;
-  --font-size-title: clamp(56px, 6vw, 92px);
-  --font-size-h2: clamp(26px, 4vw, 42px);
+  --font-size-title: 92px;
+  --font-size-h2: 42px;
   --font-size-h3: 22px;
   --font-size-kicker: 13px;
   --font-size-meta: 14px;
@@ -63,5 +63,4 @@
   --motion-easing-entrance: cubic-bezier(0.12, 0.92, 0.16, 1);
   --opacity-full: 1;
   --opacity-bg-fallback: 0.84;
-  --mix-bg-strong: 92%;
 }

@@ -1,86 +1,64 @@
 # StudioFlow Claude Code Operating Instructions
 
-This file is the in-repo contract for Claude Code sessions.
-
 ## Mission
 
-Keep the StudioFlow loop reliable:
-- `code -> canvas -> code`
-- token-first styling
-- stable `sfid` anchors
-- proof artifacts generated on every serious loop run
+Keep the StudioFlow roundtrip reliable:
+- `code → Figma → code`
+- token-first styling (zero hardcoded values in `src/`)
+- stable `sfid` anchors across both environments
+- 1:1 token fidelity: `tokens/figma-variables.json` is the single source of truth
 
 ## Non-Negotiables
 
 1. Never introduce hardcoded style values where token values are expected.
 2. Never remove or rename stable `data-sfid="sfid:*"` anchors without coordinated updates.
 3. Never apply canvas payloads without successful contract verification.
-4. Keep diffs minimal and task-scoped.
+4. Never write resolved `color-mix()` or `clamp()` values back into `figma-variables.json`.
+5. Keep diffs minimal and task-scoped.
 
-## Standard Operating Flow
+## Token Fidelity Rules
 
-1. Generate handoff:
+- `tokens/figma-variables.json` contains canonical token values including CSS expressions.
+- `color-mix()` and `clamp()` are valid CSS — the browser evaluates them. Figma cannot.
+- For Figma, these expressions must be resolved deterministically at sync time:
+  - `color-mix(in srgb, A NN%, B)` → compute the actual hex color
+  - `clamp(minPx, Nvw, maxPx)` → compute px for each breakpoint width
+- Only 4 colors are literal hex (bindable as COLOR variables): `ink`, `signal`, `primary`, `secondary`.
+- All other colors use computed hex fills in Figma (not variable bindings).
+- Spacing/sizing tokens: strip `px` unit → bind as FLOAT variable.
+
+## Workflow: Code → Figma
+
 ```bash
+npm run build:tokens
 npm run loop:code-to-canvas
+npm run check
 ```
-2. Export tokens for Figma import (one-time, or when tokens change):
-```bash
-npm run export:tokens-studio
-```
-Import `tokens/tokens-studio-import.json` via Tokens Studio plugin in Figma.
-3. Verify returned payload:
+Then use Talk-to-Figma MCP to run the StudioFlow plugin.
+
+## Workflow: Figma → Code
+
 ```bash
 npm run loop:verify-canvas
-```
-4. Apply approved payload:
-```bash
 npm run loop:canvas-to-code
-```
-5. Run quality gate:
-```bash
 npm run check
 npm run build
-npm run manifest:update
-```
-6. Capture proof when needed:
-```bash
-npm run loop:proof
 ```
 
-## Design-First Flow
+## Quality Gates
 
-If Figma is the source:
-1. Save approved payload to `handoff/canvas-to-code.json`.
-2. Set `integrationMode` to `design-first`.
-3. Run verify/apply/check/build as above.
+- `npm run verify:tokens-sync` — generated CSS/TS matches source JSON
+- `npm run verify:no-hardcoded` — no raw colors/units in `src/`
+- `npm run verify:id-sync` — sfid parity between code and snapshots
+- `npm run loop:verify-canvas` — canvas payload has all modes/screens/tokens/sfids
+- `tsc --noEmit` — TypeScript compiles
+- `npm run build` — Vite builds
 
-## Figma MCP Rules
+If any gate fails, stop and report the failing command, exact cause, and smallest safe fix.
 
-1. Use project-scoped MCP config (`.mcp.json`).
-2. Treat `figma-sites` as canonical provider.
-3. Treat `figma-make` as exploratory; promote only after `loop:verify-canvas` passes.
+## Commands
 
-## Quality Gates to Respect
-
-- `npm run test:contracts`
-- `npm run verify:tokens-sync`
-- `npm run verify:no-hardcoded`
-- `npm run verify:id-sync`
-- `npm run check`
-- `npm run build`
-
-If any gate fails, stop and report:
-- failing command,
-- exact cause,
-- smallest safe fix.
-
-## Command Macros
-
-Use command templates in `.claude/commands/` for repeatable workflows.
-They are the repo-level equivalent of “skills” for Claude Code operations.
-
-## Tone and Output
-
-Write concise, factual updates.
-Prioritize signal over flourish.
-Use direct language and concrete commands.
+Use `.claude/commands/` for repeatable workflows:
+- `studioflow-sync-to-figma` — push code state to Figma
+- `studioflow-apply-from-figma` — apply Figma edits back to code
+- `studioflow-verify` — run all quality gates

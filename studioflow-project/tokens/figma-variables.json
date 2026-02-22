@@ -8,25 +8,25 @@
         "value": "#88AEBF"
       },
       "bg": {
-        "value": "color-mix(in srgb, var(--color-brand-ink) 94%, var(--color-brand-signal))"
+        "value": "#0F141D"
       },
       "surface": {
-        "value": "color-mix(in srgb, var(--color-brand-ink) 88%, var(--color-brand-signal))"
+        "value": "#161E28"
       },
       "panel": {
-        "value": "color-mix(in srgb, var(--color-brand-ink) 82%, var(--color-brand-signal))"
+        "value": "#1E2832"
       },
       "text": {
-        "value": "color-mix(in srgb, var(--color-brand-signal) 86%, white)"
+        "value": "#99B9C8"
       },
       "muted": {
-        "value": "color-mix(in srgb, var(--color-brand-signal) 64%, var(--color-brand-ink))"
+        "value": "#5A7381"
       },
       "stroke": {
-        "value": "color-mix(in srgb, var(--color-brand-signal) 42%, var(--color-brand-ink))"
+        "value": "#3D4F5B"
       },
       "stroke-strong": {
-        "value": "color-mix(in srgb, var(--color-brand-signal) 70%, var(--color-brand-ink))"
+        "value": "#617D8B"
       },
       "primary": {
         "value": "#7A8DFF"
@@ -35,13 +35,13 @@
         "value": "#7EF7F0"
       },
       "accent": {
-        "value": "color-mix(in srgb, var(--color-brand-signal) 92%, white)"
+        "value": "#92B4C4"
       },
       "good": {
-        "value": "color-mix(in srgb, var(--color-brand-signal) 96%, white)"
+        "value": "#8DB1C2"
       },
       "danger": {
-        "value": "color-mix(in srgb, var(--color-brand-signal) 52%, var(--color-brand-ink))"
+        "value": "#4A5F6C"
       }
     }
   },
@@ -127,10 +127,10 @@
   },
   "shadow": {
     "card": {
-      "value": "0 18px 42px color-mix(in srgb, var(--color-brand-ink) 76%, transparent)"
+      "value": "0 18px 42px rgba(7, 10, 19, 0.76)"
     },
     "glow": {
-      "value": "0 0 34px color-mix(in srgb, var(--color-brand-signal) 34%, transparent)"
+      "value": "0 0 34px rgba(136, 174, 191, 0.34)"
     }
   },
   "font": {
@@ -147,10 +147,10 @@
         "value": "16px"
       },
       "title": {
-        "value": "clamp(56px, 6vw, 92px)"
+        "value": "92px"
       },
       "h2": {
-        "value": "clamp(26px, 4vw, 42px)"
+        "value": "42px"
       },
       "h3": {
         "value": "22px"
@@ -220,11 +220,6 @@
     },
     "bg-fallback": {
       "value": "0.84"
-    }
-  },
-  "mix": {
-    "bg-strong": {
-      "value": "92%"
     }
   }
 }

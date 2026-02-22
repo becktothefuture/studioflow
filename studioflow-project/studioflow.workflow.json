@@ -1,22 +1,7 @@
 {
-  "workflowVersion": "3.0.0",
+  "workflowVersion": "4.0.0",
   "integration": "canvas-central",
-  "canvas": {
-    "providers": ["figma-sites", "figma-make"],
-    "canonicalProvider": "figma-sites",
-    "exploratoryProvider": "figma-make",
-    "promotionRule": "Only verified figma-make explorations can be promoted into the figma-sites canonical loop."
-  },
-  "modelPolicy": {
-    "profile": "max-quality",
-    "defaultModel": "opus",
-    "planningModel": "opus",
-    "executionFallback": "sonnet",
-    "lightweightModel": "haiku"
-  },
-  "compatibility": {
-    "enableFigmaAliases": true
-  },
+  "figmaSync": "talk-to-figma",
   "tokenFrames": [
     {
       "name": "Tokens / Colors",
@@ -56,10 +41,6 @@
   "exchangeFiles": {
     "codeToCanvas": "handoff/code-to-canvas.json",
     "canvasToCode": "handoff/canvas-to-code.json",
-    "canvasToCodeTemplate": "handoff/canvas-to-code.template.json",
-    "codeToFigma": "handoff/code-to-figma.json",
-    "figmaToCode": "handoff/figma-to-code.json",
-    "figmaToCodeTemplate": "handoff/figma-to-code.template.json",
-    "breakpointVariables": "tokens/figma-breakpoint-variables.json"
+    "canvasToCodeTemplate": "handoff/canvas-to-code.template.json"
   }
 }

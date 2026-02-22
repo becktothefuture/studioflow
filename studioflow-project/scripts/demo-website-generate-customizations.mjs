@@ -48,7 +48,7 @@ async function main() {
 
   const output = structuredClone(template);
   output.generatedAt = new Date().toISOString();
-  output.canvasProvider = process.env.STUDIOFLOW_CANVAS_PROVIDER || workflow.canvas.canonicalProvider;
+  output.canvasProvider = process.env.STUDIOFLOW_CANVAS_PROVIDER || "figma";
   output.integrationMode = "code-first";
   output.claudeSession = {
     ...(output.claudeSession ?? {}),

@@ -1,33 +1,51 @@
 {
   "project": "studioflow-project",
   "version": "1.0.0",
-  "workflowVersion": "3.0.0",
+  "workflowVersion": "4.0.0",
   "integration": "canvas-central",
-  "canvasProvider": "figma-sites",
-  "claudeModelUsed": "opus",
-  "loopCount": 0,
-  "updatedAt": "2026-02-21T22:33:06.195Z",
+  "canvasProvider": "figma",
+  "claudeModelUsed": "claude-code",
+  "loopCount": 1,
+  "updatedAt": "2026-02-22T01:37:18.821Z",
   "publicMicrositeUrl": "https://<owner>.github.io/<repo>/",
-  "lastSnapshot": null,
-  "lastSnapshotAt": null,
+  "lastSnapshot": "figma-2026-02-21T23-49-16-352Z.json",
+  "lastSnapshotAt": "2026-02-21T23:49:16.352Z",
   "lastCodeToCanvas": {
-    "ranAt": "2026-02-21T22:33:06.195Z",
-    "tokenCount": 64,
+    "ranAt": "2026-02-22T01:37:01.366Z",
+    "tokenCount": 63,
     "sfidCount": 8,
     "handoffFile": "handoff/code-to-canvas.json"
   },
-  "lastCanvasSync": null,
-  "lastCanvasVerification": null,
+  "lastCanvasSync": {
+    "ranAt": "2026-02-21T23:49:16.352Z",
+    "sourceFile": "handoff/canvas-to-code.json",
+    "canvasProvider": "figma-sites",
+    "integrationMode": "code-first",
+    "canonicalMode": "desktop",
+    "updatedTokenCount": 0
+  },
+  "lastCanvasVerification": {
+    "status": "passed",
+    "ranAt": "2026-02-22T01:37:18.821Z",
+    "sourceFile": "handoff/canvas-to-code.template.json",
+    "canvasProvider": "figma",
+    "errorsCount": 0
+  },
   "lastCodeToFigma": {
-    "ranAt": "2026-02-21T22:33:06.195Z",
+    "ranAt": "2026-02-22T01:21:37.529Z",
     "tokenCount": 64,
     "sfidCount": 8,
     "handoffFile": "handoff/code-to-figma.json"
   },
-  "lastFigmaToCode": null,
+  "lastFigmaToCode": {
+    "ranAt": "2026-02-21T23:49:16.352Z",
+    "sourceFile": "handoff/figma-to-code.json",
+    "canonicalMode": "desktop",
+    "updatedTokenCount": 0
+  },
   "lastVerification": {
     "status": "passed",
-    "ranAt": "2026-02-21T20:10:06.094Z",
+    "ranAt": "2026-02-21T23:49:27.530Z",
     "command": "npm run check"
   },
   "expectedSfids": [
