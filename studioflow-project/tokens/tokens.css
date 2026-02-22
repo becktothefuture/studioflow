@@ -14,6 +14,7 @@
   --color-brand-accent: #92B4C4;
   --color-brand-good: #8DB1C2;
   --color-brand-danger: #4A5F6C;
+  --color-brand-white: #FFFFFF;
   --space-xxs: 2px;
   --space-xs: 4px;
   --space-sm: 8px;
@@ -21,6 +22,10 @@
   --space-lg: 24px;
   --space-xl: 44px;
   --space-xxl: 64px;
+  --space-ms: 12px;
+  --space-ml: 20px;
+  --space-2xl: 32px;
+  --space-3xl: 40px;
   --size-border-default: 1px;
   --size-border-strong: 2px;
   --size-full: 100%;
@@ -33,6 +38,7 @@
   --size-logo: 50px;
   --size-blur-soft: 8px;
   --size-blur-strong: 22px;
+  --size-button-height: 48px;
   --radius-sm: 6px;
   --radius-md: 12px;
   --radius-lg: 20px;
@@ -55,6 +61,7 @@
   --font-weight-semibold: 600;
   --font-weight-bold: 700;
   --font-line-height-body: 1.6;
+  --font-line-height-snug: 1.5;
   --font-line-height-title: 0.96;
   --motion-duration-intro: 2200ms;
   --motion-duration-fast: 220ms;

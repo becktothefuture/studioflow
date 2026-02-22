@@ -42,6 +42,9 @@
       },
       "danger": {
         "value": "#4A5F6C"
+      },
+      "white": {
+        "value": "#FFFFFF"
       }
     }
   },
@@ -66,6 +69,18 @@
     },
     "xxl": {
       "value": "64px"
+    },
+    "ms": {
+      "value": "12px"
+    },
+    "ml": {
+      "value": "20px"
+    },
+    "2xl": {
+      "value": "32px"
+    },
+    "3xl": {
+      "value": "40px"
     }
   },
   "size": {
@@ -106,6 +121,9 @@
     },
     "blur-strong": {
       "value": "22px"
+    },
+    "button-height": {
+      "value": "48px"
     }
   },
   "radius": {
@@ -187,6 +205,9 @@
     "line-height": {
       "body": {
         "value": "1.6"
+      },
+      "snug": {
+        "value": "1.5"
       },
       "title": {
         "value": "0.96"

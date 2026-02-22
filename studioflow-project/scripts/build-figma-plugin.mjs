@@ -99,7 +99,11 @@ const payload = {
   project: pageContent.project || "Untitled",
   integration: workflow.integration,
   workflowVersion: workflow.workflowVersion,
-  fonts: pageContent.fonts || { display: "Inter", body: "Inter", fallback: "Inter" },
+  fonts: pageContent.fonts || {
+    display: tokenJson?.font?.family?.display?.value || "Inter",
+    body: tokenJson?.font?.family?.base?.value || "Inter",
+    fallback: "Inter",
+  },
   screens,
   scale,
   colors,

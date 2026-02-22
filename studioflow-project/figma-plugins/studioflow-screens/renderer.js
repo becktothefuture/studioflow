@@ -1407,130 +1407,144 @@ function buildGrid(name, parent, scale, desiredCols) {
 // ══════════════════════════════════════════════════════════════════════════════
 
 function bindAllVariables() {
-  return figma.variables.getLocalVariableCollectionsAsync().then(function(collections) {
-    var colorByHex = new Map();
-    var floatByVal = new Map();
-    var promises = [];
+  return createTextStyles().then(function(textStyleMap) {
+    return figma.variables.getLocalVariableCollectionsAsync().then(function(collections) {
+      var colorByHex = new Map();
+      var floatByVal = new Map();
+      var promises = [];
 
-    for (var ci = 0; ci < collections.length; ci++) {
-      var col = collections[ci];
-      for (var vi = 0; vi < col.variableIds.length; vi++) {
-        (function(colRef, id) {
-          promises.push(figma.variables.getVariableByIdAsync(id).then(function(v) {
-            if (!v) return;
-            var flatName = v.name.replace(/\//g, '-');
-            var modeId = colRef.modes[colRef.modes.length - 1] ? colRef.modes[colRef.modes.length - 1].modeId : (colRef.modes[0] ? colRef.modes[0].modeId : undefined);
-            if (!modeId) return;
-            var val = v.valuesByMode[modeId];
-            if (val === undefined) return;
-
-            if (v.resolvedType === 'COLOR' && typeof val === 'object' && 'r' in val) {
-              var hex = toHex(val);
-              if (!colorByHex.has(hex)) colorByHex.set(hex, v);
-            } else if (v.resolvedType === 'FLOAT' && typeof val === 'number') {
-              if (!floatByVal.has(val)) floatByVal.set(val, []);
-              floatByVal.get(val).push({ variable: v, flatName: flatName });
-            }
-          }));
-        })(col, col.variableIds[vi]);
-      }
-    }
-
-    return Promise.all(promises).then(function() {
-      log('Binding: ' + colorByHex.size + ' colors, ' + floatByVal.size + ' numeric values');
-
-      var visited = 0;
-      var bound = 0;
-
-      function walk(node) {
-        visited++;
-
-        if ('fills' in node && Array.isArray(node.fills)) {
-          for (var fi = 0; fi < node.fills.length; fi++) {
-            var fill = node.fills[fi];
-            if (fill.type === 'SOLID' && fill.color) {
-              var mv = colorByHex.get(toHex(fill.color));
-              if (mv) { try { node.setBoundVariable('fills/' + fi + '/color', mv); bound++; } catch (_e) {} }
-            }
-          }
-        }
-
-        if ('strokes' in node && Array.isArray(node.strokes)) {
-          for (var sti = 0; sti < node.strokes.length; sti++) {
-            var s = node.strokes[sti];
-            if (s.type === 'SOLID' && s.color) {
-              var sv = colorByHex.get(toHex(s.color));
-              if (sv) { try { node.setBoundVariable('strokes/' + sti + '/color', sv); bound++; } catch (_e) {} }
-            }
-          }
-        }
-
-        // Numeric field bindings — match by value + flat name prefix
-        var numericFields = [
-          ['paddingTop', 'space-'], ['paddingRight', 'space-'],
-          ['paddingBottom', 'space-'], ['paddingLeft', 'space-'],
-          ['itemSpacing', 'space-'], ['strokeWeight', 'size-border-'],
-          ['fontSize', 'font-size-'], ['minWidth', 'size-'],
-          ['maxWidth', 'size-'], ['cornerRadius', 'radius-'],
-        ];
-
-        for (var nfi = 0; nfi < numericFields.length; nfi++) {
-          var prop = numericFields[nfi][0];
-          var prefix = numericFields[nfi][1];
-          if (prop in node && typeof node[prop] === 'number') {
-            var candidates = floatByVal.get(node[prop]);
-            if (candidates) {
-              var match = null;
-              for (var ci2 = 0; ci2 < candidates.length; ci2++) {
-                if (candidates[ci2].flatName.indexOf(prefix) === 0) { match = candidates[ci2]; break; }
+      for (var ci = 0; ci < collections.length; ci++) {
+        var col = collections[ci];
+        for (var vi = 0; vi < col.variableIds.length; vi++) {
+          (function(colRef, id) {
+            promises.push(figma.variables.getVariableByIdAsync(id).then(function(v) {
+              if (!v) return;
+              var flatName = v.name.replace(/\//g, '-');
+              var modeId = colRef.modes[colRef.modes.length - 1] ? colRef.modes[colRef.modes.length - 1].modeId : (colRef.modes[0] ? colRef.modes[0].modeId : undefined);
+              if (!modeId) return;
+              var val = v.valuesByMode[modeId];
+              if (val === undefined) return;
+              if (v.resolvedType === 'COLOR' && typeof val === 'object' && 'r' in val) {
+                var hex = toHex(val);
+                if (!colorByHex.has(hex)) colorByHex.set(hex, v);
+              } else if (v.resolvedType === 'FLOAT' && typeof val === 'number') {
+                if (!floatByVal.has(val)) floatByVal.set(val, []);
+                floatByVal.get(val).push({ variable: v, flatName: flatName });
               }
-              if (match) { try { node.setBoundVariable(prop, match.variable); bound++; } catch (_e) {} }
-            }
+            }));
+          })(col, col.variableIds[vi]);
+        }
+      }
+
+      return Promise.all(promises).then(function() {
+        log('Binding: ' + colorByHex.size + ' colors, ' + floatByVal.size + ' numeric values');
+        var visited = 0;
+        var bound = 0;
+
+        function findFloat(value, prefix) {
+          var candidates = floatByVal.get(value);
+          if (!candidates) return null;
+          for (var i = 0; i < candidates.length; i++) {
+            if (candidates[i].flatName.indexOf(prefix) === 0) return candidates[i];
           }
+          return null;
         }
 
-        // Text-specific bindings: lineHeight, letterSpacing
-        if (node.type === 'TEXT') {
-          if (node.lineHeight && node.lineHeight.unit === 'PERCENT') {
-            var lhCandidates = floatByVal.get(node.lineHeight.value);
-            if (lhCandidates) {
-              for (var lhi = 0; lhi < lhCandidates.length; lhi++) {
-                if (lhCandidates[lhi].flatName.indexOf('font-line-height-') === 0) {
-                  try { node.setBoundVariable('lineHeight', lhCandidates[lhi].variable); bound++; } catch (_e) {}
-                  break;
+        function walk(node) {
+          visited++;
+
+          // Fills (immediate)
+          if ('fills' in node && Array.isArray(node.fills)) {
+            for (var fi = 0; fi < node.fills.length; fi++) {
+              var fill = node.fills[fi];
+              if (fill.type === 'SOLID' && fill.color) {
+                var mv = colorByHex.get(toHex(fill.color));
+                if (mv) { try { node.setBoundVariable('fills/' + fi + '/color', mv); bound++; } catch (_e) {} }
+              }
+            }
+          }
+
+          // Strokes (immediate)
+          if ('strokes' in node && Array.isArray(node.strokes)) {
+            for (var sti = 0; sti < node.strokes.length; sti++) {
+              var s = node.strokes[sti];
+              if (s.type === 'SOLID' && s.color) {
+                var sv = colorByHex.get(toHex(s.color));
+                if (sv) { try { node.setBoundVariable('strokes/' + sti + '/color', sv); bound++; } catch (_e) {} }
+              }
+            }
+          }
+
+          // Numeric field bindings
+          var numericFields = [
+            ['paddingTop', 'space-'], ['paddingRight', 'space-'],
+            ['paddingBottom', 'space-'], ['paddingLeft', 'space-'],
+            ['itemSpacing', 'space-'], ['strokeWeight', 'size-border-'],
+            ['fontSize', 'font-size-'], ['minWidth', 'size-'],
+            ['maxWidth', 'size-'], ['minHeight', 'size-'],
+            ['cornerRadius', 'radius-'],
+          ];
+
+          var isText = node.type === 'TEXT';
+          var deferred = [];
+
+          for (var nfi = 0; nfi < numericFields.length; nfi++) {
+            var prop = numericFields[nfi][0];
+            var prefix = numericFields[nfi][1];
+            if (prop in node && typeof node[prop] === 'number') {
+              var match = findFloat(node[prop], prefix);
+              if (match) {
+                if (isText) {
+                  deferred.push({ prop: prop, variable: match.variable });
+                } else {
+                  try { node.setBoundVariable(prop, match.variable); bound++; } catch (_e) {}
                 }
               }
             }
           }
-          if (node.letterSpacing && node.letterSpacing.unit === 'PERCENT' && node.letterSpacing.value !== 0) {
-            var lsCandidates = floatByVal.get(node.letterSpacing.value);
-            if (lsCandidates) {
-              for (var lsi = 0; lsi < lsCandidates.length; lsi++) {
-                if (lsCandidates[lsi].flatName.indexOf('font-letter-spacing-') === 0) {
-                  try { node.setBoundVariable('letterSpacing', lsCandidates[lsi].variable); bound++; } catch (_e) {}
-                  break;
-                }
+
+          // Text nodes: collect deferred bindings, apply text style, then bind
+          if (isText) {
+            if (node.lineHeight && node.lineHeight.unit === 'PERCENT') {
+              var lhMatch = findFloat(node.lineHeight.value, 'font-line-height-');
+              if (lhMatch) deferred.push({ prop: 'lineHeight', variable: lhMatch.variable });
+            }
+            if (node.letterSpacing && node.letterSpacing.unit === 'PERCENT' && node.letterSpacing.value !== 0) {
+              var lsMatch = findFloat(node.letterSpacing.value, 'font-letter-spacing-');
+              if (lsMatch) deferred.push({ prop: 'letterSpacing', variable: lsMatch.variable });
+            }
+
+            // Apply text style (links font family)
+            if (node.fontName && node.fontName !== figma.mixed && textStyleMap) {
+              var fontKey = node.fontName.family + '/' + node.fontName.style;
+              if (textStyleMap[fontKey]) {
+                try { node.textStyleId = textStyleMap[fontKey]; bound++; } catch (_e) {}
               }
             }
+
+            // Apply deferred bindings after text style
+            for (var di = 0; di < deferred.length; di++) {
+              try { node.setBoundVariable(deferred[di].prop, deferred[di].variable); bound++; } catch (_e) {}
+            }
+          }
+
+          if ('children' in node) {
+            for (var chi = 0; chi < node.children.length; chi++) walk(node.children[chi]);
           }
         }
 
-        if ('children' in node) {
-          for (var chi = 0; chi < node.children.length; chi++) walk(node.children[chi]);
+        var page = figma.currentPage;
+        for (var pci = 0; pci < page.children.length; pci++) {
+          var pnode = page.children[pci];
+          if (SCREENS.some(function(s) { return s.name === pnode.name; })) {
+            log('  Walking "' + pnode.name + '"');
+            walk(pnode);
+          }
         }
-      }
 
-      var page = figma.currentPage;
-      for (var pci = 0; pci < page.children.length; pci++) {
-        var pnode = page.children[pci];
-        if (SCREENS.some(function(s) { return s.name === pnode.name; })) {
-          log('  Walking "' + pnode.name + '"');
-          walk(pnode);
-        }
-      }
-
-      log('Done: ' + bound + ' bindings across ' + visited + ' nodes', 'success');
-      return { visited: visited, bound: bound };
+        log('Done: ' + bound + ' bindings across ' + visited + ' nodes', 'success');
+        return { visited: visited, bound: bound };
+      });
     });
   });
 }
