@@ -43,8 +43,11 @@ export function validateCanvasPayload(payload, { workflow, tokenNames, codeSfids
     }
   }
 
-  if (sourceIsCanvas && (!payload.claudeSession || typeof payload.claudeSession !== "object")) {
-    errors.push("Missing claudeSession metadata.");
+  const hasSessionMetadata =
+    (payload.clientSession && typeof payload.clientSession === "object") ||
+    (payload.claudeSession && typeof payload.claudeSession === "object");
+  if (sourceIsCanvas && !hasSessionMetadata) {
+    errors.push("Missing clientSession metadata.");
   }
 
   const sfids = Array.isArray(payload.sfids) ? payload.sfids.map(String) : [];

@@ -42,10 +42,10 @@ function createScreens(workflow, codeSfids) {
   }));
 }
 
-function createClaudeSession() {
+function createClientSession() {
   return {
-    agent: "claude-code",
-    notes: "Set sessionId to your current Claude Code session identifier when available."
+    agent: process.env.STUDIOFLOW_AGENT_NAME || "mcp-client",
+    notes: "Set sessionId to your current MCP client session identifier when available."
   };
 }
 
@@ -81,7 +81,7 @@ export async function runLoopCodeToCanvas() {
     workflowVersion: workflow.workflowVersion,
     canvasProvider: "figma",
     integrationMode: "code-first",
-    claudeSession: createClaudeSession(),
+    clientSession: createClientSession(),
     requirements: {
       tokenFrames: workflow.tokenFrames.map((frame) => frame.name),
       variableModes: workflow.breakpoints.map((breakpoint) => ({
@@ -110,8 +110,8 @@ export async function runLoopCodeToCanvas() {
       workflowVersion: workflow.workflowVersion,
       canvasProvider: "figma",
       integrationMode: "code-first",
-      claudeSession: {
-        ...createClaudeSession(),
+      clientSession: {
+        ...createClientSession(),
         sessionId: "replace-with-session-id"
       },
       tokenFrames: frameTokens,
@@ -137,7 +137,7 @@ export async function runLoopCodeToCanvas() {
   manifest.workflowVersion = workflow.workflowVersion;
   manifest.integration = workflow.integration;
   manifest.canvasProvider = "figma";
-  manifest.claudeModelUsed = "claude-code";
+  manifest.automationClient = process.env.STUDIOFLOW_AGENT_NAME || "mcp-client";
   manifest.updatedAt = generatedAt;
   manifest.lastCodeToCanvas = {
     ranAt: generatedAt,

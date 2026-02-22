@@ -147,7 +147,7 @@
         "value": "16px"
       },
       "title": {
-        "value": "92px"
+        "value": "clamp(56px, 6vw, 92px)"
       },
       "h2": {
         "value": "42px"

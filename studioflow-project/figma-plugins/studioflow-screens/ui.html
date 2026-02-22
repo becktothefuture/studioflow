@@ -4,63 +4,129 @@
 <meta charset="UTF-8">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { background: #2C2C2C; }
 
   :root {
-    --ink:    #070A13;
-    --bg:     #0F141D;
-    --surf:   #161E28;
-    --panel:  #1E2832;
-    --text:   #99B9C8;
-    --muted:  #5A7381;
-    --stroke: #3D4F5B;
-    --strstr: #617D8B;
-    --pri:    #7A8DFF;
-    --sec:    #7EF7F0;
-    --warn:   #C8A46A;
-    --err:    #FF6B6B;
+    --bg:      #2C2C2C;
+    --surface:  #383838;
+    --panel:    #2C2C2C;
+    --border:   #4A4A4A;
+    --border-hi:#5C5C5C;
+    --text:     #E0E0E0;
+    --muted:    #999;
+    --dim:      #666;
+    --push:     #7EF7F0;
+    --push-fg:  #0A0A0A;
+    --pull:     #7A8DFF;
+    --pull-fg:  #fff;
+    --success:  #7EF7F0;
+    --warn:     #E8C36A;
+    --err:      #FF6B6B;
   }
 
   body {
     background: var(--bg);
     color: var(--text);
-    font-family: "Inter", system-ui, sans-serif;
-    font-size: 12px;
+    font-family: "Inter", system-ui, -apple-system, sans-serif;
+    font-size: 11px;
     line-height: 1.5;
     height: 100vh;
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    -webkit-font-smoothing: antialiased;
   }
 
-  /* Header */
+  /* ── Header (PRD 1: animated background, no logo) ── */
   header {
-    background: var(--ink);
-    border-bottom: 1px solid var(--stroke);
-    padding: 10px 14px 8px;
-    flex-shrink: 0;
-  }
-  .wordmark { font-size: 13px; font-weight: 600; color: #fff; letter-spacing: -0.02em; }
-  .wordmark em { color: var(--sec); font-style: normal; }
-  .sub { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-top: 1px; }
-
-  /* Screens */
-  .screens { padding: 8px 14px; border-bottom: 1px solid var(--stroke); flex-shrink: 0; }
-  .label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 5px; }
-  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
-  .chip {
-    background: var(--surf);
-    border: 1px solid var(--stroke);
-    border-radius: 5px;
-    padding: 5px 8px;
+    padding: 12px 16px 10px;
+    border-bottom: 1px solid var(--border);
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
   }
-  .chip-name { font-size: 11px; color: var(--text); }
-  .chip-w    { font-size: 10px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      120deg,
+      rgba(126, 247, 240, .06) 0%,
+      rgba(122, 141, 255, .08) 50%,
+      rgba(126, 247, 240, .06) 100%
+    );
+    background-size: 200% 100%;
+    animation: headerShimmer 6s ease-in-out infinite;
+    pointer-events: none;
+  }
+  @keyframes headerShimmer {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    position: relative;
+    z-index: 1;
+  }
+  .brand-name {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: -0.01em;
+  }
+  .brand-name span { color: var(--push); }
+  .version {
+    font-size: 10px;
+    color: var(--dim);
+    font-variant-numeric: tabular-nums;
+    position: relative;
+    z-index: 1;
+  }
 
-  /* Actions */
-  .actions { padding: 8px 14px; border-bottom: 1px solid var(--stroke); flex-shrink: 0; display: flex; flex-direction: column; gap: 5px; }
+  /* ── Sections ── */
+  .section {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .section-head {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 4px;
+  }
+  .section-arrow {
+    width: 16px; height: 16px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .section-arrow.push { background: var(--push); color: var(--push-fg); }
+  .section-arrow.pull { background: var(--pull); color: var(--pull-fg); }
+  .section-label {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+  }
+  .section-desc {
+    font-size: 10px;
+    color: var(--dim);
+    line-height: 1.4;
+    margin-bottom: 8px;
+  }
+
+  /* ── Buttons (PRD 4: glow + pointer + icon) ── */
   button {
     cursor: pointer;
     border: none;
@@ -69,98 +135,301 @@
     font-size: 11px;
     font-weight: 500;
     padding: 7px 12px;
-    transition: opacity .15s;
+    transition: opacity .12s, transform .12s, box-shadow .25s;
+    width: 100%;
   }
-  button:disabled { opacity: .4; cursor: not-allowed; }
-  .row { display: flex; gap: 5px; }
-  .btn-run  { background: var(--sec); color: var(--ink); font-weight: 700; width: 100%; }
-  .btn-sec  { background: var(--surf); color: var(--text); border: 1px solid var(--stroke); flex: 1; }
+  button:hover:not(:disabled) { opacity: .88; }
+  button:active:not(:disabled) { transform: scale(.98); }
+  button:disabled { opacity: .35; cursor: not-allowed; }
 
-  /* Log */
+  .btn-push {
+    background: var(--push);
+    color: var(--push-fg);
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .btn-push:hover:not(:disabled) {
+    opacity: 1;
+    box-shadow: 0 0 14px rgba(126, 247, 240, .45), 0 0 30px rgba(126, 247, 240, .2);
+    animation: glowPush .8s ease-in-out infinite alternate;
+  }
+  @keyframes glowPush {
+    from { box-shadow: 0 0 10px rgba(126, 247, 240, .35), 0 0 24px rgba(126, 247, 240, .15); }
+    to   { box-shadow: 0 0 18px rgba(126, 247, 240, .55), 0 0 36px rgba(126, 247, 240, .25); }
+  }
+
+  .btn-pull {
+    background: var(--pull);
+    color: var(--pull-fg);
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .btn-pull:hover:not(:disabled) {
+    opacity: 1;
+    box-shadow: 0 0 14px rgba(122, 141, 255, .45), 0 0 30px rgba(122, 141, 255, .2);
+    animation: glowPull .8s ease-in-out infinite alternate;
+  }
+  @keyframes glowPull {
+    from { box-shadow: 0 0 10px rgba(122, 141, 255, .35), 0 0 24px rgba(122, 141, 255, .15); }
+    to   { box-shadow: 0 0 18px rgba(122, 141, 255, .55), 0 0 36px rgba(122, 141, 255, .25); }
+  }
+
+  .btn-icon {
+    font-size: 13px;
+    line-height: 1;
+  }
+
+  /* Context banner */
+  .context {
+    display: none;
+    padding: 6px 16px;
+    font-size: 10px;
+    color: var(--pull);
+    background: rgba(122, 141, 255, .08);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+    align-items: center;
+    gap: 4px;
+  }
+  .context.show { display: flex; }
+  .context-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--pull);
+    flex-shrink: 0;
+  }
+
+  /* ── Log (PRD 6: 9px font) ── */
+  .log-header {
+    padding: 6px 16px 4px;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--dim);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .log-clear {
+    font-size: 9px;
+    color: var(--dim);
+    cursor: pointer;
+    text-transform: none;
+    letter-spacing: 0;
+    font-weight: 400;
+  }
+  .log-clear:hover { color: var(--muted); }
+
   .log {
     flex: 1;
     overflow-y: auto;
-    padding: 8px 14px;
+    padding: 6px 16px;
     display: flex;
     flex-direction: column;
     gap: 1px;
-    font-family: "SF Mono", "Fira Mono", monospace;
-    font-size: 10px;
+    font-family: "SF Mono", "Fira Code", monospace;
+    font-size: 9px;
   }
-  .e        { color: var(--muted); }
-  .e.info   { color: var(--text); }
+  .e        { color: var(--dim); }
+  .e.info   { color: var(--muted); }
   .e.warn   { color: var(--warn); }
-  .e.success{ color: var(--sec); }
+  .e.success{ color: var(--success); }
   .e.error  { color: var(--err); }
 
-  /* Status bar */
+  /* ── Status bar (PRD 7: flashing dot, PRD 8: version + link) ── */
   footer {
-    padding: 5px 14px;
-    background: var(--ink);
-    border-top: 1px solid var(--stroke);
+    padding: 6px 16px;
+    border-top: 1px solid var(--border);
     font-size: 10px;
-    color: var(--muted);
+    color: var(--dim);
     display: flex;
     align-items: center;
     justify-content: space-between;
     flex-shrink: 0;
   }
+  .status-left {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
   .dot {
     width: 6px; height: 6px; border-radius: 50%;
-    background: var(--muted);
-    display: inline-block; margin-right: 5px;
+    background: var(--dim);
+    flex-shrink: 0;
     transition: background .2s;
   }
-  .dot.ready   { background: var(--sec); }
-  .dot.running { background: var(--pri); animation: pulse 1s infinite; }
+  .dot.ready   { background: var(--success); animation: flash 2s ease-in-out infinite; }
+  .dot.running { background: var(--pull); animation: pulse 1s infinite; }
   .dot.error   { background: var(--err); }
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+  @keyframes flash {
+    0%, 100% { opacity: 1; box-shadow: 0 0 3px rgba(126, 247, 240, .6); }
+    50%      { opacity: .4; box-shadow: 0 0 0px transparent; }
+  }
+  .footer-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .footer-link {
+    color: var(--dim);
+    text-decoration: none;
+    font-size: 10px;
+    transition: color .15s;
+  }
+  .footer-link:hover { color: var(--muted); }
+
+  /* Bridge status indicator */
+  .bridge-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 9px;
+    color: var(--dim);
+    margin-left: 8px;
+  }
+  .bridge-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--dim);
+  }
+  .bridge-dot.connected { background: var(--success); }
 </style>
 </head>
 <body>
 
+<!-- PRD 1: Animated header, no logo dot -->
 <header>
-  <div class="wordmark">Studio<em>Flow</em></div>
-  <div class="sub">Screen Frames · Token Binding</div>
+  <div class="brand">
+    <div class="brand-name">Studio<span>Flow</span></div>
+    <span class="bridge-badge" id="bridgeBadge">
+      <span class="bridge-dot" id="bridgeDot"></span>
+      <span id="bridgeLabel">offline</span>
+    </span>
+  </div>
+  <div class="version">v4.0</div>
 </header>
 
-<div class="screens">
-  <div class="label">Breakpoints</div>
-  <div class="grid">
-    <div class="chip"><span class="chip-name">Mobile</span><span class="chip-w">390 px</span></div>
-    <div class="chip"><span class="chip-name">Tablet</span><span class="chip-w">768 px</span></div>
-    <div class="chip"><span class="chip-name">Laptop</span><span class="chip-w">1280 px</span></div>
-    <div class="chip"><span class="chip-name">Desktop</span><span class="chip-w">1440 px</span></div>
-  </div>
+<!-- Context banner -->
+<div class="context" id="context">
+  <div class="context-dot"></div>
+  <span id="contextText"></span>
 </div>
 
-<div class="actions">
-  <button class="btn-run" id="runAll">▶  Run All — Create Frames + Bind Tokens</button>
-  <div class="row">
-    <button class="btn-sec" id="createBtn">Create / Update Frames</button>
-    <button class="btn-sec" id="bindBtn">Bind Token Variables</button>
+<!-- CODE → FIGMA (PRD 2: renamed, PRD 3: sub-buttons removed, PRD 4: icon + glow) -->
+<div class="section">
+  <div class="section-head">
+    <div class="section-arrow push">↓</div>
+    <div class="section-label">Code → Figma</div>
   </div>
+  <div class="section-desc">
+    Build screens and sync token variables from your codebase to this canvas.
+  </div>
+  <button class="btn-push" id="runAll">
+    <span class="btn-icon">↓</span> Sync to Figma
+  </button>
 </div>
 
-<div class="log" id="log"><div class="e">Ready.</div></div>
+<!-- FIGMA → CODE (PRD 2: renamed, PRD 4: icon + glow, PRD 5: direct bridge) -->
+<div class="section">
+  <div class="section-head">
+    <div class="section-arrow pull">↑</div>
+    <div class="section-label">Figma → Code</div>
+  </div>
+  <div class="section-desc">
+    Capture design changes — tokens, structure, and anchors — to sync back to your codebase.
+  </div>
+  <button class="btn-pull" id="exportBtn">
+    <span class="btn-icon">↑</span> Sync to Code
+  </button>
+</div>
 
+<!-- Log -->
+<div class="log-header">
+  <span>Log</span>
+  <span class="log-clear" id="clearLog">Clear</span>
+</div>
+<div class="log" id="log"><div class="e info">Ready.</div></div>
+
+<!-- PRD 8: version number + repo docs link -->
 <footer>
-  <div><span class="dot ready" id="dot"></span><span id="status">Ready</span></div>
-  <span>StudioFlow v3.0.0</span>
+  <div class="status-left">
+    <div class="dot ready" id="dot"></div>
+    <span id="status">Ready</span>
+  </div>
+  <div class="footer-right">
+    <span>v4.0.0</span>
+    <a class="footer-link" href="https://github.com/becktothefuture/studioflow" target="_blank" rel="noopener">Docs ↗</a>
+  </div>
 </footer>
 
 <script>
   const logEl     = document.getElementById('log');
   const statusEl  = document.getElementById('status');
   const dotEl     = document.getElementById('dot');
-  const runAllBtn = document.getElementById('runAll');
-  const createBtn = document.getElementById('createBtn');
-  const bindBtn   = document.getElementById('bindBtn');
-  const allBtns   = [runAllBtn, createBtn, bindBtn];
+  const contextEl = document.getElementById('context');
+  const contextTextEl = document.getElementById('contextText');
+  const bridgeDot   = document.getElementById('bridgeDot');
+  const bridgeLabel = document.getElementById('bridgeLabel');
 
-  function addLog(text, level = 'info') {
+  const runAllBtn  = document.getElementById('runAll');
+  const exportBtn  = document.getElementById('exportBtn');
+  const clearBtn   = document.getElementById('clearLog');
+
+  const allBtns = [runAllBtn, exportBtn];
+
+  // ── Bridge connection (PRD 5) ──
+  let ws = null;
+  let bridgeConnected = false;
+  const BRIDGE_PORT = 9801;
+
+  function connectBridge() {
+    try {
+      ws = new WebSocket('ws://localhost:' + BRIDGE_PORT);
+      ws.onopen = () => {
+        bridgeConnected = true;
+        bridgeDot.classList.add('connected');
+        bridgeLabel.textContent = 'bridge';
+        addLog('Bridge connected', 'success');
+      };
+      ws.onmessage = (event) => {
+        try {
+          const msg = JSON.parse(event.data);
+          if (msg.type === 'log') addLog(msg.text, msg.level || 'info');
+          if (msg.type === 'done') setDone(msg.text || 'Sync complete');
+          if (msg.type === 'error') setError(msg.text || 'Bridge error');
+        } catch (e) {
+          addLog(event.data, 'info');
+        }
+      };
+      ws.onclose = () => {
+        bridgeConnected = false;
+        bridgeDot.classList.remove('connected');
+        bridgeLabel.textContent = 'offline';
+        setTimeout(connectBridge, 5000);
+      };
+      ws.onerror = () => {
+        ws.close();
+      };
+    } catch (e) {
+      setTimeout(connectBridge, 5000);
+    }
+  }
+  connectBridge();
+
+  // ── Logging ──
+  function addLog(text, level) {
     const d = document.createElement('div');
-    d.className = 'e ' + level;
+    d.className = 'e ' + (level || 'info');
     d.textContent = text;
     logEl.appendChild(d);
     logEl.scrollTop = logEl.scrollHeight;
@@ -187,19 +456,16 @@
     addLog('✗ ' + msg, 'error');
   }
 
-  runAllBtn.addEventListener('click', () => {
-    setRunning('Running all…');
-    parent.postMessage({ pluginMessage: { type: 'run-all' } }, '*');
-  });
-  createBtn.addEventListener('click', () => {
-    setRunning('Creating frames…');
-    parent.postMessage({ pluginMessage: { type: 'create-frames' } }, '*');
-  });
-  bindBtn.addEventListener('click', () => {
-    setRunning('Binding variables…');
-    parent.postMessage({ pluginMessage: { type: 'bind-variables' } }, '*');
-  });
+  function post(type) {
+    parent.postMessage({ pluginMessage: { type } }, '*');
+  }
 
+  // ── Button actions (PRD 2: sync terminology) ──
+  runAllBtn.addEventListener('click', () => { setRunning('Syncing to canvas…'); post('run-all'); });
+  exportBtn.addEventListener('click', () => { setRunning('Syncing from canvas…'); post('export-canvas'); });
+  clearBtn.addEventListener('click', () => { logEl.innerHTML = '<div class="e info">Log cleared.</div>'; });
+
+  // ── Message handler ──
   window.onmessage = (event) => {
     const msg = event.data.pluginMessage;
     if (!msg) return;
@@ -211,22 +477,53 @@
 
       case 'frames-done':
         for (const r of (msg.results || [])) {
-          addLog(`  "${r.name}"  ${r.width}px  →  ${r.id}`, 'success');
+          addLog('  "' + r.name + '"  ' + r.width + 'px  →  ' + r.id, 'success');
         }
         setDone('Frames created');
         break;
 
       case 'bind-done':
-        addLog(`  ${msg.stats.bound} bindings · ${msg.stats.visited} nodes`, 'success');
+        addLog('  ' + msg.stats.bound + ' bindings · ' + msg.stats.visited + ' nodes', 'success');
         setDone('Variables bound');
         break;
 
       case 'all-done':
         for (const r of (msg.results || [])) {
-          addLog(`  "${r.name}"  ${r.width}px  →  ${r.id}`, 'success');
+          addLog('  "' + r.name + '"  ' + r.width + 'px  →  ' + r.id, 'success');
         }
-        if (msg.stats) addLog(`  ${msg.stats.bound} variable bindings`, 'success');
-        setDone('All done');
+        if (msg.stats) addLog('  ' + msg.stats.bound + ' variable bindings', 'success');
+        setDone('Sync to Figma complete');
+        break;
+
+      case 'export-done':
+        if (msg.json) {
+          // PRD 5: Send via bridge if connected, otherwise fall back to clipboard
+          if (bridgeConnected && ws && ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify({ type: 'sync-to-code', payload: msg.json }));
+            addLog('Payload sent to bridge — running sync pipeline…', 'info');
+          } else {
+            navigator.clipboard.writeText(msg.json).then(() => {
+              setDone('Copied to clipboard (bridge offline)');
+              addLog('Bridge offline — paste payload into handoff/canvas-to-code.json', 'warn');
+            }).catch(() => {
+              addLog('Clipboard failed — showing in log', 'warn');
+              addLog(msg.json.substring(0, 200) + '…', 'info');
+              setDone('Sync ready (clipboard failed)');
+            });
+          }
+        }
+        break;
+
+      case 'selection-update':
+        if (msg.screenName) {
+          contextEl.classList.add('show');
+          contextTextEl.textContent = msg.screenName + ' selected — ready to sync';
+        } else if (msg.hasScreens) {
+          contextEl.classList.add('show');
+          contextTextEl.textContent = 'Screen frames found on canvas';
+        } else {
+          contextEl.classList.remove('show');
+        }
         break;
 
       case 'error':

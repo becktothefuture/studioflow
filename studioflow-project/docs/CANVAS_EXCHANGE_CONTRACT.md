@@ -10,7 +10,7 @@
 - `workflowVersion`: `"3.0.0"` (or current)
 - `canvasProvider`: `"figma-sites" | "figma-make"`
 - `integrationMode`: `"code-first" | "design-first"`
-- `claudeSession`: object metadata (`agent`, `model`, optional `sessionId`)
+- `clientSession`: object metadata (`agent`, `model`, optional `sessionId`)
 - `tokenFrames`: array
 - `variableModes`: array
 - `screens`: array
@@ -25,8 +25,8 @@
   "workflowVersion": "3.0.0",
   "canvasProvider": "figma-sites",
   "integrationMode": "code-first",
-  "claudeSession": {
-    "agent": "claude-code",
+  "clientSession": {
+    "agent": "cursor",
     "model": "opus",
     "sessionId": "optional"
   },

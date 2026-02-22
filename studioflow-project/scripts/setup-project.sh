@@ -613,11 +613,7 @@ has_open_command() {
 }
 
 detect_mcp_figma_status() {
-  if ! command -v claude >/dev/null 2>&1; then
-    echo "missing (claude CLI not found)"
-    return
-  fi
-  if claude mcp list 2>/dev/null | grep -qi figma; then
+  if [[ -f "$ROOT_DIR/.mcp.json" ]] && grep -qi '"figma' "$ROOT_DIR/.mcp.json"; then
     echo "configured"
   else
     echo "missing"
@@ -642,7 +638,7 @@ print_environment_status() {
   echo "Workspace: $ROOT_DIR"
   echo ".env.local: $env_status"
   echo "Figma credentials: $creds_status"
-  echo "Claude MCP figma: $mcp_status"
+  echo "MCP figma config: $mcp_status"
 }
 
 print_environment_status_compact() {
@@ -656,7 +652,7 @@ print_environment_status_compact() {
     creds_label="${YELLOW}missing${RESET}"
   fi
 
-  if command -v claude >/dev/null 2>&1 && claude mcp list 2>/dev/null | grep -qi figma; then
+  if [[ -f "$ROOT_DIR/.mcp.json" ]] && grep -qi '"figma' "$ROOT_DIR/.mcp.json"; then
     mcp_label="${GREEN}configured${RESET}"
   else
     mcp_label="${YELLOW}missing${RESET}"
@@ -691,9 +687,9 @@ print_menu_item() {
 print_menu_reference() {
   echo
   printf "%sWhat do you want to do next?%s\n" "$WHITE" "$RESET"
-  print_menu_item "1" "Send website to Figma" "Checks login, validates token + file, prepares payloads, syncs variables, then opens Claude." "(recommended)"
+  print_menu_item "1" "Send website to Figma" "Builds token artifacts and the code-to-canvas payload for Cursor + Conduit." "(recommended)"
   print_menu_item "2" "Create a local proof report" "Builds a visual report on this computer only (no Figma write)."
-  print_menu_item "3" "Advanced tools" "Strict API test, apply approved Figma edits back to code, monitor controls, detailed status."
+  print_menu_item "3" "Advanced tools" "Apply approved Figma edits back to code and run verification helpers."
   print_menu_item "q" "Quit installer" ""
 }
 
@@ -857,9 +853,8 @@ print_advanced_menu() {
   echo
   printf "%sAdvanced actions%s\n" "$WHITE" "$RESET"
   print_menu_item "1" "Apply approved Figma edits back to code" "loop:verify-canvas -> loop:canvas-to-code -> check/build/manifest"
-  print_menu_item "2" "Start bridge monitor" "Detached MCP + deep bridge health monitor."
-  print_menu_item "3" "Bridge monitor status" "Show monitor PID and last check state."
-  print_menu_item "4" "Stop bridge monitor" "Stop detached monitor."
+  print_menu_item "2" "Run quality gates" "verify:tokens-sync -> verify:no-hardcoded -> verify:id-sync -> tsc"
+  print_menu_item "3" "Generate proof + manifest" "Create proof artifacts and refresh manifest metadata."
   print_menu_item "b" "Back to main menu" ""
 }
 
@@ -868,7 +863,7 @@ interactive_advanced_menu() {
   while true; do
     print_advanced_menu
     echo
-    printf "%sSelect advanced option%s [1-4, b]: " "$WHITE" "$RESET"
+    printf "%sSelect advanced option%s [1-3, b]: " "$WHITE" "$RESET"
     read -r advanced_choice || return
     case "$advanced_choice" in
       1)
@@ -876,20 +871,16 @@ interactive_advanced_menu() {
           "npm run loop:verify-canvas && npm run loop:canvas-to-code && npm run check && npm run build && npm run manifest:update"
         ;;
       2)
-        run_interactive_action "Start always-on bridge monitor" \
-          "npm run monitor:figma-bridge:start -- --interval $MONITOR_INTERVAL_DEFAULT --deep-every $MONITOR_DEEP_EVERY_DEFAULT"
+        run_interactive_action "Run quality gates" "npm run check"
         ;;
       3)
-        run_interactive_action "Bridge monitor status" "npm run monitor:figma-bridge:status"
-        ;;
-      4)
-        run_interactive_action "Stop bridge monitor" "npm run monitor:figma-bridge:stop"
+        run_interactive_action "Generate proof + manifest" "npm run loop:proof && npm run manifest:update"
         ;;
       b | B)
         return
         ;;
       *)
-        printf "%sPlease choose 1, 2, 3, 4, or b.%s\n" "$YELLOW" "$RESET"
+        printf "%sPlease choose 1, 2, 3, or b.%s\n" "$YELLOW" "$RESET"
         ;;
     esac
   done
@@ -965,23 +956,19 @@ interactive_launch_menu() {
         if ! has_figma_credentials; then
           configure_figma_credentials || continue
         fi
-        run_interactive_action "Demo website -> Figma prep" "npm run demo:figma:prep" || continue
+        run_interactive_action "Prepare code-to-canvas payload" "npm run build:tokens && npm run loop:code-to-canvas && npm run check" || continue
         if ! has_figma_credentials; then
           printf "%sCredentials are still missing. Open option 3 -> Status details to inspect.%s\n" "$YELLOW" "$RESET"
           continue
         fi
-        run_interactive_action "Export Tokens Studio import file" "npm run export:tokens-studio"
         echo
-        printf "%sImport variables into Figma (one-time):%s\n" "$WHITE" "$RESET"
-        printf "  1. Open Figma → Plugins → Tokens Studio for Figma\n"
-        printf "  2. Load tokens/tokens-studio-import.json\n"
-        printf "  3. Export to Figma → Variables\n"
-        printf "  Once done, variables persist and Claude can reference them.\n"
+        printf "%sNext in Cursor + Figma:%s\n" "$WHITE" "$RESET"
+        printf "  1. Open handoff/code-to-canvas.json in Cursor.\n"
+        printf "  2. Use Conduit MCP to apply it in your target Figma file.\n"
+        printf "  3. Export handoff/canvas-to-code.json from Figma.\n"
+        printf "  4. Run: npm run loop:verify-canvas && npm run loop:canvas-to-code\n"
+        printf "  5. Run: npm run check && npm run build\n"
         echo
-        read -r -p "Open Claude now for /mcp and push prompt? [Y/n]: " open_claude
-        if [[ ! "$open_claude" =~ ^[Nn]$ ]]; then
-          claude
-        fi
         ;;
       2)
         run_interactive_action "Create local proof report (no Figma write)" "npm run demo:website:capture"
@@ -1006,9 +993,7 @@ printf "%sLogs: %s%s%s\n\n" "$BRAND_SOFT" "${LOG_DIR#$ROOT_DIR/}" " (full transc
 load_local_env_file
 
 add_step "Loading project dependencies" "npm install" "npm install" "fail"
-add_step "Ensuring Claude CLI is ready" "command -v claude >/dev/null 2>&1 || npm install -g @anthropic-ai/claude-code" "npm install -g @anthropic-ai/claude-code" "warn"
-add_step "Refreshing Claude project files" "npm run setup:claude" "npm run setup:claude" "fail"
-add_step "Wiring Claude + Figma bridge" "claude mcp list | grep -qi figma || claude mcp add --transport http figma https://mcp.figma.com/mcp --scope user" "claude mcp add --transport http figma https://mcp.figma.com/mcp --scope user && claude mcp list" "warn"
+add_step "Checking MCP config for Cursor" "test -f .mcp.json && grep -qi '\"figma\"' .mcp.json" "Create .mcp.json with figma + conduit servers from docs/MCP_SETUP.md" "warn"
 add_step "Checking Figma Code Connect package" "npm ls @figma/code-connect --depth=0 >/dev/null 2>&1 || npm install" "npm install" "warn"
 add_step "Checking Figma Code Connect CLI" "npx figma connect --help" "npx figma connect --help" "warn"
 add_step "Installing screenshot engine" "npx playwright install chromium" "npx playwright install chromium" "warn"
@@ -1016,8 +1001,7 @@ add_step "Syncing token artifacts" "npm run build:tokens" "npm run build:tokens"
 add_step "Running contract fixtures" "npm run test:contracts" "npm run test:contracts" "fail"
 add_step "Running quality gates" "npm run check" "npm run check" "fail"
 add_step "Generating canvas handoff" "npm run loop:code-to-canvas" "npm run loop:code-to-canvas" "fail"
-add_step "Validating MCP health" "npm run check:mcp" "claude mcp add --transport http figma https://mcp.figma.com/mcp --scope user && claude mcp list" "warn"
-add_step "Running deep bridge healthcheck" "npm run check:figma-bridge" "FIGMA_ACCESS_TOKEN=... FIGMA_FILE_KEY=... npm run check:figma-bridge" "warn"
+add_step "Verifying canvas payload contract" "npm run loop:verify-canvas" "Ensure handoff/canvas-to-code.json exists and includes all required modes/screens/sfids" "warn"
 
 TOTAL_STEPS="${#STEP_NAMES[@]}"
 if [[ "${STUDIOFLOW_SETUP_SHOW_CHECKLIST:-0}" == "1" ]]; then

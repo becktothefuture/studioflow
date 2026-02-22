@@ -43,7 +43,7 @@
   --font-family-base: "Space Grotesk", "Inter", sans-serif;
   --font-family-display: "Xanh Mono", "Space Grotesk", monospace;
   --font-size-body: 16px;
-  --font-size-title: 92px;
+  --font-size-title: clamp(56px, 6vw, 92px);
   --font-size-h2: 42px;
   --font-size-h3: 22px;
   --font-size-kicker: 13px;

@@ -4,31 +4,30 @@
   "workflowVersion": "4.0.0",
   "integration": "canvas-central",
   "canvasProvider": "figma",
-  "claudeModelUsed": "claude-code",
-  "loopCount": 1,
-  "updatedAt": "2026-02-22T01:37:18.821Z",
+  "loopCount": 2,
+  "updatedAt": "2026-02-22T10:58:33.439Z",
   "publicMicrositeUrl": "https://<owner>.github.io/<repo>/",
-  "lastSnapshot": "figma-2026-02-21T23-49-16-352Z.json",
-  "lastSnapshotAt": "2026-02-21T23:49:16.352Z",
+  "lastSnapshot": "figma-2026-02-22T10-58-21-752Z.json",
+  "lastSnapshotAt": "2026-02-22T10:58:21.751Z",
   "lastCodeToCanvas": {
-    "ranAt": "2026-02-22T01:37:01.366Z",
+    "ranAt": "2026-02-22T10:58:20.916Z",
     "tokenCount": 63,
     "sfidCount": 8,
     "handoffFile": "handoff/code-to-canvas.json"
   },
   "lastCanvasSync": {
-    "ranAt": "2026-02-21T23:49:16.352Z",
-    "sourceFile": "handoff/canvas-to-code.json",
-    "canvasProvider": "figma-sites",
+    "ranAt": "2026-02-22T10:58:21.751Z",
+    "sourceFile": "handoff/demo-website-canvas-to-code.json",
+    "canvasProvider": "figma",
     "integrationMode": "code-first",
     "canonicalMode": "desktop",
-    "updatedTokenCount": 0
+    "updatedTokenCount": 1
   },
   "lastCanvasVerification": {
     "status": "passed",
-    "ranAt": "2026-02-22T01:37:18.821Z",
-    "sourceFile": "handoff/canvas-to-code.template.json",
-    "canvasProvider": "figma",
+    "ranAt": "2026-02-22T10:58:33.439Z",
+    "sourceFile": "handoff/canvas-to-code.json",
+    "canvasProvider": "figma-sites",
     "errorsCount": 0
   },
   "lastCodeToFigma": {
@@ -45,7 +44,7 @@
   },
   "lastVerification": {
     "status": "passed",
-    "ranAt": "2026-02-21T23:49:27.530Z",
+    "ranAt": "2026-02-22T10:58:25.742Z",
     "command": "npm run check"
   },
   "expectedSfids": [
@@ -57,5 +56,6 @@
     "sfid:hero-root",
     "sfid:hero-secondary-cta",
     "sfid:hero-title"
-  ]
+  ],
+  "automationClient": "mcp-client"
 }

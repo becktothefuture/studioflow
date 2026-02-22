@@ -113,6 +113,10 @@ export function normalizeCanvasPayload(input, workflow) {
   payload.integration ||= workflow.integration;
   payload.workflowVersion ||= workflow.workflowVersion;
 
+  if (!payload.clientSession && payload.claudeSession && typeof payload.claudeSession === "object") {
+    payload.clientSession = payload.claudeSession;
+  }
+
   if (payload.source === "figma") {
     payload.source = "figma-canvas";
   }

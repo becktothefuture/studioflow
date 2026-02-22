@@ -95,7 +95,7 @@ export async function runLoopCanvasToCode(options = {}) {
   manifest.lastSnapshotAt = snapshotGeneratedAt;
   manifest.expectedSfids = payload.sfids;
   manifest.canvasProvider = payload.canvasProvider;
-  manifest.claudeModelUsed = payload.claudeSession?.model ?? "claude-code";
+  manifest.automationClient = payload.clientSession?.agent ?? payload.claudeSession?.agent ?? "mcp-client";
   manifest.lastCanvasSync = {
     ranAt: snapshotGeneratedAt,
     sourceFile: path.relative(rootDir, inputPath),

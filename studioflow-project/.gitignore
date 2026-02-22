@@ -32,3 +32,6 @@ scripts/*.tmp
 
 # Bridge monitor runtime
 .bridge-monitor/
+
+# Generated Figma plugin (rebuilt from renderer.js + payload)
+figma-plugins/studioflow-screens/code.js

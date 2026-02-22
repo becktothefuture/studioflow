@@ -50,9 +50,9 @@ async function main() {
   output.generatedAt = new Date().toISOString();
   output.canvasProvider = process.env.STUDIOFLOW_CANVAS_PROVIDER || "figma";
   output.integrationMode = "code-first";
-  output.claudeSession = {
-    ...(output.claudeSession ?? {}),
-    sessionId: output.claudeSession?.sessionId ?? "demo-website-session"
+  output.clientSession = {
+    ...(output.clientSession ?? output.claudeSession ?? {}),
+    sessionId: output.clientSession?.sessionId ?? output.claudeSession?.sessionId ?? "demo-website-session"
   };
 
   output.variableModes = (output.variableModes ?? []).map((mode) => ({

@@ -61,7 +61,7 @@ If any gate fails, stop on failure and report the failing command, exact cause, 
 
 ## Commands
 
-Use `.claude/commands/` for repeatable workflows:
-- `studioflow-sync-to-figma` — push code state to Figma
-- `studioflow-apply-from-figma` — apply Figma edits back to code
-- `studioflow-verify` — run all quality gates
+Use npm scripts for repeatable workflows from any MCP-capable client (Cursor, Claude Code, etc.):
+- `npm run loop:code-to-canvas` — push code state to Figma handoff payload
+- `npm run loop:verify-canvas` + `npm run loop:canvas-to-code` — apply Figma edits back to code
+- `npm run check` — run all quality gates
