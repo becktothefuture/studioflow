@@ -66,7 +66,8 @@ var PAYLOAD = {
     "secondary": "#7EF7F0",
     "accent": "#92B4C4",
     "good": "#8DB1C2",
-    "danger": "#4A5F6C"
+    "danger": "#4A5F6C",
+    "white": "#FFFFFF"
   },
   "tokens": [
     {
@@ -140,6 +141,11 @@ var PAYLOAD = {
       "frame": "Tokens / Colors"
     },
     {
+      "name": "color-brand-white",
+      "value": "#FFFFFF",
+      "frame": "Tokens / Colors"
+    },
+    {
       "name": "space-xxs",
       "value": "2px",
       "frame": "Tokens / Spacing"
@@ -172,6 +178,26 @@ var PAYLOAD = {
     {
       "name": "space-xxl",
       "value": "64px",
+      "frame": "Tokens / Spacing"
+    },
+    {
+      "name": "space-ms",
+      "value": "12px",
+      "frame": "Tokens / Spacing"
+    },
+    {
+      "name": "space-ml",
+      "value": "20px",
+      "frame": "Tokens / Spacing"
+    },
+    {
+      "name": "space-2xl",
+      "value": "32px",
+      "frame": "Tokens / Spacing"
+    },
+    {
+      "name": "space-3xl",
+      "value": "40px",
       "frame": "Tokens / Spacing"
     },
     {
@@ -232,6 +258,11 @@ var PAYLOAD = {
     {
       "name": "size-blur-strong",
       "value": "22px",
+      "frame": "Tokens / Spacing"
+    },
+    {
+      "name": "size-button-height",
+      "value": "48px",
       "frame": "Tokens / Spacing"
     },
     {
@@ -910,7 +941,7 @@ var PAYLOAD = {
 // Supported section types: nav, hero, card-section, split-section, footer
 // Any project can generate a compatible PAYLOAD and reuse this renderer.
 
-figma.showUI(__html__, { width: 360, height: 560, title: PAYLOAD.project + ' Screens', themeColors: true });
+figma.showUI(__html__, { width: 270, height: 390, title: PAYLOAD.project + ' Screens', themeColors: true });
 
 // ── Derived from PAYLOAD ───────────────────────────────────────────────────────
 var SCREENS = PAYLOAD.screens;
@@ -1622,7 +1653,7 @@ function renderPluginPanel(name, fonts) {
     pullFg:  hexToRgb('#FFFFFF'),
   };
 
-  var W = 250;
+  var W = 270;
   var font = fonts.body || FONTS_CFG.fallback;
 
   var root = vFrame(name, { gap: 0, fills: [solid(P.bg)], clip: true });
@@ -1630,87 +1661,103 @@ function renderPluginPanel(name, fonts) {
   root.counterAxisSizingMode = 'FIXED';
   root.primaryAxisSizingMode = 'AUTO';
 
-  // ── Header ──
+  // ── Header (gradient bg, status dot in brand row) ──
+  var headerBg = vFrame('header-bg', { gap: 0, fills: [
+    solid(P.bg),
+    { type: 'GRADIENT_LINEAR', gradientStops: [
+      { position: 0, color: { r: P.push.r, g: P.push.g, b: P.push.b, a: 0.06 } },
+      { position: 0.5, color: { r: P.pull.r, g: P.pull.g, b: P.pull.b, a: 0.08 } },
+      { position: 1, color: { r: P.push.r, g: P.push.g, b: P.push.b, a: 0.06 } },
+    ], gradientTransform: [[0.87, 0.5, 0], [-0.5, 0.87, 0.25]] },
+  ], stretch: true });
+  headerBg.layoutAlign = 'STRETCH';
+  headerBg.counterAxisSizingMode = 'AUTO';
+
   var header = hFrame('header', { gap: 6, padX: 12, padY: 10, fills: [], stretch: true, alignX: 'SPACE_BETWEEN', alignY: 'CENTER' });
   header.layoutAlign = 'STRETCH';
   header.counterAxisSizingMode = 'AUTO';
 
   var brandRow = hFrame('brand', { gap: 5, hugWidth: true, fills: [], alignY: 'CENTER' });
   brandRow.counterAxisSizingMode = 'AUTO';
-  var dot = figma.createRectangle();
-  dot.name = 'brand-dot';
-  dot.resize(14, 14);
-  dot.cornerRadius = 4;
-  dot.fills = [{ type: 'GRADIENT_LINEAR', gradientStops: [
-    { position: 0, color: { r: P.push.r, g: P.push.g, b: P.push.b, a: 1 } },
-    { position: 1, color: { r: P.pull.r, g: P.pull.g, b: P.pull.b, a: 1 } },
-  ], gradientTransform: [[0.7, 0.7, 0], [-0.7, 0.7, 0.5]] }];
-  brandRow.appendChild(dot);
   brandRow.appendChild(txt('brand-name', 'StudioFlow', { font: font, style: 'SemiBold', size: 11, color: P.text }));
+  var statusDotH = figma.createEllipse();
+  statusDotH.name = 'status-dot';
+  statusDotH.resize(5, 5);
+  statusDotH.fills = [solid(P.push)];
+  brandRow.appendChild(statusDotH);
+  brandRow.appendChild(txt('status-text', 'Ready', { font: font, style: 'Regular', size: 8, color: P.dim }));
+
   header.appendChild(brandRow);
   header.appendChild(txt('version', 'v4.0', { font: font, style: 'Regular', size: 9, color: P.dim }));
+  headerBg.appendChild(header);
 
   var headerSep = figma.createRectangle();
   headerSep.name = 'header-sep';
   headerSep.resize(W, 1);
   headerSep.fills = [solid(P.border)];
 
-  root.appendChild(header);
+  root.appendChild(headerBg);
   root.appendChild(headerSep);
 
-  // ── Section helper ──
-  function sectionBlock(arrowLabel, arrowColor, arrowFg, label, desc) {
+  // ── Context banner (sync target) ──
+  var contextBanner = hFrame('context', { gap: 4, padX: 12, padY: 5, fills: [{ type: 'SOLID', color: P.pull, opacity: 0.08 }], stretch: true, alignY: 'CENTER' });
+  contextBanner.layoutAlign = 'STRETCH';
+  contextBanner.counterAxisSizingMode = 'AUTO';
+  var contextDot = figma.createEllipse();
+  contextDot.name = 'context-dot';
+  contextDot.resize(5, 5);
+  contextDot.fills = [solid(P.pull)];
+  contextBanner.appendChild(contextDot);
+  contextBanner.appendChild(txt('context-text', 'Target: entire page', { font: font, style: 'Regular', size: 9, color: P.pull }));
+
+  var contextSep = figma.createRectangle();
+  contextSep.name = 'context-sep';
+  contextSep.resize(W, 1);
+  contextSep.fills = [solid(P.border)];
+
+  root.appendChild(contextBanner);
+  root.appendChild(contextSep);
+
+  // ── Section helper (no arrow badges, just label) ──
+  function sectionBlock(label, desc) {
     var sec = vFrame('section', { gap: 6, padX: 12, padY: 10, fills: [], stretch: true });
     sec.layoutAlign = 'STRETCH';
     sec.counterAxisSizingMode = 'AUTO';
-
-    var head = hFrame('section-head', { gap: 5, hugWidth: true, fills: [], alignY: 'CENTER' });
-    head.counterAxisSizingMode = 'AUTO';
-
-    var arrow = hFrame('arrow', { gap: 0, padX: 0, padY: 0, hugWidth: true, fills: [solid(arrowColor)], cornerRadius: 3, alignX: 'CENTER', alignY: 'CENTER' });
-    arrow.resize(14, 14);
-    arrow.counterAxisSizingMode = 'FIXED';
-    arrow.primaryAxisSizingMode = 'FIXED';
-    arrow.primaryAxisAlignItems = 'CENTER';
-    arrow.counterAxisAlignItems = 'CENTER';
-    arrow.appendChild(txt('arrow-icon', arrowLabel, { font: font, style: 'Bold', size: 9, color: arrowFg }));
-    head.appendChild(arrow);
-
-    head.appendChild(txt('section-label', label, { font: font, style: 'SemiBold', size: 9, color: P.muted }));
-    sec.appendChild(head);
-
+    sec.appendChild(txt('section-label', label, { font: font, style: 'SemiBold', size: 9, color: P.muted }));
     sec.appendChild(txt('section-desc', desc, { font: font, style: 'Regular', size: 9, color: P.dim, stretch: true, lineHeight: 140 }));
-
     return sec;
   }
 
-  // ── Button helper ──
-  function btn(label, bgColor, fgColor, isGhost) {
-    var b = hFrame('btn', { gap: 0, padX: 10, padY: 6, fills: isGhost ? [solid(P.surface)] : [solid(bgColor)], cornerRadius: 5, alignX: 'CENTER', alignY: 'CENTER' });
+  // ── Solid button ──
+  function btnSolid(icon, label, bgColor, fgColor) {
+    var b = hFrame('btn', { gap: 5, padX: 12, padY: 8, fills: [solid(bgColor)], cornerRadius: 6, alignX: 'CENTER', alignY: 'CENTER' });
     b.layoutAlign = 'STRETCH';
     b.counterAxisSizingMode = 'AUTO';
     b.primaryAxisSizingMode = 'FIXED';
     b.primaryAxisAlignItems = 'CENTER';
-    if (isGhost) {
-      b.strokes = [solid(P.border)];
-      b.strokeWeight = 1;
-      b.strokeAlign = 'INSIDE';
-    }
-    b.appendChild(txt('btn-label', label, { font: font, style: isGhost ? 'Medium' : 'Bold', size: 10, color: fgColor }));
+    b.appendChild(txt('btn-icon', icon, { font: font, style: 'Regular', size: 12, color: fgColor }));
+    b.appendChild(txt('btn-label', label, { font: font, style: 'Bold', size: 11, color: fgColor }));
     return b;
   }
 
-  // ── Push section ──
-  var pushSec = sectionBlock('↓', P.push, P.pushFg, 'CODE → FIGMA', 'Build screens and sync token variables from your codebase to this canvas.');
-  pushSec.appendChild(btn('Push All', P.push, P.pushFg, false));
-  var btnRow = hFrame('btn-row', { gap: 5, fills: [], stretch: true });
-  btnRow.layoutAlign = 'STRETCH';
-  btnRow.counterAxisSizingMode = 'AUTO';
-  var b1 = btn('Screens Only', P.surface, P.text, true); b1.layoutGrow = 1;
-  var b2 = btn('Bind Only', P.surface, P.text, true); b2.layoutGrow = 1;
-  btnRow.appendChild(b1);
-  btnRow.appendChild(b2);
-  pushSec.appendChild(btnRow);
+  // ── Ghost button (transparent bg, teal border) ──
+  function btnGhost(icon, label) {
+    var b = hFrame('btn', { gap: 5, padX: 12, padY: 8, fills: [solid(P.bg, 0)], cornerRadius: 6, alignX: 'CENTER', alignY: 'CENTER' });
+    b.layoutAlign = 'STRETCH';
+    b.counterAxisSizingMode = 'AUTO';
+    b.primaryAxisSizingMode = 'FIXED';
+    b.primaryAxisAlignItems = 'CENTER';
+    b.strokes = [solid(P.push)];
+    b.strokeWeight = 1;
+    b.strokeAlign = 'INSIDE';
+    b.appendChild(txt('btn-icon', icon, { font: font, style: 'Regular', size: 12, color: P.text }));
+    b.appendChild(txt('btn-label', label, { font: font, style: 'Bold', size: 11, color: P.text }));
+    return b;
+  }
+
+  // ── Code → Figma section ──
+  var pushSec = sectionBlock('CODE → FIGMA', 'Rebuild all screen frames and token variables on this canvas from code.');
+  pushSec.appendChild(btnSolid('⟳', 'Sync to Figma', P.push, P.pushFg));
 
   var pushSep = figma.createRectangle();
   pushSep.name = 'push-sep';
@@ -1720,17 +1767,9 @@ function renderPluginPanel(name, fonts) {
   root.appendChild(pushSec);
   root.appendChild(pushSep);
 
-  // ── Sync section ──
-  var syncSec = sectionBlock('↑', P.pull, P.pullFg, 'FIGMA → CODE', 'Capture design changes — tokens, structure, and anchors — to sync back to your codebase.');
-  syncSec.appendChild(btn('Sync to Clipboard', P.pull, P.pullFg, false));
-
-  var hint = vFrame('hint', { gap: 2, fills: [], stretch: true });
-  hint.layoutAlign = 'STRETCH';
-  hint.counterAxisSizingMode = 'AUTO';
-  hint.appendChild(txt('step-1', '1. Paste into handoff/canvas-to-code.json', { font: font, style: 'Regular', size: 8, color: P.dim, stretch: true }));
-  hint.appendChild(txt('step-2', '2. npm run loop:verify-canvas', { font: font, style: 'Regular', size: 8, color: P.dim, stretch: true }));
-  hint.appendChild(txt('step-3', '3. npm run loop:canvas-to-code', { font: font, style: 'Regular', size: 8, color: P.dim, stretch: true }));
-  syncSec.appendChild(hint);
+  // ── Figma → Code section (ghost button) ──
+  var syncSec = sectionBlock('FIGMA → CODE', 'Send your design changes back to the codebase in one step.');
+  syncSec.appendChild(btnGhost('⟳', 'Sync to Code'));
 
   var syncSep = figma.createRectangle();
   syncSep.name = 'sync-sep';
@@ -1756,7 +1795,7 @@ function renderPluginPanel(name, fonts) {
   logArea.layoutAlign = 'STRETCH';
   logArea.counterAxisSizingMode = 'AUTO';
   logArea.minHeight = 80;
-  logArea.appendChild(txt('log-entry', 'Ready.', { font: font, style: 'Regular', size: 9, color: P.muted, stretch: true }));
+  logArea.appendChild(txt('log-entry', 'Awaiting action…', { font: font, style: 'Regular', size: 8, color: P.muted, stretch: true }));
 
   root.appendChild(logHeader);
   root.appendChild(logSep);
@@ -1773,16 +1812,13 @@ function renderPluginPanel(name, fonts) {
   footer.layoutAlign = 'STRETCH';
   footer.counterAxisSizingMode = 'AUTO';
 
-  var statusRow = hFrame('status-left', { gap: 4, hugWidth: true, fills: [], alignY: 'CENTER' });
-  statusRow.counterAxisSizingMode = 'AUTO';
-  var statusDot = figma.createEllipse();
-  statusDot.name = 'status-dot';
-  statusDot.resize(5, 5);
-  statusDot.fills = [solid(P.push)];
-  statusRow.appendChild(statusDot);
-  statusRow.appendChild(txt('status-text', 'Ready', { font: font, style: 'Regular', size: 9, color: P.dim }));
-  footer.appendChild(statusRow);
-  footer.appendChild(txt('footer-brand', 'StudioFlow', { font: font, style: 'Regular', size: 9, color: P.dim }));
+  footer.appendChild(txt('footer-brand', 'StudioFlow v4.0.0', { font: font, style: 'Regular', size: 8, color: P.dim }));
+
+  var footerRight = hFrame('footer-right', { gap: 8, hugWidth: true, fills: [], alignY: 'CENTER' });
+  footerRight.counterAxisSizingMode = 'AUTO';
+  footerRight.appendChild(txt('footer-docs', 'Docs ↗', { font: font, style: 'Regular', size: 8, color: P.dim }));
+  footerRight.appendChild(txt('footer-github', 'GitHub ↗', { font: font, style: 'Regular', size: 8, color: P.dim }));
+  footer.appendChild(footerRight);
   root.appendChild(footer);
 
   log('  Plugin Panel');
