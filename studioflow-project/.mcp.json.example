@@ -1,8 +1,16 @@
 {
   "mcpServers": {
+    "figma-desktop": {
+      "transport": "http",
+      "url": "http://127.0.0.1:3845/mcp"
+    },
     "figma": {
       "transport": "http",
       "url": "https://mcp.figma.com/mcp"
+    },
+    "conduit": {
+      "command": "bunx",
+      "args": ["conduit-design@latest"]
     }
   }
 }

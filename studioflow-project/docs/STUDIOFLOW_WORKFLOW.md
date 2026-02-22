@@ -23,13 +23,20 @@ StudioFlow preserves intent through three controls:
 2. Naming parity via stable `sfid` identifiers and canonical naming rules.
 3. Deterministic generation and verification with script-level contract gates.
 
+## MCP Transport Model
+- Figma Dev Mode MCP provides read context.
+- Conduit provides write operations into Figma.
+- StudioFlow contract payloads remain canonical for apply operations.
+- StudioFlow verification gates control every apply path.
+- Setup instructions live in `docs/MCP_SETUP.md` and `docs/CONDUIT_SETUP.md`.
+
 ## System Flow
 1. Generate canonical handoff from code.
    - `npm run loop:code-to-canvas`
 2. Export tokens for Figma variable import.
    - `npm run export:tokens-studio`
    - Import `tokens/tokens-studio-import.json` via Tokens Studio plugin (one-time, or when tokens change).
-3. Apply updates in Figma and export canonical response payload.
+3. Use Conduit to apply payload updates in Figma and export canonical response payload.
    - `handoff/canvas-to-code.json`
 4. Verify contract integrity before source mutation.
    - `npm run loop:verify-canvas`
@@ -84,6 +91,9 @@ npm run setup:project
 npm run loop:code-to-canvas
 npm run export:tokens-studio
 # Import tokens via Tokens Studio plugin if needed, then Figma operations and export
+npm run loop:figma-roundtrip
+# Use Conduit to apply in Figma and export handoff/canvas-to-code.json
+npm run loop:figma-roundtrip:apply
 npm run loop:verify-canvas
 npm run loop:canvas-to-code
 npm run check
@@ -95,4 +105,6 @@ npm run manifest:update
 ## Related Docs
 - `docs/CANVAS_EXCHANGE_CONTRACT.md`
 - `docs/DEMO_WEBSITE_ROUNDTRIP.md`
+- `docs/MCP_SETUP.md`
+- `docs/CONDUIT_SETUP.md`
 - `docs/BRAND_POSITIONING.md`

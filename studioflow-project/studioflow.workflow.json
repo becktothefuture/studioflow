@@ -1,7 +1,7 @@
 {
   "workflowVersion": "4.0.0",
   "integration": "canvas-central",
-  "figmaSync": "talk-to-figma",
+  "figmaSync": "conduit",
   "tokenFrames": [
     {
       "name": "Tokens / Colors",

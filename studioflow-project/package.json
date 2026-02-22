@@ -16,6 +16,8 @@
     "loop:code-to-canvas": "node scripts/loop-code-to-canvas.mjs",
     "loop:verify-canvas": "node scripts/loop-verify-canvas.mjs",
     "loop:canvas-to-code": "node scripts/loop-canvas-to-code.mjs",
+    "loop:figma-roundtrip": "node scripts/loop-figma-roundtrip.mjs",
+    "loop:figma-roundtrip:apply": "node scripts/loop-figma-roundtrip.mjs --apply",
     "demo:website:generate": "node scripts/demo-website-generate-customizations.mjs",
     "demo:website:verify": "STUDIOFLOW_INPUT=handoff/demo-website-canvas-to-code.json npm run loop:verify-canvas",
     "demo:website:apply": "STUDIOFLOW_INPUT=handoff/demo-website-canvas-to-code.json npm run loop:canvas-to-code",

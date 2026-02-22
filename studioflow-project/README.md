@@ -1,126 +1,64 @@
-# StudioFlow Project
+# StudioFlow For Designers
 
-## Direct Value Summary
-StudioFlow preserves one intent model from code to canvas and back to code. The workflow enforces structural parity through deterministic payload generation, stable naming, and contract-gated verification. Each approved loop produces proof artifacts and manifest updates for operational traceability.
+StudioFlow keeps your approved design intent aligned from Figma to code.
 
-## Problem Definition
-UI delivery loses coherence when teams translate intent manually between design and code. Token semantics drift, component identity changes, breakpoint behavior diverges, and review cycles absorb interpretation defects. StudioFlow encodes intent as enforceable system contracts to keep releases aligned.
+## What You Get
+- A clear loop from code to Figma and back to code.
+- Token-first styling that keeps named styles consistent.
+- Stable `sfid` anchors so matching UI parts stay connected.
+- Built-in checks that stop unsafe apply steps.
+- Proof output after each apply so reviews are simple.
 
-## Principle: Intent Preservation
-Intent preservation is the governing rule for every loop.
+## Quick Start
 
-Operational scope:
-- Shared token, mode, screen, and `sfid` vocabulary.
-- Deterministic payload generation and verification.
-- Gated application path tied to proof and manifest evidence.
-
-## System Guarantees
-The guarantees below are enforceable and mapped to commands.
-
-| Guarantee | Verify With | Evidence Path |
-| --- | --- | --- |
-| Every approved loop preserves stable component identity via `sfid` parity checks. | `npm run verify:id-sync` | `src/** data-sfid`, `snapshots/*.json` |
-| Every approved loop validates all four breakpoint modes and screens. | `npm run loop:verify-canvas` | `handoff/canvas-to-code.json` |
-| Style data entering code is token-backed and contract-validated. | `npm run verify:tokens-sync` + `npm run loop:verify-canvas` | `tokens/figma-variables.json`, `handoff/canvas-to-code.json` |
-| Roundtrip application is blocked when contract coverage is incomplete. | `npm run loop:verify-canvas` | `studioflow.manifest.json` gate status |
-| Proof artifacts are generated as review evidence, not optional output. | `npm run loop:proof` | `proof/latest/index.html`, `proof/latest/summary-card.png` |
-| Manifest state records loop outcomes for operational traceability. | `npm run manifest:update` | `studioflow.manifest.json` |
-
-## Architecture Overview
-System flow:
-1. `npm run loop:code-to-canvas` generates canonical payloads.
-2. `npm run export:tokens-studio` generates Tokens Studio import file.
-3. Figma receives tokens via Tokens Studio plugin (one-time) and returns approved updates in `handoff/canvas-to-code.json`.
-4. `npm run loop:verify-canvas` validates token/mode/screen/sfid coverage.
-5. `npm run loop:canvas-to-code` applies verified updates into source.
-6. `npm run check && npm run build` validates source integrity.
-7. `npm run loop:proof && npm run manifest:update` records evidence.
-
-## Workflow Overview
-Code-first path:
-```bash
-npm run setup:project
-npm run loop:code-to-canvas
-npm run export:tokens-studio
-# Import tokens/tokens-studio-import.json via Tokens Studio plugin in Figma (one-time)
-# Figma update + export handoff/canvas-to-code.json
-npm run loop:verify-canvas
-npm run loop:canvas-to-code
-npm run check
-npm run build
-npm run loop:proof
-npm run manifest:update
-```
-
-Design-first path:
-```bash
-# Start from approved Figma design state
-# Export handoff/canvas-to-code.json
-npm run loop:verify-canvas
-npm run loop:canvas-to-code
-npm run check
-npm run build
-npm run loop:proof
-npm run manifest:update
-```
-
-## Installation
-Prerequisites:
-- Node.js 18+ and npm
-- Claude Code with project MCP access for live Figma loops
-
-Setup and first proof:
+Install and run:
 ```bash
 npm install
-npm run setup:project
-npm run demo:website:capture
+npm run dev
 ```
 
-First successful run criteria:
-- `proof/latest/index.html` exists.
-- `proof/latest/summary-card.png` exists.
-- `npm run check` passes.
-- `npm run build` passes.
+Set up your MCP tools:
+- `docs/MCP_SETUP.md`
+- `docs/CONDUIT_SETUP.md`
 
-Always-on bridge monitor:
+## Daily Designer Loop
+
+1. Build tokens.
 ```bash
-npm run monitor:figma-bridge:start
-npm run monitor:figma-bridge:status
-npm run monitor:figma-bridge:stop
+npm run build:tokens
 ```
 
-Foreground mode (single terminal):
+2. Generate the payload for Figma.
 ```bash
-npm run monitor:figma-bridge
+npm run loop:code-to-canvas
 ```
 
-## Naming & Semantic Conventions
-Canonical naming policy:
-- `sfid:*` values preserve stable component identity.
-- Breakpoint modes remain `mobile`, `tablet`, `laptop`, `desktop`.
-- Token authority starts in `tokens/figma-variables.json`.
-- Canonical payload paths are `handoff/code-to-canvas.json` and `handoff/canvas-to-code.json`.
+3. Print the checklist.
+```bash
+npm run loop:figma-roundtrip
+```
 
-Glossary:
-- Intent: semantic meaning shared across code and design state.
-- Parity: equivalence of semantic identity across environments.
-- Deterministic generation: repeatable payload output from the same source state.
-- Contract gate: validation command that must pass before apply.
-- Proof artifact: generated evidence that supports review and audit.
+4. In Figma, use Conduit to apply the payload and export:
+- `handoff/canvas-to-code.json`
 
-## Roadmap
-Near-term:
-1. Add measured production baselines for modeled outcomes.
-2. Expand CI templates for contract gates and proof generation.
-3. Publish versioned glossary policy for naming governance.
+5. Apply safely back to code.
+```bash
+npm run loop:figma-roundtrip:apply
+```
 
-Mid-term:
-1. Add multi-repo manifest aggregation and lineage tracking.
-2. Provide rollout playbooks for platform-level adoption.
-3. Extend payload diagnostics for faster contract triage.
+The apply wrapper runs verification, apply, check, build, proof, and manifest update in order.
 
-Related docs:
+## Fallback Path
+
+If Conduit is not available:
+- Use `figma-plugins/studioflow-screens/` for frame creation and variable binding.
+- Use Figma Dev Mode MCP for read-only context.
+- Export `handoff/canvas-to-code.json` manually.
+- Run `npm run loop:verify-canvas` and `npm run loop:canvas-to-code`.
+
+## Helpful Docs
+- `docs/DEMO_WEBSITE_ROUNDTRIP.md`
 - `docs/STUDIOFLOW_WORKFLOW.md`
 - `docs/CANVAS_EXCHANGE_CONTRACT.md`
-- `docs/DEMO_WEBSITE_ROUNDTRIP.md`
-- `docs/BRAND_POSITIONING.md`
+- `docs/MCP_SETUP.md`
+- `docs/CONDUIT_SETUP.md`

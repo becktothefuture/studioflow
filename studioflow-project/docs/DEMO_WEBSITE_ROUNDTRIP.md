@@ -14,7 +14,9 @@ This demo uses the StudioFlow landing page as a working example of intent preser
 npm run setup:project
 ```
 
-If MCP readiness fails, complete `docs/CLAUDE_CODE_SETUP.md`.
+Complete MCP setup before live Figma loops:
+- `docs/MCP_SETUP.md`
+- `docs/CONDUIT_SETUP.md`
 
 ## Path A: Live Figma Roundtrip
 
@@ -42,8 +44,8 @@ Enterprise alternative (REST API, requires `file_variables` scopes):
 FIGMA_ACCESS_TOKEN=... FIGMA_FILE_KEY=... npm run figma:variables:sync
 ```
 
-### 3) Push payload to Figma with preserved naming
-Claude prompt:
+### 3) Apply payload in Figma with Conduit
+Agent instruction:
 ```text
 Use handoff/code-to-canvas.json.
 Create or update token frames, variable modes, and screens.
@@ -62,6 +64,13 @@ Save as:
 - `handoff/canvas-to-code.json`
 
 ### 6) Verify, apply, and publish evidence
+Checklist and apply wrapper:
+```bash
+npm run loop:figma-roundtrip
+npm run loop:figma-roundtrip:apply
+```
+
+Manual command path:
 ```bash
 npm run loop:verify-canvas
 npm run loop:canvas-to-code

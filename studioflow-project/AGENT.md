@@ -1,4 +1,4 @@
-# StudioFlow Claude Code Operating Instructions
+# StudioFlow Agent Operating Instructions
 
 ## Mission
 
@@ -19,13 +19,15 @@ Keep the StudioFlow roundtrip reliable:
 ## Token Fidelity Rules
 
 - `tokens/figma-variables.json` contains canonical token values including CSS expressions.
-- `color-mix()` and `clamp()` are valid CSS — the browser evaluates them. Figma cannot.
-- For Figma, these expressions must be resolved deterministically at sync time:
-  - `color-mix(in srgb, A NN%, B)` → compute the actual hex color
+- `color-mix()` and `clamp()` are valid CSS. The browser evaluates them. Figma requires resolved values.
+- For Figma sync, resolve expressions deterministically:
+  - `color-mix(in srgb, A NN%, B)` → compute the hex color
   - `clamp(minPx, Nvw, maxPx)` → compute px for each breakpoint width
 - Only 4 colors are literal hex (bindable as COLOR variables): `ink`, `signal`, `primary`, `secondary`.
 - All other colors use computed hex fills in Figma (not variable bindings).
-- Spacing/sizing tokens: strip `px` unit → bind as FLOAT variable.
+- Spacing/sizing tokens: strip `px` unit and bind as FLOAT variable.
+
+Any MCP-capable client can run this workflow. Cursor is a common client.
 
 ## Workflow: Code → Figma
 
@@ -34,7 +36,8 @@ npm run build:tokens
 npm run loop:code-to-canvas
 npm run check
 ```
-Then use Talk-to-Figma MCP to run the StudioFlow plugin.
+
+Use Conduit for write operations and Figma Dev Mode MCP for read context.
 
 ## Workflow: Figma → Code
 
@@ -54,7 +57,7 @@ npm run build
 - `tsc --noEmit` — TypeScript compiles
 - `npm run build` — Vite builds
 
-If any gate fails, stop and report the failing command, exact cause, and smallest safe fix.
+If any gate fails, stop on failure and report the failing command, exact cause, and smallest safe fix.
 
 ## Commands
 

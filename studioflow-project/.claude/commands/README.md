@@ -4,7 +4,7 @@ Repeatable workflows for Claude Code sessions.
 
 ## Available Commands
 
-- **studioflow-sync-to-figma** — Push code state to Figma via Talk-to-Figma MCP
+- **studioflow-sync-to-figma** — Push code state to Figma via Conduit MCP
 - **studioflow-apply-from-figma** — Apply verified Figma edits back to code
 - **studioflow-verify** — Run all quality gates
 

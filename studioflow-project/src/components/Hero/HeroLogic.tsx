@@ -106,222 +106,224 @@ export function HeroLogic() {
   const content = useMemo<LandingContent>(
     () => ({
       brandName: "StudioFlow",
-      tagline: "One intent. Two environments. Zero drift.",
+      tagline: "Design in Figma. Ship the same intent.",
       topLinks: [
-        { label: "Alignment", href: "#structural-alignment-title" },
-        { label: "Intent", href: "#intent-preservation-title" },
-        { label: "Workflow", href: "#how-to-use" },
+        { label: "Why", href: "#structural-alignment-title" },
+        { label: "Loop", href: "#how-to-use" },
+        { label: "Anchors", href: "#intent-preservation-title" },
         { label: "Proof", href: "#proof" },
         { label: "Docs", href: "#docs" },
         { label: "Repo", href: "./README.md" }
       ],
       hero: {
-        announcement: "INTENT PRESERVATION WORKFLOW",
-        kicker: "StudioFlow / Code -> Canvas -> Code",
-        heading: "Preserve one intent from code to design.",
-        valueStatement: "StudioFlow keeps semantic identity stable across code and design through deterministic contracts and naming parity.",
+        announcement: "DESIGNER ROUNDTRIP",
+        kicker: "StudioFlow / Figma <-> Code",
+        heading: "Approve once. Keep it true in code.",
+        valueStatement:
+          "StudioFlow keeps tokens and component anchors aligned so your approved design arrives in production the way you intended.",
         supportingParagraph:
-          "Production teams use one operational language for tokens, modes, screens, and sfids, then verify each transition with explicit gates before release.",
-        commandLine: "$ npm run setup:project",
-        commandHint: "Then run npm run demo:website:capture to generate proof/latest/index.html and summary-card evidence.",
-        primaryActionLabel: "Start First Verified Loop",
-        secondaryActionLabel: "Inspect Proof + Guarantees"
+          "Run one checklist, apply updates in Figma with Conduit, and send changes back to code through built-in safety checks.",
+        commandLine: "$ npm run loop:figma-roundtrip",
+        commandHint:
+          "After you export handoff/canvas-to-code.json from Figma, run npm run loop:figma-roundtrip:apply.",
+        primaryActionLabel: "See the Loop",
+        secondaryActionLabel: "View Proof"
       },
       structuralAlignment: {
-        title: "Structural Alignment",
-        body: "Shared schema keeps token vocabulary, breakpoint modes, screen definitions, and stable identifiers aligned across every environment.",
+        title: "What Stays in Sync",
+        body: "StudioFlow keeps naming, layout modes, and component anchors steady between Figma and code.",
         matrix: [
           {
-            label: "Token frame coverage",
-            guarantee: "Required token frames are present and complete.",
-            verification: "npm run loop:verify-canvas",
-            evidence: "handoff/canvas-to-code.json -> tokenFrames"
+            label: "Token styles",
+            guarantee: "Named styles stay token-based across the full loop.",
+            verification: "npm run verify:tokens-sync",
+            evidence: "tokens/figma-variables.json + generated token files"
           },
           {
-            label: "Breakpoint mode coverage",
-            guarantee: "mobile/tablet/laptop/desktop modes are validated with expected widths.",
+            label: "Breakpoints",
+            guarantee: "Mobile, tablet, laptop, and desktop layouts are all checked.",
             verification: "npm run loop:verify-canvas",
-            evidence: "handoff/canvas-to-code.json -> variableModes"
+            evidence: "handoff/canvas-to-code.json -> variableModes + screens"
           },
           {
-            label: "Screen parity",
-            guarantee: "All four breakpoint screens are required for apply.",
-            verification: "npm run loop:verify-canvas",
-            evidence: "handoff/canvas-to-code.json -> screens"
-          },
-          {
-            label: "Stable identity parity",
-            guarantee: "All required sfids remain aligned across code and payload.",
+            label: "Component anchors",
+            guarantee: "Stable sfid anchors keep each screen part matched.",
             verification: "npm run verify:id-sync",
-            evidence: "snapshots/*.json and source data-sfid attributes"
+            evidence: "source data-sfid attributes + snapshots/*.json"
+          },
+          {
+            label: "Safe apply",
+            guarantee: "Code updates only run after payload checks pass.",
+            verification: "npm run loop:verify-canvas",
+            evidence: "verification gate before loop:canvas-to-code"
           }
         ]
       },
       intentPreservation: {
-        title: "Preserving Intent Across Environments",
-        body: "Intent survives each transition when naming, token semantics, and screen coverage map to one contract model.",
+        title: "How the Roundtrip Works",
+        body: "You move through one clear loop from code to Figma and back to code.",
         examples: [
           {
-            title: "Code to canvas",
-            state: "Source components emit canonical payload structure and sfid identity into handoff/code-to-canvas.json.",
-            result: "Figma receives the same semantic map used in code review and release checks.",
+            title: "1) Send code to Figma",
+            state: "Generate handoff/code-to-canvas.json from the current app state.",
+            result: "Figma gets the same token and anchor map used in code.",
             verification: "npm run loop:code-to-canvas"
           },
           {
-            title: "Canvas to contract",
-            state: "Approved edits return through handoff/canvas-to-code.json with complete token and mode coverage.",
-            result: "Contract gates confirm parity before code changes are accepted.",
+            title: "2) Edit in Figma",
+            state: "Use Conduit in Figma and export handoff/canvas-to-code.json.",
+            result: "Your approved edits are packaged for a safe apply step.",
             verification: "npm run loop:verify-canvas"
           },
           {
-            title: "Contract to source",
-            state: "Verified payload updates token sources and generated artifacts in one deterministic apply step.",
-            result: "Code and design remain synchronized through one intent model.",
-            verification: "npm run loop:canvas-to-code"
+            title: "3) Apply back to code",
+            state: "Run the apply wrapper to verify, apply, check, build, and create proof output.",
+            result: "Code and Figma remain aligned with a review trail.",
+            verification: "npm run loop:figma-roundtrip:apply"
           }
         ]
       },
       deterministicGeneration: {
-        title: "Deterministic Code-to-Canvas Generation",
-        body: "The workflow emits repeatable payloads, validates constraints, and records evidence for each approved loop.",
+        title: "Your Daily Loop",
+        body: "These are the only steps most designers need each day.",
         steps: [
           {
-            title: "Initialize operator baseline",
-            detail: "Install dependencies, configure agent tooling, and run baseline checks before edits begin.",
+            title: "Set up once",
+            detail: "Install the project and finish MCP + Conduit setup.",
             command: "npm run setup:project",
-            verification: "Validation target: check + build pass in local environment."
+            verification: "Use docs/MCP_SETUP.md and docs/CONDUIT_SETUP.md."
           },
           {
-            title: "Generate canonical payload",
-            detail: "Export code state into handoff/code-to-canvas.json and generate tokens/tokens-studio-import.json for Figma variable import.",
-            command: "npm run loop:code-to-canvas && npm run export:tokens-studio",
-            verification: "Evidence files: handoff/code-to-canvas.json, tokens/tokens-studio-import.json."
+            title: "Prepare payload",
+            detail: "Build tokens and generate the code-to-Figma payload.",
+            command: "npm run build:tokens && npm run loop:code-to-canvas",
+            verification: "Output file: handoff/code-to-canvas.json"
           },
           {
-            title: "Enforce contract gates",
-            detail: "Validate frames, modes, screens, and sfids before any source mutation is accepted.",
-            command: "npm run loop:verify-canvas",
-            verification: "Evidence file: studioflow.manifest.json gate status."
+            title: "Run checklist",
+            detail: "Print the operator checklist before editing in Figma.",
+            command: "npm run loop:figma-roundtrip",
+            verification: "The checklist shows steps 1 through 9."
           },
           {
-            title: "Apply and record proof",
-            detail: "Apply verified payloads and publish review artifacts tied to the current loop state.",
-            command: "npm run loop:canvas-to-code && npm run loop:proof && npm run manifest:update",
-            verification: "Evidence files: proof/latest/index.html and studioflow.manifest.json."
+            title: "Apply safely",
+            detail: "After Figma export, run one command to apply and generate proof output.",
+            command: "npm run loop:figma-roundtrip:apply",
+            verification: "Output files: proof/latest/index.html + studioflow.manifest.json"
           }
         ]
       },
       identityParity: {
-        title: "Naming and Component Identity Parity",
-        body: "Stable naming controls preserve component identity and semantic meaning across generated payloads and source assets.",
+        title: "Stable Anchors",
+        body: "`data-sfid` anchors keep the same UI parts connected between Figma and code.",
         rules: [
           {
-            title: "sfid continuity",
-            control: "Every required sfid from source must appear in contract payloads and verification snapshots.",
+            title: "Anchor continuity",
+            control: "Every required sfid appears in source, payloads, and snapshots.",
             verification: "npm run verify:id-sync"
           },
           {
-            title: "Token source authority",
-            control: "Token names originate from tokens/figma-variables.json and remain canonical across generation outputs.",
+            title: "Token authority",
+            control: "tokens/figma-variables.json remains the source for token names and values.",
             verification: "npm run verify:tokens-sync"
           },
           {
-            title: "Mode naming lock",
-            control: "Mode names remain mobile/tablet/laptop/desktop with fixed width semantics.",
+            title: "Mode coverage",
+            control: "All four breakpoint modes are required in the payload.",
             verification: "npm run loop:verify-canvas"
           },
           {
-            title: "Deterministic apply gate",
-            control: "Source updates occur only after contract verification reports complete coverage.",
-            verification: "npm run loop:verify-canvas && npm run loop:canvas-to-code"
+            title: "Apply guard",
+            control: "Code updates stop automatically if verification fails.",
+            verification: "npm run loop:figma-roundtrip:apply"
           }
         ]
       },
       teamOutcomes: {
-        title: "Team-Level Outcomes",
-        body: "Operational outcomes are tracked as modeled signals until measured production baselines are established for each team.",
+        title: "What Designers Get",
+        body: "StudioFlow gives design teams a predictable handoff rhythm.",
         outcomes: [
           {
-            signal: "Design-to-merge loop time",
-            range: "Modeled 28-46% faster",
-            measurement: "Track elapsed time from payload generation to manifest update across comparable releases."
+            signal: "Clear handoff steps",
+            range: "One checklist",
+            measurement: "The wrapper command prints exactly what to do next."
           },
           {
-            signal: "Breakpoint drift rate",
-            range: "Modeled 70-90% lower",
-            measurement: "Count breakpoint-specific visual or semantic regressions after loop verification."
+            signal: "Consistent breakpoints",
+            range: "All 4 required",
+            measurement: "Verification blocks partial payloads before apply."
           },
           {
-            signal: "Token consistency pass rate",
-            range: "Modeled 95%+",
-            measurement: "Capture pass/fail rates from npm run verify:tokens-sync in CI and local loops."
+            signal: "Token-first styling",
+            range: "No random style values",
+            measurement: "Token and hardcoded-style checks run before release."
           },
           {
-            signal: "Post-handoff rework cycles",
-            range: "Modeled 25-40% lower",
-            measurement: "Track code review rounds linked to design interpretation defects."
+            signal: "Review-ready proof",
+            range: "Every apply",
+            measurement: "Proof pages and manifest updates capture each loop."
           },
           {
-            signal: "Operational confidence",
-            range: "Modeled +1.2 to +1.8 rubric points",
-            measurement: "Use internal readiness rubric tied to proof artifacts and gate coverage."
+            signal: "Fallback path",
+            range: "Always available",
+            measurement: "Use the StudioFlow Figma plugin when Conduit is unavailable."
           }
         ]
       },
       technicalFoundations: {
-        title: "Technical Foundations",
-        body: "StudioFlow relies on explicit contracts, verification scripts, and manifest evidence to keep intent alignment inspectable at scale.",
+        title: "Helpful Docs",
+        body: "Open these guides when you need setup details or deeper workflow rules.",
         foundations: [
           {
-            title: "Workflow specification",
-            detail: "Runtime entry paths, gate policy, and promotion logic for code-first and design-first operation.",
-            referenceLabel: "Open STUDIOFLOW_WORKFLOW.md",
-            referenceHref: "./docs/STUDIOFLOW_WORKFLOW.md"
+            title: "MCP setup",
+            detail: "Connect Figma Dev Mode MCP (read) and Conduit (write) in your MCP client.",
+            referenceLabel: "Open MCP_SETUP.md",
+            referenceHref: "./docs/MCP_SETUP.md"
           },
           {
-            title: "Canvas exchange contract",
-            detail: "Canonical payload schema and validation rules for deterministic canvas-to-code synchronization.",
-            referenceLabel: "Open CANVAS_EXCHANGE_CONTRACT.md",
-            referenceHref: "./docs/CANVAS_EXCHANGE_CONTRACT.md"
+            title: "Conduit setup",
+            detail: "Install and pair the Conduit MCP server and Figma plugin.",
+            referenceLabel: "Open CONDUIT_SETUP.md",
+            referenceHref: "./docs/CONDUIT_SETUP.md"
           },
           {
-            title: "Demo roundtrip implementation",
-            detail: "Executable example that maps intent preservation claims to commands and output artifacts.",
+            title: "Roundtrip walkthrough",
+            detail: "Follow the full demo flow from code to Figma and back.",
             referenceLabel: "Open DEMO_WEBSITE_ROUNDTRIP.md",
             referenceHref: "./docs/DEMO_WEBSITE_ROUNDTRIP.md"
           },
           {
-            title: "Project operator manual",
-            detail: "Installation flow, glossary, naming conventions, and roadmap for system operators.",
-            referenceLabel: "Open Project README",
-            referenceHref: "./README.md"
+            title: "Workflow rules",
+            detail: "See the full system model and required quality gates.",
+            referenceLabel: "Open STUDIOFLOW_WORKFLOW.md",
+            referenceHref: "./docs/STUDIOFLOW_WORKFLOW.md"
           }
         ]
       },
       footerGroups: [
         {
+          title: "Setup",
+          links: [
+            { label: "MCP Setup", href: "./docs/MCP_SETUP.md" },
+            { label: "Conduit Setup", href: "./docs/CONDUIT_SETUP.md" }
+          ]
+        },
+        {
           title: "Workflow",
           links: [
-            { label: "Operational Guide", href: "./docs/STUDIOFLOW_WORKFLOW.md" },
-            { label: "Canvas Contract", href: "./docs/CANVAS_EXCHANGE_CONTRACT.md" }
+            { label: "Workflow Guide", href: "./docs/STUDIOFLOW_WORKFLOW.md" },
+            { label: "Demo Walkthrough", href: "./docs/DEMO_WEBSITE_ROUNDTRIP.md" }
           ]
         },
         {
-          title: "Implementation",
+          title: "Evidence",
           links: [
-            { label: "Project README", href: "./README.md" },
-            { label: "Manifest", href: "./studioflow.manifest.json" }
-          ]
-        },
-        {
-          title: "Integrations",
-          links: [
-            { label: "Demo Roundtrip", href: "./docs/DEMO_WEBSITE_ROUNDTRIP.md" },
-            { label: "Claude Setup", href: "./docs/CLAUDE_CODE_SETUP.md" }
+            { label: "Manifest", href: "./studioflow.manifest.json" },
+            { label: "Project README", href: "./README.md" }
           ]
         }
       ],
-      legalLine: "StudioFlow Workflow // Intent Preservation System // 2026"
+      legalLine: "StudioFlow // Designer roundtrip workflow // 2026"
     }),
     []
   );

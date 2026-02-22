@@ -37,7 +37,7 @@
 | `scripts/loop-code-to-figma.mjs` | Alias wrapper, adds nothing |
 | `scripts/loop-verify-figma.mjs` | Alias wrapper, adds nothing |
 | `scripts/loop-figma-to-code.mjs` | Alias wrapper, adds nothing |
-| `scripts/check-figma-bridge.mjs` | Bridge monitor for official MCP, not needed for Talk-to-Figma |
+| `scripts/check-figma-bridge.mjs` | Bridge monitor for official MCP, not needed for Conduit |
 | `scripts/check-mcp-health.mjs` | MCP health check, replaced by direct plugin connection |
 | `scripts/monitor-figma-bridge.mjs` | Bridge monitor daemon |
 | `scripts/snapshot-figma.mjs` | Redundant with loop-canvas-to-code snapshots |
@@ -140,7 +140,7 @@ Remove:
 
 ## Risk Mitigation
 
-### Talk-to-Figma MCP reliability
+### Conduit MCP reliability
 - It's community-maintained (Grab, 6.3k stars)
 - Requires: local websocket server + Figma plugin running
 - Mitigation: treat as local dev tool, not CI dependency

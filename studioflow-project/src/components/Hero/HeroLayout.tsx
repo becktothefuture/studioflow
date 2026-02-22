@@ -41,8 +41,8 @@ export function HeroLayout(props: HeroContract) {
       {props.showIntro ? (
         <div className="intro-overlay" role="status" aria-live="polite" aria-label="StudioFlow intro sequence">
           <div className="intro-panel">
-            <p className="intro-kicker">StudioFlow // Prism channel online</p>
-            <h2 className="intro-title">Signal stable. Scene loaded. Workflow warm.</h2>
+            <p className="intro-kicker">StudioFlow // Designer loop ready</p>
+            <h2 className="intro-title">Figma and code are ready to stay in sync.</h2>
             <button type="button" className="button button-ghost" onClick={props.onSkipIntro}>
               Continue
             </button>

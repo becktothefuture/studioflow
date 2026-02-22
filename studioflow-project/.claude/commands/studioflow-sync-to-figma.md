@@ -1,10 +1,11 @@
 # StudioFlow: Sync to Figma
 
-Push the current code state into Figma using the deterministic plugin.
+Push the current code state into Figma using Conduit.
 
 ## Prerequisites
 
-- Talk-to-Figma MCP connected (websocket bridge running, plugin open in Figma)
+- Conduit MCP connected and available in your client
+- Conduit plugin open in the target Figma file
 - Token variables exist in Figma (imported via Tokens Studio, or created by previous plugin run)
 
 ## Runbook
@@ -20,7 +21,7 @@ npm run loop:code-to-canvas
 npm run check
 ```
 
-3. Use Talk-to-Figma MCP to run the StudioFlow Sync plugin in Figma:
+3. Use Conduit MCP to run the StudioFlow Sync plugin in Figma:
 - The plugin reads `handoff/code-to-canvas.json`
 - It creates/updates screen frames for all 4 breakpoints
 - It binds all available token variables by name (not by value)
