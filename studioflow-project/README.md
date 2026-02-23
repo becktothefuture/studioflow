@@ -23,25 +23,30 @@ Set up your MCP tools:
 
 ## Daily Designer Loop
 
-1. Build tokens.
+1. Prepare preview artifacts.
 ```bash
-npm run build:tokens
+npm run conduit:preview
 ```
 
-2. Generate the payload for Figma.
+2. Commit the reviewed preview.
 ```bash
-npm run loop:code-to-canvas
+npm run conduit:commit -- --run-id <preview-run-id>
 ```
 
-3. Print the checklist.
+3. Build outbound handoff payload.
+```bash
+npm run conduit:generate
+```
+
+4. Print the checklist.
 ```bash
 npm run loop:figma-roundtrip
 ```
 
-4. In Figma, use Conduit to apply the payload and export:
+5. In Figma, use Conduit to apply the payload and export:
 - `handoff/canvas-to-code.json`
 
-5. Apply safely back to code.
+6. Apply safely back to code.
 ```bash
 npm run loop:figma-roundtrip:apply
 ```

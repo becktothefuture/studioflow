@@ -1,6 +1,7 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { flattenTokens } from "./build-tokens.mjs";
+import { formatConduitValidationError } from "./lib/conduit-errors.mjs";
 import {
   duplicateValues,
   exchangePath,
@@ -185,7 +186,8 @@ export async function runLoopVerifyCanvas(options = {}) {
   }
 
   if (errors.length > 0) {
-    const error = new Error(errors.join("\n"));
+    const formattedErrors = errors.map((line) => formatConduitValidationError(line));
+    const error = new Error(formattedErrors.join("\n"));
     error.name = "CanvasContractValidationError";
     throw error;
   }

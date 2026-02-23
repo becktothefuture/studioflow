@@ -5,15 +5,17 @@
   "integration": "canvas-central",
   "canvasProvider": "figma",
   "loopCount": 2,
-  "updatedAt": "2026-02-22T17:35:09.688Z",
+  "updatedAt": "2026-02-22T18:49:26.852Z",
   "publicMicrositeUrl": "https://<owner>.github.io/<repo>/",
   "lastSnapshot": "figma-2026-02-22T10-58-21-752Z.json",
   "lastSnapshotAt": "2026-02-22T10:58:21.751Z",
   "lastCodeToCanvas": {
-    "ranAt": "2026-02-22T17:35:09.688Z",
+    "ranAt": "2026-02-22T18:49:26.852Z",
+    "conduitVersion": "1.0.0",
     "tokenCount": 70,
     "sfidCount": 8,
-    "handoffFile": "handoff/code-to-canvas.json"
+    "handoffFile": "handoff/code-to-canvas.json",
+    "mappingFile": "handoff/code-to-figma-mapping.json"
   },
   "lastCanvasSync": {
     "ranAt": "2026-02-22T10:58:21.751Z",

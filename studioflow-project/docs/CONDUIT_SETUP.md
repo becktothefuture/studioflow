@@ -27,6 +27,8 @@ bunx conduit-design@latest
 3. Select the Conduit plugin `manifest.json` you installed from the Conduit package.
 4. Confirm the plugin appears under your development plugins.
 
+**StudioFlow Screens plugin:** To use the project’s own plugin (`figma-plugins/studioflow-screens/manifest.json`), import it the same way. It then appears under **Plugins → Development** and, in **Dev Mode**, in the right-hand **Inspect** panel (Plugins). In Design mode you get full create/bind/export; in Dev Mode the plugin is read-only (inspect and export only)—switch to Design mode to create frames or bind variables.
+
 ## 3) Connect from Any MCP Client
 1. Add MCP server config for `figma-desktop` (or `figma`) and `conduit`.
 2. Start MCP servers in your client.
@@ -35,11 +37,45 @@ bunx conduit-design@latest
 5. Run your StudioFlow loop command from the client with `handoff/code-to-canvas.json`.
 
 ## 4) StudioFlow Roundtrip Sequence
-1. Run `npm run loop:code-to-canvas`.
-2. Use Conduit to apply and produce `handoff/canvas-to-code.json`.
-3. Run `npm run loop:figma-roundtrip:apply`.
+1. Run `npm run conduit:preview`.
+2. Review `handoff/trust-ledger.json` and `handoff/preview-diff.json`.
+3. Run `npm run conduit:commit -- --run-id <preview-run-id>`.
+4. Run `npm run conduit:generate`.
+5. Use Conduit to apply and produce `handoff/canvas-to-code.json`.
+6. Run `npm run loop:figma-roundtrip:apply`.
 
 StudioFlow contract gates remain mandatory for every apply path.
+
+Preview/commit artifacts:
+- `handoff/trust-ledger.json` — canonical run state for CLI/plugin.
+- `handoff/band-context.json` — shared active target context.
+- `handoff/preview-diff.json` — deterministic preview hash + summary.
+- `proof/receipts/<timestamp>-<runId>.json` — immutable commit receipt.
+
+## 5) Conduit Error Taxonomy
+
+When verification fails, errors include deterministic codes and recovery hints.
+
+| Code | Title | Fastest fix | Safe fallback |
+| --- | --- | --- | --- |
+| `SF_SOURCE_INVALID` | Payload source is invalid | Set `source` to `figma-canvas` and re-export from Figma. | `npm run loop:code-to-canvas` |
+| `SF_MODE_MISMATCH` | Mode set is incomplete or mismatched | Re-export all four breakpoint modes from Figma. | `npm run conduit:generate` |
+| `SF_SFID_NOT_FOUND` | Required sfid is missing | Restore missing `data-sfid` and export again. | `npm run verify:id-sync` |
+| `SF_TOKEN_FRAME_MISSING` | Token frame coverage is incomplete | Regenerate handoff payload. | `npm run conduit:generate` |
+| `SF_TOKEN_MODE_VALUE_MISSING` | Token value missing for one or more modes | Ensure every token exists in each mode, then re-export. | `npm run verify:tokens-sync` |
+| `SF_SCREEN_MISMATCH` | Screen metadata does not match workflow | Recreate screens from plugin defaults and re-export. | `npm run conduit:generate` |
+| `SF_STYLE_APPLY_FAILED` | Style layer apply failed | Verify style names in conduit `styleLayer`, then re-apply. | Continue with token-only bindings |
+| `SF_PREVIEW_STALE` | Preview artifact is stale | Re-run `npm run conduit:preview`, then commit with the new runId. | Do not commit stale preview data |
+| `SF_CONTEXT_STALE` | Band context is stale | Refresh target context from Figma or CLI and retry commit. | Continue only after manual target verification |
+| `SF_PREVIEW_GATE_FAILED` | Preview quality gates failed | Run `npm run check` and fix first failure. | Use `conduit:doctor` for exact recovery |
+| `SF_COMMIT_GATE_FAILED` | Commit quality gates failed | Run `npm run check` and retry commit. | Re-run preview to rebuild deterministic baseline |
+| `SF_CONTRACT_INVALID` | Payload failed contract validation | Fix the first emitted validation line and retry. | `npm run conduit:generate` |
+
+Look up a specific code:
+
+```bash
+npm run conduit:doctor -- --code SF_MODE_MISMATCH
+```
 
 ## Fallback Path
 - Use `figma-plugins/studioflow-screens/` for frame creation and variable binding.

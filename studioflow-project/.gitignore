@@ -14,6 +14,7 @@ handoff/*.json
 # Generated proof artifacts
 proof/history/
 proof/latest/
+proof/receipts/
 !proof/.gitkeep
 
 # Generated snapshot artifacts

@@ -18,6 +18,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { spawn } from "node:child_process";
+import { TRUST_LEDGER_STATES, writeBandContext, writeTrustLedger } from "./lib/ux-ledger.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, "..");
@@ -44,6 +45,11 @@ wss.on("connection", (ws) => {
 
     if (msg.type === "sync-to-code" && msg.payload) {
       await handleSyncToCode(ws, msg.payload);
+      return;
+    }
+
+    if (msg.type === "band-context" && msg.context) {
+      await handleBandContext(msg.context);
     }
   });
 
@@ -60,6 +66,11 @@ function send(ws, type, text, level) {
 }
 
 async function handleSyncToCode(ws, jsonPayload) {
+  await writeTrustLedger({
+    state: TRUST_LEDGER_STATES.COMMIT_IN_PROGRESS,
+    blockingIssues: []
+  });
+
   // 1. Write payload to handoff file
   try {
     fs.mkdirSync(path.dirname(HANDOFF_PATH), { recursive: true });
@@ -67,6 +78,17 @@ async function handleSyncToCode(ws, jsonPayload) {
     send(ws, "log", "Wrote canvas-to-code.json", "success");
     console.log("  ✓ Wrote handoff/canvas-to-code.json");
   } catch (err) {
+    await writeTrustLedger({
+      state: TRUST_LEDGER_STATES.COMMIT_BLOCKED,
+      blockingIssues: [
+        {
+          code: "SF_COMMIT_GATE_FAILED",
+          title: "Bridge could not write canvas payload",
+          fastestFix: "Check handoff directory permissions and rerun Sync to Code.",
+          safeFallback: "Manually write payload into handoff/canvas-to-code.json and run loop commands."
+        }
+      ]
+    });
     send(ws, "error", "Failed to write handoff file: " + err.message);
     console.error("  ✗ Write failed:", err.message);
     return;
@@ -76,6 +98,17 @@ async function handleSyncToCode(ws, jsonPayload) {
   send(ws, "log", "Running verify-canvas…", "info");
   const verifyOk = await runNpm(ws, "loop:verify-canvas");
   if (!verifyOk) {
+    await writeTrustLedger({
+      state: TRUST_LEDGER_STATES.COMMIT_BLOCKED,
+      blockingIssues: [
+        {
+          code: "SF_CONTRACT_INVALID",
+          title: "Canvas verification failed",
+          fastestFix: "Resolve the first loop:verify-canvas error and retry Sync to Code.",
+          safeFallback: "Run `npm run conduit:doctor -- --code SF_CONTRACT_INVALID`."
+        }
+      ]
+    });
     send(ws, "error", "Verify failed — check logs");
     return;
   }
@@ -85,12 +118,37 @@ async function handleSyncToCode(ws, jsonPayload) {
   send(ws, "log", "Running canvas-to-code…", "info");
   const applyOk = await runNpm(ws, "loop:canvas-to-code");
   if (!applyOk) {
+    await writeTrustLedger({
+      state: TRUST_LEDGER_STATES.COMMIT_BLOCKED,
+      blockingIssues: [
+        {
+          code: "SF_COMMIT_GATE_FAILED",
+          title: "Canvas apply failed",
+          fastestFix: "Review loop:canvas-to-code output and fix the first failing step.",
+          safeFallback: "Re-run preview and commit once apply path is stable."
+        }
+      ]
+    });
     send(ws, "error", "canvas-to-code failed — check logs");
     return;
   }
 
+  await writeTrustLedger({
+    state: TRUST_LEDGER_STATES.COMMIT_DONE,
+    blockingIssues: []
+  });
   send(ws, "done", "Sync to code complete");
   console.log("  ✓ Sync pipeline complete\n");
+}
+
+async function handleBandContext(context) {
+  await writeBandContext({
+    screen: context.screen ?? null,
+    breakpoint: context.breakpoint ?? null,
+    sfid: context.sfid ?? null,
+    selectionPath: Array.isArray(context.selectionPath) ? context.selectionPath : [],
+    sourceTool: context.sourceTool ?? "figma-plugin"
+  });
 }
 
 function runNpm(ws, script) {

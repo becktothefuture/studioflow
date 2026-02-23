@@ -946,7 +946,7 @@ var PAYLOAD = {
 // Supported section types: nav, hero, card-section, split-section, footer
 // Any project can generate a compatible PAYLOAD and reuse this renderer.
 
-figma.showUI(__html__, { width: 270, height: 390, title: PAYLOAD.project + ' Screens', themeColors: true });
+figma.showUI(__html__, { width: 239, height: 560, title: PAYLOAD.project + ' Screens', themeColors: false });
 
 // ── Derived from PAYLOAD ───────────────────────────────────────────────────────
 var SCREENS = PAYLOAD.screens;
@@ -975,18 +975,33 @@ var SCALE_FACTORS = [0.729, 0.81, 0.9, 1.0]; // mobile, tablet, laptop, desktop
 function send(type, d) { figma.ui.postMessage(Object.assign({ type: type }, d || {})); }
 var log = function(text, level) { send('log', { text: text, level: level || 'info' }); };
 
+function isDevMode() { return figma.editorType === 'dev'; }
+if (isDevMode()) { send('dev-mode', { isDev: true }); }
+
 // ── Message router ─────────────────────────────────────────────────────────────
+function rejectWriteInDevMode() {
+  if (isDevMode()) {
+    figma.notify('StudioFlow: Switch to Design mode to create or edit.');
+    send('error', { text: 'Read-only in Dev Mode.' });
+    return true;
+  }
+  return false;
+}
+
 figma.ui.onmessage = function(msg) {
   switch (msg.type) {
     case 'create-frames':
+      if (rejectWriteInDevMode()) return;
       createScreenFrames().then(function(r) { send('frames-done', { results: r }); })
         .catch(function(e) { send('error', { text: String(e) }); });
       break;
     case 'bind-variables':
+      if (rejectWriteInDevMode()) return;
       bindAllVariables().then(function(s) { send('bind-done', { stats: s }); })
         .catch(function(e) { send('error', { text: String(e) }); });
       break;
     case 'run-all':
+      if (rejectWriteInDevMode()) return;
       createScreenFrames().then(function(r) {
         return bindAllVariables().then(function(s) { send('all-done', { results: r, stats: s }); });
       }).catch(function(e) { send('error', { text: String(e) }); });

@@ -1,6 +1,7 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { flattenTokens } from "./build-tokens.mjs";
+import { CONDUIT_VERSION, createCodeToFigmaMapping, createConduitStyleLayer } from "./lib/conduit-metadata.mjs";
 import {
   exchangePath,
   extractCodeSfids,
@@ -20,7 +21,10 @@ const __filename = fileURLToPath(import.meta.url);
 function collectFrameTokenNames(tokens, tokenFrames) {
   return tokenFrames.map((frame) => ({
     name: frame.name,
-    tokenNames: tokens.filter((token) => token.frame === frame.name).map((token) => token.name)
+    tokenNames: tokens
+      .filter((token) => token.frame === frame.name)
+      .map((token) => token.name)
+      .sort((a, b) => a.localeCompare(b))
   }));
 }
 
@@ -60,10 +64,12 @@ export async function runLoopCodeToCanvas() {
     throw new Error("No code sfids found. Add data-sfid=\"sfid:*\" attributes before syncing.");
   }
 
-  const flattened = flattenTokens(tokenJson).map((token) => ({
-    ...token,
-    frame: groupTokenFrame(token.name, workflow.tokenFrames)
-  }));
+  const flattened = flattenTokens(tokenJson)
+    .map((token) => ({
+      ...token,
+      frame: groupTokenFrame(token.name, workflow.tokenFrames)
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name));
 
   if (flattened.length === 0) {
     throw new Error("No tokens found in tokens/figma-variables.json");
@@ -73,8 +79,12 @@ export async function runLoopCodeToCanvas() {
   const frameTokens = collectFrameTokenNames(flattened, workflow.tokenFrames);
   const modeValues = createModeValues(flattened);
   const screens = createScreens(workflow, codeSfids);
+  const tokenMapping = createCodeToFigmaMapping(flattened);
+  const styleLayer = createConduitStyleLayer();
+  const mappingOutputPath = path.join(rootDir, "handoff", "code-to-figma-mapping.json");
 
   const codeToCanvasPayload = {
+    conduitVersion: CONDUIT_VERSION,
     generatedAt,
     source: "code",
     integration: workflow.integration,
@@ -99,6 +109,8 @@ export async function runLoopCodeToCanvas() {
       value: token.value,
       frame: token.frame
     })),
+    tokenMapping,
+    styleLayer,
     sfids: codeSfids
   };
 
@@ -128,7 +140,12 @@ export async function runLoopCodeToCanvas() {
 
   const writes = [
     writeJson(exchangePath(workflow, "codeToCanvas"), codeToCanvasPayload),
-    writeJson(exchangePath(workflow, "canvasToCodeTemplate"), canvasTemplatePayload)
+    writeJson(exchangePath(workflow, "canvasToCodeTemplate"), canvasTemplatePayload),
+    writeJson(mappingOutputPath, {
+      conduitVersion: CONDUIT_VERSION,
+      generatedAt,
+      mapping: tokenMapping
+    })
   ];
 
   await Promise.all(writes);
@@ -141,15 +158,18 @@ export async function runLoopCodeToCanvas() {
   manifest.updatedAt = generatedAt;
   manifest.lastCodeToCanvas = {
     ranAt: generatedAt,
+    conduitVersion: CONDUIT_VERSION,
     tokenCount: flattened.length,
     sfidCount: codeSfids.length,
-    handoffFile: workflow.exchangeFiles.codeToCanvas
+    handoffFile: workflow.exchangeFiles.codeToCanvas,
+    mappingFile: path.relative(rootDir, mappingOutputPath)
   };
   manifest.expectedSfids = codeSfids;
   await writeJson(manifestPath, manifest);
 
   console.log(`Created ${path.relative(rootDir, exchangePath(workflow, "codeToCanvas"))}`);
   console.log(`Created ${path.relative(rootDir, exchangePath(workflow, "canvasToCodeTemplate"))}`);
+  console.log(`Created ${path.relative(rootDir, mappingOutputPath)}`);
   console.log("Next: produce handoff/canvas-to-code.json and run `npm run loop:verify-canvas`.");
 }
 

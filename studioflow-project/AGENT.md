@@ -29,11 +29,12 @@ Keep the StudioFlow roundtrip reliable:
 
 Any MCP-capable client can run this workflow. Cursor is a common client.
 
+For **Figma MCP design-to-code** and **code→Figma sync**: use `docs/DESIGN_SYSTEM_AND_FIGMA_SYNC.md` for the design system, token rules, three-phase pipeline, and Figma interpretation.
+
 ## Workflow: Code → Figma
 
 ```bash
-npm run build:tokens
-npm run loop:code-to-canvas
+npm run conduit:generate
 npm run check
 ```
 
@@ -62,6 +63,11 @@ If any gate fails, stop on failure and report the failing command, exact cause, 
 ## Commands
 
 Use npm scripts for repeatable workflows from any MCP-capable client (Cursor, Claude Code, etc.):
+- `npm run conduit:preview` — generate deterministic preview artifacts (`trust-ledger`, `preview-diff`)
+- `npm run conduit:commit -- --run-id <preview-run-id>` — finalize preview with immutable receipt
+- `npm run conduit:generate` — build tokens + generate `handoff/code-to-canvas.json` and mapping artifact
+- `npm run report:token-coverage` — report token usage by category + hardcoded style violations
+- `npm run conduit:doctor -- --code <ERROR_CODE>` — print deterministic recovery guidance
 - `npm run loop:code-to-canvas` — push code state to Figma handoff payload
 - `npm run loop:verify-canvas` + `npm run loop:canvas-to-code` — apply Figma edits back to code
 - `npm run check` — run all quality gates

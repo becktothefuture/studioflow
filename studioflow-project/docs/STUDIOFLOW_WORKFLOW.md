@@ -103,6 +103,7 @@ npm run manifest:update
 ```
 
 ## Related Docs
+- `docs/DESIGN_SYSTEM_AND_FIGMA_SYNC.md` — Design system, tokens, code→Figma pipeline, Figma MCP
 - `docs/CANVAS_EXCHANGE_CONTRACT.md`
 - `docs/DEMO_WEBSITE_ROUNDTRIP.md`
 - `docs/MCP_SETUP.md`

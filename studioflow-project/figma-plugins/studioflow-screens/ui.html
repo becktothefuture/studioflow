@@ -1,107 +1,666 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><meta charset="UTF-8">
+<head>
+<meta charset="UTF-8">
+<title>StudioFlow</title>
 <style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html{background:#2C2C2C}
-:root{--bg:#2C2C2C;--surface:#383838;--border:#4A4A4A;--text:#E0E0E0;--muted:#999;--dim:#666;--push:#7EF7F0;--push-fg:#0A0A0A;--pull:#7A8DFF;--success:#7EF7F0;--warn:#E8C36A;--err:#FF6B6B}
-body{background:var(--bg);color:var(--text);font-family:"Inter",system-ui,sans-serif;font-size:11px;line-height:1.2;width:270px;height:100vh;display:flex;flex-direction:column;overflow:hidden;-webkit-font-smoothing:antialiased}
+/* Exact parity with Figma export — text, gradients, box-shadow match */
+*, *::before, *::after { box-sizing: border-box; }
+html {
+  background: #2c2c2c;
+  outline: none;
+}
+html:focus, body:focus {
+  outline: none;
+}
+body {
+  outline: none;
+  margin: 0;
+  background: #2c2c2c;
+  color: #e0e0e0;
+  font-family: 'Inter-Regular', Inter, sans-serif;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.03em;
+  width: 239px;
+  height: 560px;
+  min-width: 239px;
+  max-width: 239px;
+  min-height: 560px;
+  max-height: 560px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  align-items: stretch;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+html.figma-light body, html.figma-dark body { background: #2c2c2c !important; color: #e0e0e0 !important; }
 
-/* header */
-.hbg{flex-shrink:0;background:var(--bg);border-bottom:1px solid var(--border)}
-header{padding:12px 16px;display:flex;align-items:center;gap:6px}
-.bname{font-size:13px;font-weight:700;color:var(--text)}
-.sdot{width:6px;height:6px;border-radius:50%;background:var(--success);flex-shrink:0}
-.sdot.run{background:var(--pull);animation:pul 1s infinite}
-.sdot.err{background:var(--err)}
-@keyframes pul{0%,100%{opacity:1}50%{opacity:.3}}
-.stxt{font-size:10px;color:var(--dim)}
+.plugin-panel {
+  background: #2c2c2c;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  align-items: flex-start;
+  outline: none;
+  justify-content: flex-start;
+  width: 239px;
+  min-width: 239px;
+  max-width: 239px;
+  height: 560px;
+  min-height: 560px;
+  max-height: 560px;
+  position: relative;
+  overflow: hidden;
+}
 
-/* context banner - centered */
-.ctx{padding:6px 16px;font-size:10px;color:var(--pull);background:rgba(122,141,255,.08);border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;gap:5px}
-.cdot{width:6px;height:6px;border-radius:50%;background:var(--pull);flex-shrink:0}
+/* header-bg — gradient 150% scale (wider band 32%–68%) */
+.plugin-panel__header-bg {
+  background: linear-gradient(119.89deg, transparent 0%, rgba(126, 247, 240, 0.05) 32%, rgba(122, 141, 255, 0.07) 50%, rgba(126, 247, 240, 0.05) 68%, transparent 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  align-items: flex-start;
+  justify-content: flex-start;
+  align-self: stretch;
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+}
+.plugin-panel__header {
+  padding: 10px 12px 10px 12px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  align-self: stretch;
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+}
+.plugin-panel__brand {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+.plugin-panel__frame-3 {
+  display: flex;
+  flex-direction: row;
+  gap: 6px;
+  align-items: center;
+  justify-content: flex-start;
+  flex-shrink: 0;
+  width: 90px;
+  position: relative;
+}
+.plugin-panel__status-dot {
+  background: #00ffee;
+  border-radius: 50%;
+  flex-shrink: 0;
+  width: 5px;
+  height: 5px;
+  position: relative;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .plugin-panel__status-dot { animation: blink 2.8s steps(1) infinite; }
+}
+.plugin-panel__status-dot.run { background: #7a8dff; }
+.plugin-panel__status-dot.err { background: #ff6b6b; animation: none; }
+@media (prefers-reduced-motion: no-preference) {
+  .plugin-panel__status-dot.run { animation: pul 1s ease-in-out infinite; }
+}
+@keyframes blink {
+  0%, 92% { opacity: 1; }
+  93%, 100% { opacity: 0; }
+}
+@keyframes pul { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+.plugin-panel__status-text {
+  color: #63686c;
+  text-align: left;
+  font-family: 'Inter-Regular', sans-serif;
+  font-size: 10px;
+  font-weight: 400;
+  position: relative;
+}
+.plugin-panel__brand-name {
+  color: #e0e0e0;
+  text-align: left;
+  font-family: 'Inter-SemiBold', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  position: relative;
+}
 
-/* sections */
-.sec{padding:14px 16px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;flex-direction:column;gap:8px}
-.slbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
-.sdesc{font-size:10px;color:var(--dim);line-height:1.45}
+/* separators — exact box-shadow from Figma */
+.plugin-panel__header-sep,
+.plugin-panel__context-sep,
+.plugin-panel__push-sep,
+.plugin-panel__sync-sep,
+.plugin-panel__footer-sep {
+  background: #4a4a4a;
+  align-self: stretch;
+  flex-shrink: 0;
+  height: 1px;
+  position: relative;
+  box-shadow: 0px -1px 0px 0px rgba(0, 0, 0, 1.00);
+}
 
-/* buttons - outline by default, solid on hover */
-button{cursor:pointer;border:1px solid var(--push);border-radius:8px;font-family:inherit;font-size:13px;font-weight:700;padding:12px 16px;width:100%;display:flex;align-items:center;justify-content:center;gap:6px;background:transparent;color:var(--text);position:relative;overflow:hidden;transition:background 94ms ease-in-out,color 94ms ease-in-out,box-shadow 94ms ease-in-out,transform 94ms ease-in-out}
-button:hover:not(:disabled){background:var(--push);color:var(--push-fg);box-shadow:0 0 20px rgba(126,247,240,.3),0 0 40px rgba(126,247,240,.12)}
-button:active:not(:disabled){transform:scale(.97)}
-button:disabled{opacity:.35;cursor:not-allowed}
-.bicon{font-size:15px;font-weight:400;line-height:1}
+/* context — same gradient as header, 150% scale */
+.plugin-panel__context {
+  background: linear-gradient(119.89deg, transparent 0%, rgba(126, 247, 240, 0.05) 32%, rgba(122, 141, 255, 0.07) 50%, rgba(126, 247, 240, 0.05) 68%, transparent 100%);
+  padding: 8px 12px 8px 12px;
+  display: flex;
+  flex-direction: row;
+  gap: 4px;
+  align-items: center;
+  justify-content: center;
+  align-self: stretch;
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+}
+.plugin-panel__context-dot {
+  background: #7a8dff;
+  border-radius: 50%;
+  flex-shrink: 0;
+  width: 5px;
+  height: 5px;
+  position: relative;
+}
+.plugin-panel__context-text {
+  color: #7a8dff;
+  text-align: left;
+  font-family: 'Inter-Regular', sans-serif;
+  font-size: 11px;
+  font-weight: 400;
+  position: relative;
+}
+
+/* section — entire area clickable */
+.plugin-panel__section,
+.plugin-panel__section2 {
+  padding: 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: stretch;
+  flex-shrink: 0;
+  border: none;
+  margin: 0;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  background: #2c2c2c;
+  position: relative;
+  overflow: visible;
+  transform-origin: center;
+  transition: transform 0.28s ease-out, filter 0.28s ease-out, box-shadow 45ms ease-out;
+}
+.plugin-panel--syncing .plugin-panel__section,
+.plugin-panel--syncing .plugin-panel__section2 {
+  transform: scale(0.94);
+  filter: blur(3px);
+}
+.plugin-panel__section:hover:not(:disabled),
+.plugin-panel__section2:hover:not(:disabled) {
+  cursor: pointer;
+  box-shadow: inset 0 0 0 999px rgba(0, 0, 0, 0.01);
+}
+.plugin-panel__section {
+  background-color: #2c2c2c;
+}
+.plugin-panel__section2 {
+  background-color: #2c2c2c;
+}
+@media (prefers-reduced-motion: reduce) {
+  .plugin-panel__section:hover:not(:disabled) .plugin-panel__btn,
+  .plugin-panel__section2:hover:not(:disabled) .plugin-panel__btn2 {
+    transform: none;
+  }
+  .plugin-panel__section,
+  .plugin-panel__section2 {
+    transition-duration: 0.05s;
+  }
+  .plugin-panel--syncing .plugin-panel__section,
+  .plugin-panel--syncing .plugin-panel__section2 {
+    transform: scale(0.98);
+    filter: none;
+  }
+}
+.plugin-panel__section:disabled,
+.plugin-panel__section2:disabled { cursor: not-allowed; opacity: 0.9; }
+.plugin-panel__section:disabled .plugin-panel__btn,
+.plugin-panel__section2:disabled .plugin-panel__btn2 { opacity: 0.35; }
+.plugin-panel__wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  position: relative;
+  z-index: 1;
+}
+.plugin-panel__section-label {
+  color: #d5d5d5;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.045em;
+}
+.plugin-panel__section-desc,
+.plugin-panel__section-desc * {
+  box-sizing: border-box;
+}
+.plugin-panel__section-desc {
+  color: rgba(255, 255, 255, 0.40);
+  text-align: left;
+  font-family: 'Inter-Regular', sans-serif;
+  font-size: 11px;
+  line-height: 140%;
+  font-weight: 400;
+  letter-spacing: 0.03em;
+  position: relative;
+  align-self: stretch;
+}
+
+/* button visuals — Figma: #222222, 7px radius, border 1px, padding 8px 12px, gap 5px */
+.plugin-panel__btn,
+.plugin-panel__btn2 {
+  pointer-events: none;
+  align-self: flex-start;
+  background: #222222;
+  border-radius: 7px;
+  border-style: solid;
+  border-width: 1px;
+  padding: 8px 12px 8px 12px;
+  display: flex;
+  flex-direction: row;
+  gap: 5px;
+  align-items: center;
+  justify-content: flex-start;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+  overflow: visible;
+  transform-origin: center;
+  transition: transform 65ms ease-out;
+  will-change: transform;
+  backface-visibility: hidden;
+  -webkit-font-smoothing: antialiased;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.06),
+    0 4px 10px rgba(0, 0, 0, 0.1);
+}
+.plugin-panel__btn { border-color: #00ffee; }
+.plugin-panel__btn2 { border-color: #00b7ff; }
+.plugin-panel__section:hover:not(:disabled) .plugin-panel__btn,
+.plugin-panel__section2:hover:not(:disabled) .plugin-panel__btn2 { transform: scale3d(1.06, 1.06, 1); }
+.plugin-panel__section:active:not(:disabled) .plugin-panel__btn,
+.plugin-panel__section2:active:not(:disabled) .plugin-panel__btn2 { transform: scale3d(0.97, 0.97, 1); }
+@media (prefers-reduced-motion: reduce) {
+  .plugin-panel__section:active:not(:disabled) .plugin-panel__btn,
+  .plugin-panel__section2:active:not(:disabled) .plugin-panel__btn2 { transform: none; }
+}
+.plugin-panel__btn-label {
+  color: #ffffff;
+  text-align: left;
+  font-family: 'Inter-Medium', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  position: relative;
+}
+.plugin-panel__material-symbols-sync-outline {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  position: relative;
+  overflow: visible;
+  aspect-ratio: 1;
+}
+.plugin-panel__btn2 .plugin-panel__material-symbols-sync-outline { fill: #e0e0e0; }
+.plugin-panel__btn-icon {
+  color: #e0e0e0;
+  text-align: left;
+  font-family: 'Inter-Regular', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  position: relative;
+}
+.plugin-panel__btn-label2 {
+  color: #e0e0e0;
+  text-align: left;
+  font-family: 'Inter-Medium', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  position: relative;
+}
 
 /* log */
-.lhdr{padding:6px 16px;font-size:10px;font-weight:600;color:var(--dim);text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;justify-content:space-between;align-items:center}
-.lclr{font-size:9px;color:var(--dim);cursor:pointer;text-transform:none;letter-spacing:0;font-weight:400}
-.lclr:hover{color:var(--muted)}
-.log{flex:1;min-height:80px;overflow-y:auto;padding:8px 16px;display:flex;flex-direction:column;gap:1px;font-family:"SF Mono","Fira Code",monospace;font-size:9px}
-.e{color:var(--dim)}.e.info{color:var(--muted)}.e.warn{color:var(--warn)}.e.success{color:var(--success)}.e.error{color:var(--err)}
+.plugin-panel__log-header {
+  padding: 5px 12px 5px 12px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  align-self: stretch;
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+}
+.plugin-panel__log-label {
+  color: #666666;
+  text-align: left;
+  font-family: 'Inter-SemiBold', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  position: relative;
+}
+.plugin-panel__log-clear {
+  color: #666666;
+  text-align: left;
+  font-family: 'Inter-Regular', sans-serif;
+  font-size: 10px;
+  font-weight: 400;
+  position: relative;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+}
+.plugin-panel__log-clear:hover { color: #999999; }
+.plugin-panel__log-area {
+  flex: 1;
+  min-height: 0;
+  padding: 6px 12px 6px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  align-items: flex-start;
+  justify-content: flex-start;
+  align-self: stretch;
+  overflow: hidden;
+  font-family: 'Inter-Regular', Inter, sans-serif;
+  overflow-wrap: break-word;
+}
+.plugin-panel__log-entry {
+  color: #999999;
+  text-align: left;
+  font-family: 'Inter-Regular', sans-serif;
+  font-size: 10px;
+  font-weight: 400;
+  position: relative;
+  align-self: stretch;
+}
+.log-e.info { color: #999999; }
+.log-e.success { color: #7ef7f0; }
+.log-e.warn { color: #e8c36a; }
+.log-e.error { color: #ff6b6b; }
 
 /* footer */
-footer{padding:8px 16px;border-top:1px solid var(--border);font-size:9px;color:var(--dim);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
-.fr{display:flex;align-items:center;gap:10px}
-.fl{color:var(--dim);text-decoration:none;font-size:9px}
-.fl:hover{color:var(--muted)}
-</style></head>
+.plugin-panel__footer {
+  padding: 6px 12px 6px 12px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  align-self: stretch;
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+}
+.plugin-panel__footer-brand {
+  color: #666666;
+  text-align: left;
+  font-family: 'Inter-Regular', sans-serif;
+  font-size: 10px;
+  font-weight: 400;
+  position: relative;
+}
+.plugin-panel__footer-right {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-start;
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+}
+.plugin-panel__footer-docs,
+.plugin-panel__footer-github {
+  color: #666666;
+  text-align: left;
+  font-family: 'Inter-Regular', sans-serif;
+  font-size: 10px;
+  font-weight: 400;
+  position: relative;
+  text-decoration: none;
+}
+.plugin-panel__footer-docs:hover,
+.plugin-panel__footer-github:hover { color: #999999; }
+
+/* Dev Mode read-only notice */
+.plugin-panel__dev-mode-notice {
+  padding: 6px 12px;
+  background: rgba(122, 141, 255, 0.12);
+  color: #99b9c8;
+  font-size: 10px;
+  font-weight: 500;
+  flex-shrink: 0;
+  border-left: 3px solid #7a8dff;
+}
+
+button:focus-visible,
+.plugin-panel__footer-docs:focus-visible, .plugin-panel__footer-github:focus-visible,
+.plugin-panel__log-clear:focus-visible {
+  outline: none;
+}
+</style>
+</head>
 <body>
-<div class="hbg"><header>
-<span class="bname">StudioFlow</span>
-<span class="sdot" id="dot"></span>
-<span class="stxt" id="status">Ready</span>
-</header></div>
-<div class="ctx" id="ctx"><span class="cdot"></span><span id="ctxTxt">Target: entire page</span></div>
-<div class="sec">
-<div class="slbl">Code → Figma</div>
-<div class="sdesc">Rebuild all screen frames and token variables on this canvas from code.</div>
-<button id="runAll"><span class="bicon">⟳</span> Sync to Figma</button>
+<div class="plugin-panel" id="panel">
+  <div class="plugin-panel__header-bg">
+    <div class="plugin-panel__header">
+      <div class="plugin-panel__brand">
+        <div class="plugin-panel__frame-3">
+          <div class="plugin-panel__status-dot" id="dot"></div>
+          <div class="plugin-panel__status-text" id="status">Ready</div>
+        </div>
+        <div class="plugin-panel__brand-name">StudioFlow</div>
+      </div>
+    </div>
+  </div>
+  <div class="plugin-panel__header-sep"></div>
+  <div class="plugin-panel__dev-mode-notice" id="devModeNotice" role="status" aria-live="polite" hidden>
+    Read-only in Dev Mode. Use Design mode to create or edit.
+  </div>
+  <div class="plugin-panel__context" id="ctx">
+    <div class="plugin-panel__context-dot"></div>
+    <div class="plugin-panel__context-text" id="ctxTxt">Nothing selected</div>
+  </div>
+  <div class="plugin-panel__context-sep"></div>
+  <button type="button" class="plugin-panel__section" id="runAll" aria-label="Sync to Figma">
+    <div class="plugin-panel__wrapper">
+      <div class="plugin-panel__section-label">CODE TO FIGMA</div>
+      <div class="plugin-panel__section-desc">Rebuild all screen frames and token variables on this canvas from code.</div>
+    </div>
+    <span class="plugin-panel__btn">
+      <svg class="plugin-panel__material-symbols-sync-outline" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M2.6665 13.3333V12H4.49984L4.23317 11.7667C3.65539 11.2555 3.24984 10.6722 3.0165 10.0167C2.78317 9.3611 2.6665 8.69999 2.6665 8.03332C2.6665 6.79999 3.03584 5.70266 3.7745 4.74132C4.51317 3.77999 5.47717 3.14399 6.6665 2.83332V4.23332C5.8665 4.52221 5.22206 5.01399 4.73317 5.70866C4.24428 6.40332 3.99984 7.17821 3.99984 8.03332C3.99984 8.53332 4.09428 9.01954 4.28317 9.49199C4.47206 9.96443 4.7665 10.4004 5.1665 10.8L5.33317 10.9667V9.33332H6.6665V13.3333H2.6665ZM9.33317 13.1667V11.7667C10.1332 11.4778 10.7776 10.9862 11.2665 10.292C11.7554 9.59777 11.9998 8.82266 11.9998 7.96666C11.9998 7.46666 11.9054 6.98066 11.7165 6.50866C11.5276 6.03666 11.2332 5.60043 10.8332 5.19999L10.6665 5.03332V6.66666H9.33317V2.66666H13.3332V3.99999H11.4998L11.7665 4.23332C12.3109 4.77777 12.7083 5.36954 12.9585 6.00866C13.2087 6.64777 13.3336 7.30043 13.3332 7.96666C13.3332 9.19999 12.9638 10.2973 12.2252 11.2587C11.4865 12.22 10.5225 12.856 9.33317 13.1667Z" fill="white"/>
+      </svg>
+      <span class="plugin-panel__btn-label">Sync to Figma</span>
+    </span>
+  </button>
+  <div class="plugin-panel__push-sep"></div>
+  <button type="button" class="plugin-panel__section2" id="exportBtn" aria-label="Sync to Code">
+    <div class="plugin-panel__wrapper">
+      <div class="plugin-panel__section-label">FIGMA TO CODE</div>
+      <div class="plugin-panel__section-desc">Send your design changes back to the codebase in one step.</div>
+    </div>
+    <span class="plugin-panel__btn2">
+      <svg class="plugin-panel__material-symbols-sync-outline" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M2.6665 13.3333V12H4.49984L4.23317 11.7667C3.65539 11.2555 3.24984 10.6722 3.0165 10.0167C2.78317 9.3611 2.6665 8.69999 2.6665 8.03332C2.6665 6.79999 3.03584 5.70266 3.7745 4.74132C4.51317 3.77999 5.47717 3.14399 6.6665 2.83332V4.23332C5.8665 4.52221 5.22206 5.01399 4.73317 5.70866C4.24428 6.40332 3.99984 7.17821 3.99984 8.03332C3.99984 8.53332 4.09428 9.01954 4.28317 9.49199C4.47206 9.96443 4.7665 10.4004 5.1665 10.8L5.33317 10.9667V9.33332H6.6665V13.3333H2.6665ZM9.33317 13.1667V11.7667C10.1332 11.4778 10.7776 10.9862 11.2665 10.292C11.7554 9.59777 11.9998 8.82266 11.9998 7.96666C11.9998 7.46666 11.9054 6.98066 11.7165 6.50866C11.5276 6.03666 11.2332 5.60043 10.8332 5.19999L10.6665 5.03332V6.66666H9.33317V2.66666H13.3332V3.99999H11.4998L11.7665 4.23332C12.3109 4.77777 12.7083 5.36954 12.9585 6.00866C13.2087 6.64777 13.3336 7.30043 13.3332 7.96666C13.3332 9.19999 12.9638 10.2973 12.2252 11.2587C11.4865 12.22 10.5225 12.856 9.33317 13.1667Z" fill="currentColor"/>
+      </svg>
+      <span class="plugin-panel__btn-label2">Sync to Code</span>
+    </span>
+  </button>
+  <div class="plugin-panel__sync-sep"></div>
+  <div class="plugin-panel__log-header">
+    <div class="plugin-panel__log-label">LOG</div>
+    <button type="button" class="plugin-panel__log-clear" id="clearLog" aria-label="Clear log">Clear</button>
+  </div>
+  <div class="plugin-panel__log-area" id="log" role="log" aria-live="polite">
+    <div class="plugin-panel__log-entry log-e info">Awaiting action…</div>
+  </div>
+  <div class="plugin-panel__footer-sep"></div>
+  <div class="plugin-panel__footer">
+    <div class="plugin-panel__footer-brand">StudioFlow v4.0.0</div>
+    <div class="plugin-panel__footer-right">
+      <a class="plugin-panel__footer-docs" href="https://github.com/becktothefuture/studioflow#readme" target="_blank" rel="noopener">Docs ↗</a>
+      <a class="plugin-panel__footer-github" href="https://github.com/becktothefuture/studioflow" target="_blank" rel="noopener">GitHub ↗</a>
+    </div>
+  </div>
 </div>
-<div class="sec">
-<div class="slbl">Variables</div>
-<div class="sdesc">Bind all variables + text styles to existing nodes (use after MCP build).</div>
-<button id="bindBtn"><span class="bicon">⌁</span> Bind Variables</button>
-</div>
-<div class="sec">
-<div class="slbl">Figma → Code</div>
-<div class="sdesc">Send your design changes back to the codebase in one step.</div>
-<button id="exportBtn"><span class="bicon">⟳</span> Sync to Code</button>
-</div>
-<div class="lhdr"><span>Log</span><span class="lclr" id="clearLog">Clear</span></div>
-<div class="log" id="log"><div class="e info">Awaiting action…</div></div>
-<footer>
-<span>v4.0.0</span>
-<div class="fr">
-<a class="fl" href="https://github.com/becktothefuture/studioflow#readme" target="_blank">Docs ↗</a>
-<a class="fl" href="https://github.com/becktothefuture/studioflow" target="_blank">GitHub ↗</a>
-</div>
-</footer>
 <script>
-var L=document.getElementById('log'),S=document.getElementById('status'),D=document.getElementById('dot'),CT=document.getElementById('ctxTxt');
-var rBtn=document.getElementById('runAll'),eBtn=document.getElementById('exportBtn'),bBtn=document.getElementById('bindBtn'),cBtn=document.getElementById('clearLog');
-var btns=[rBtn,eBtn,bBtn],ws=null,bc=false;
-function conn(){try{ws=new WebSocket('ws://localhost:9801');ws.onopen=function(){bc=true;al('Bridge connected','success')};ws.onmessage=function(e){try{var m=JSON.parse(e.data);if(m.type==='log')al(m.text,m.level||'info');if(m.type==='done')dn(m.text||'Sync complete');if(m.type==='error')er(m.text||'Bridge error')}catch(x){al(e.data,'info')}};ws.onclose=function(){bc=false;setTimeout(conn,5000)};ws.onerror=function(){ws.close()}}catch(x){setTimeout(conn,5000)}}
+var L = document.getElementById('log'),
+    S = document.getElementById('status'),
+    D = document.getElementById('dot'),
+    CT = document.getElementById('ctxTxt');
+var rBtn = document.getElementById('runAll'),
+    eBtn = document.getElementById('exportBtn'),
+    cBtn = document.getElementById('clearLog');
+var btns = [rBtn, eBtn], ws = null, bc = false;
+
+function conn() {
+  try {
+    ws = new WebSocket('ws://localhost:9801');
+    ws.onopen = function () { bc = true; };
+    ws.onmessage = function (e) {
+      try {
+        var m = JSON.parse(e.data);
+        if (m.type === 'log') al(m.text, m.level || 'info');
+        if (m.type === 'done') dn(m.text || 'Sync complete');
+        if (m.type === 'error') er(m.text || 'Bridge error');
+      } catch (x) { al(e.data, 'info'); }
+    };
+    ws.onclose = function () { bc = false; setTimeout(conn, 5000); };
+    ws.onerror = function () { ws.close(); };
+  } catch (x) { setTimeout(conn, 5000); }
+}
 conn();
-function al(t,l){var d=document.createElement('div');d.className='e '+(l||'info');d.textContent=t;L.appendChild(d);L.scrollTop=L.scrollHeight}
-function rn(m){btns.forEach(function(b){b.disabled=true});D.className='sdot run';S.textContent=m;al('▶ '+m)}
-function dn(m){btns.forEach(function(b){b.disabled=false});D.className='sdot';S.textContent='Ready';al('✓ '+m,'success')}
-function er(m){btns.forEach(function(b){b.disabled=false});D.className='sdot err';S.textContent='Error';al('✗ '+m,'error')}
-function post(t){parent.postMessage({pluginMessage:{type:t}},'*')}
-rBtn.addEventListener('click',function(){rn('Syncing…');post('run-all')});
-bBtn.addEventListener('click',function(){rn('Binding…');post('bind-variables')});
-eBtn.addEventListener('click',function(){rn('Syncing…');post('export-canvas')});
-cBtn.addEventListener('click',function(){L.innerHTML='<div class="e info">Log cleared.</div>'});
-window.onmessage=function(ev){
-var m=ev.data.pluginMessage;if(!m)return;
-switch(m.type){
-case'log':al(m.text,m.level||'info');break;
-case'frames-done':(m.results||[]).forEach(function(r){al('  "'+r.name+'" '+r.width+'px → '+r.id,'success')});dn('Frames created');break;
-case'bind-done':al('  '+m.stats.bound+' bindings · '+m.stats.visited+' nodes','success');dn('Variables bound');break;
-case'all-done':(m.results||[]).forEach(function(r){al('  "'+r.name+'" '+r.width+'px → '+r.id,'success')});if(m.stats)al('  '+m.stats.bound+' variable bindings','success');dn('Sync to Figma complete');break;
-case'export-done':if(m.json){if(bc&&ws&&ws.readyState===1){ws.send(JSON.stringify({type:'sync-to-code',payload:m.json}));al('Payload sent to bridge…','info')}else{navigator.clipboard.writeText(m.json).then(function(){dn('Copied to clipboard');al('Paste into handoff/canvas-to-code.json','warn')}).catch(function(){al('Clipboard failed','warn');dn('Sync ready')})}}break;
-case'selection-update':if(m.selectedFrames&&m.selectedFrames.length>0)CT.textContent='Target: '+m.selectedFrames.join(', ');else if(m.screenName)CT.textContent='Target: '+m.screenName;else if(m.hasScreens)CT.textContent='Target: all screen frames';else CT.textContent='Target: entire page';break;
-case'error':er(m.text);break;
-}};
+
+function al(t, l) {
+  var d = document.createElement('div');
+  d.className = 'plugin-panel__log-entry log-e ' + (l || 'info');
+  d.textContent = t;
+  L.appendChild(d);
+}
+
+function setState(state) { S.textContent = state; }
+
+var panel = document.getElementById('panel');
+
+function rn(m) {
+  if (panel) panel.classList.add('plugin-panel--syncing');
+  btns.forEach(function (b) { b.disabled = true; });
+  D.className = 'plugin-panel__status-dot run';
+  setState('Syncing…');
+  al('[RUN] ' + m);
+}
+
+function dn(m) {
+  if (panel) panel.classList.remove('plugin-panel--syncing');
+  btns.forEach(function (b) { b.disabled = false; });
+  D.className = 'plugin-panel__status-dot';
+  setState('Ready');
+  al('[OK] ' + m, 'success');
+}
+
+function er(m) {
+  if (panel) panel.classList.remove('plugin-panel--syncing');
+  btns.forEach(function (b) { b.disabled = false; });
+  D.className = 'plugin-panel__status-dot err';
+  setState('Error');
+  al('[ERR] ' + m, 'error');
+}
+
+function post(t) { parent.postMessage({ pluginMessage: { type: t } }, '*'); }
+
+rBtn.addEventListener('click', function () { rn('syncing to figma'); post('run-all'); });
+eBtn.addEventListener('click', function () { rn('syncing to code'); post('export-canvas'); });
+cBtn.addEventListener('click', function () {
+  L.innerHTML = '<div class="plugin-panel__log-entry log-e info">Log cleared.</div>';
+});
+
+window.onmessage = function (ev) {
+  var m = ev.data.pluginMessage;
+  if (!m) return;
+  switch (m.type) {
+    case 'dev-mode':
+      if (m.isDev) {
+        var notice = document.getElementById('devModeNotice');
+        if (notice) { notice.hidden = false; }
+        if (rBtn) rBtn.disabled = true;
+      }
+      break;
+    case 'error': er(m.text || 'Error'); break;
+    case 'log': al(m.text, m.level || 'info'); break;
+    case 'frames-done':
+      (m.results || []).forEach(function (r) { al('  "' + r.name + '" ' + r.width + 'px → ' + r.id, 'success'); });
+      dn('Frames created');
+      break;
+    case 'bind-done':
+      al('  ' + m.stats.bound + ' bindings · ' + m.stats.visited + ' nodes', 'success');
+      dn('Variables bound');
+      break;
+    case 'all-done':
+      (m.results || []).forEach(function (r) { al('  "' + r.name + '" ' + r.width + 'px → ' + r.id, 'success'); });
+      if (m.stats) al('  ' + m.stats.bound + ' variable bindings', 'success');
+      dn('Sync to Figma complete');
+      break;
+    case 'export-done':
+      if (m.json) {
+        if (bc && ws && ws.readyState === 1) {
+          ws.send(JSON.stringify({ type: 'sync-to-code', payload: m.json }));
+          al('[INFO] payload sent to bridge', 'info');
+        } else {
+          navigator.clipboard.writeText(m.json).then(function () {
+            dn('Copied to clipboard');
+            al('[WARN] Paste into handoff/canvas-to-code.json', 'warn');
+          }).catch(function () {
+            al('[WARN] Clipboard failed', 'warn');
+            dn('Sync ready');
+          });
+        }
+      }
+      break;
+    case 'selection-update':
+      if (m.selectedFrames && m.selectedFrames.length > 0) CT.textContent = 'Target: ' + m.selectedFrames.join(', ');
+      else if (m.screenName) CT.textContent = 'Target: ' + m.screenName;
+      else if (m.hasScreens) CT.textContent = 'Target: all screen frames';
+      else CT.textContent = 'Nothing selected';
+      if (bc && ws && ws.readyState === 1) {
+        ws.send(JSON.stringify({
+          type: 'band-context',
+          context: {
+            screen: m.screenName || null,
+            breakpoint: null,
+            sfid: null,
+            selectionPath: m.screenName ? [m.screenName] : [],
+            sourceTool: 'figma-plugin'
+          }
+        }));
+      }
+      break;
+    case 'error': er(m.text); break;
+  }
+};
 </script>
-</body></html>
+</body>
+</html>
