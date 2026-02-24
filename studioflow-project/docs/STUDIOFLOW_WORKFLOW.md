@@ -57,6 +57,13 @@ Design-first:
 - Export canonical payload.
 - Run the same verify/apply chain.
 
+Onboarding:
+- Run `npm run scan:project` to detect hardcoded values.
+- Use tokenize-map skill to propose token names.
+- Run `npm run apply:token-map` to rewire source files.
+- Run `npm run check` to verify.
+- Proceed with code-first or design-first path.
+
 ## Enforceable Guarantees
 | Guarantee | Verification | Evidence |
 | --- | --- | --- |
@@ -98,6 +105,22 @@ npm run loop:verify-canvas
 npm run loop:canvas-to-code
 npm run check
 npm run build
+npm run loop:proof
+npm run manifest:update
+```
+
+## Simplified Operator Path
+```bash
+# Onboarding a new project
+npm run scan:project
+# Run tokenize-map skill to produce handoff/token-map.json
+npm run apply:token-map
+npm run check
+
+# Daily sync
+npm run sync:push
+# Apply in Figma via Conduit, export canvas-to-code.json
+npm run sync:pull
 npm run loop:proof
 npm run manifest:update
 ```

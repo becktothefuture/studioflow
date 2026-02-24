@@ -1,18 +1,10 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 import { glob } from "glob";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const rootDir = path.resolve(__dirname, "..");
+import { colorRegex, calcRegex, arbitraryValueRegex, numberUnitRegex, collectMatches } from "./lib/hardcoded-detect.mjs";
+import { rootDir } from "./lib/workflow-utils.mjs";
 
 const scanPatterns = ["src/**/*.{ts,tsx,js,jsx,css}"];
-
-const colorRegex = /#(?:[0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})\b|\brgba?\([^\)]+\)|\bhsla?\([^\)]+\)/g;
-const calcRegex = /\bcalc\([^\)]+\)/g;
-const arbitraryValueRegex = /\[[^\]\n]+\]/g;
-const numberUnitRegex = /\b(?!0(?:\.0+)?(?:px|rem|em|%)?\b)\d*\.?\d+(?:px|rem|em|vh|vw|vmin|vmax|%)\b/g;
 
 function isIgnoredLine(line) {
   const trimmed = line.trim();
@@ -29,15 +21,11 @@ function hasTokenReference(segment) {
   return /var\(--[a-z0-9-]+\)/i.test(segment) || /tokens\.[a-z0-9_]+/i.test(segment);
 }
 
-function collectMatches(regex, line) {
-  return [...line.matchAll(regex)].map((m) => m[0]);
-}
-
 async function main() {
   const files = await glob(scanPatterns, {
     cwd: rootDir,
     nodir: true,
-    ignore: ["src/**/*.d.ts", "src/styles/tokens.css"]
+    ignore: ["src/**/*.d.ts"]
   });
   const violations = [];
 

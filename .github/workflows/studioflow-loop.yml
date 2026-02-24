@@ -30,6 +30,9 @@ jobs:
       - name: Build token artifacts
         run: npm run build:tokens
 
+      - name: Unit tests
+        run: npm test
+
       - name: Contract fixture tests
         run: npm run test:contracts
 

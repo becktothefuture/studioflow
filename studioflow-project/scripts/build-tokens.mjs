@@ -1,33 +1,14 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { flattenTokens } from "./lib/token-utils.mjs";
+import { rootDir } from "./lib/workflow-utils.mjs";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const rootDir = path.resolve(__dirname, "..");
+export { flattenTokens } from "./lib/token-utils.mjs";
+
 const inputPath = path.join(rootDir, "tokens", "figma-variables.json");
 const cssOutPath = path.join(rootDir, "tokens", "tokens.css");
 const tsOutPath = path.join(rootDir, "tokens", "tokens.ts");
-const srcCssPath = path.join(rootDir, "src", "styles", "tokens.css");
-
-function isTokenLeaf(value) {
-  return !!value && typeof value === "object" && Object.prototype.hasOwnProperty.call(value, "value");
-}
-
-export function flattenTokens(input, prefix = []) {
-  const rows = [];
-  for (const [key, value] of Object.entries(input)) {
-    const next = [...prefix, key];
-    if (isTokenLeaf(value)) {
-      rows.push({ name: next.join("-"), value: String(value.value), path: next });
-      continue;
-    }
-    if (value && typeof value === "object") {
-      rows.push(...flattenTokens(value, next));
-    }
-  }
-  return rows;
-}
 
 function buildCss(tokens) {
   const lines = [
@@ -76,9 +57,8 @@ export async function buildArtifacts() {
 
   await fs.writeFile(cssOutPath, css, "utf8");
   await fs.writeFile(tsOutPath, ts, "utf8");
-  await fs.writeFile(srcCssPath, css, "utf8");
 
-  return { count: flattened.length, cssOutPath, tsOutPath, srcCssPath };
+  return { count: flattened.length, cssOutPath, tsOutPath };
 }
 
 async function main() {
@@ -86,10 +66,9 @@ async function main() {
   console.log(`Built ${result.count} tokens:`);
   console.log(`- ${path.relative(rootDir, result.cssOutPath)}`);
   console.log(`- ${path.relative(rootDir, result.tsOutPath)}`);
-  console.log(`- ${path.relative(rootDir, result.srcCssPath)}`);
 }
 
-if (path.resolve(process.argv[1] || "") === __filename) {
+if (path.resolve(process.argv[1] || "") === fileURLToPath(import.meta.url)) {
   main().catch((error) => {
     console.error(error instanceof Error ? error.message : error);
     process.exit(1);

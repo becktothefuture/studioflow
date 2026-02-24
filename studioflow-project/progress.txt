@@ -1,0 +1,16 @@
+# Ralph Progress — outstanding-items
+
+## US-R01: Phase 3 verification log (binding coverage) — DONE
+Created scripts/verify-binding-coverage.mjs. Reports BOUND_TOKEN/BOUND_STYLE/UNBOUND/COULD_BE_STYLE per sfid. Writes handoff/binding-coverage.json. npm script added.
+
+## US-R02: Content integration into conduit roundtrip — DONE
+Modified loop-code-to-canvas.mjs to include content/content.json entries in payload. Modified loop-canvas-to-code.mjs to merge content back. Backward compatible.
+
+## US-R03: sfid migration script — DONE
+Created scripts/migrate-sfids.mjs with --map and --dry-run flags. Rewrites sfids across src, snapshots, manifest. npm script added.
+
+## US-R04: Documentation updates — DONE
+Updated AGENT.md with 7 new commands. Updated STUDIOFLOW_WORKFLOW.md with Onboarding entry path and Simplified Operator Path.
+
+## US-R05: Component-aware proof system — DONE
+Modified scripts/loop-proof.mjs with --component flag, captureComponentScreenshots(), per-component subdirectories in proof/latest/{component}/.

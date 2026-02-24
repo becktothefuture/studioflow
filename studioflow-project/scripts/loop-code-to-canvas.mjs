@@ -18,6 +18,34 @@ import {
 
 const __filename = fileURLToPath(import.meta.url);
 
+async function loadContentIfExists() {
+  const contentPath = path.join(rootDir, "content", "content.json");
+  try {
+    return await loadJson(contentPath);
+  } catch {
+    return null;
+  }
+}
+
+function groupSfidsByComponent(sfids) {
+  const groups = {};
+  for (const sfid of sfids) {
+    const withoutPrefix = sfid.replace(/^sfid:/, "");
+    const slashIndex = withoutPrefix.indexOf("/");
+    const component = slashIndex === -1 ? "_root" : withoutPrefix.slice(0, slashIndex);
+    if (!groups[component]) {
+      groups[component] = [];
+    }
+    groups[component].push(sfid);
+  }
+  // Sort keys and values for determinism
+  const sorted = {};
+  for (const key of Object.keys(groups).sort()) {
+    sorted[key] = groups[key].sort();
+  }
+  return sorted;
+}
+
 function collectFrameTokenNames(tokens, tokenFrames) {
   return tokenFrames.map((frame) => ({
     name: frame.name,
@@ -54,10 +82,11 @@ function createClientSession() {
 }
 
 export async function runLoopCodeToCanvas() {
-  const [workflow, tokenJson, codeSfids] = await Promise.all([
+  const [workflow, tokenJson, codeSfids, contentData] = await Promise.all([
     readWorkflowConfig(),
     loadJson(tokenInputPath),
-    extractCodeSfids()
+    extractCodeSfids(),
+    loadContentIfExists()
   ]);
 
   if (codeSfids.length === 0) {
@@ -111,7 +140,9 @@ export async function runLoopCodeToCanvas() {
     })),
     tokenMapping,
     styleLayer,
-    sfids: codeSfids
+    sfids: codeSfids,
+    content: contentData?.entries ?? null,
+    sfidsByComponent: groupSfidsByComponent(codeSfids)
   };
 
   const canvasTemplatePayload = normalizeCanvasPayload(

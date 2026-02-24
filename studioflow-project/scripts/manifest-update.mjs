@@ -1,12 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 import { glob } from "glob";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const rootDir = path.resolve(__dirname, "..");
-const manifestPath = path.join(rootDir, "studioflow.manifest.json");
+import { rootDir, manifestPath } from "./lib/workflow-utils.mjs";
 
 async function latestSnapshotFile() {
   const files = await glob(["snapshots/*.json"], { cwd: rootDir, nodir: true });

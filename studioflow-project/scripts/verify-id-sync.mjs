@@ -1,39 +1,17 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 import { glob } from "glob";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const rootDir = path.resolve(__dirname, "..");
-const manifestPath = path.join(rootDir, "studioflow.manifest.json");
-const snapshotsDir = path.join(rootDir, "snapshots");
+import {
+  sanitizeId,
+  duplicateValues,
+  uniqueValues,
+  rootDir,
+  manifestPath,
+  snapshotsDir
+} from "./lib/workflow-utils.mjs";
 
 const codeIdRegex = /data-sfid\s*=\s*['"]([^'"]+)['"]/g;
-const sfidRegex = /sfid:[a-zA-Z0-9:_-]+/g;
-
-function sanitizeId(input) {
-  return input
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9:_-]/g, "");
-}
-
-function duplicateValues(values) {
-  const seen = new Set();
-  const dupes = new Set();
-  for (const value of values) {
-    if (seen.has(value)) {
-      dupes.add(value);
-    }
-    seen.add(value);
-  }
-  return [...dupes];
-}
-
-function uniqueValues(values) {
-  return [...new Set(values)];
-}
+const sfidRegex = /sfid:[a-zA-Z0-9:_/-]+/g;
 
 async function extractCodeIds() {
   const files = await glob(["src/**/*.{tsx,jsx,html}"], { cwd: rootDir, nodir: true });

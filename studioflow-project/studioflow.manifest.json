@@ -5,12 +5,12 @@
   "integration": "canvas-central",
   "canvasProvider": "figma",
   "loopCount": 2,
-  "updatedAt": "2026-02-22T18:49:26.852Z",
+  "updatedAt": "2026-02-24T00:30:53.616Z",
   "publicMicrositeUrl": "https://<owner>.github.io/<repo>/",
   "lastSnapshot": "figma-2026-02-22T10-58-21-752Z.json",
   "lastSnapshotAt": "2026-02-22T10:58:21.751Z",
   "lastCodeToCanvas": {
-    "ranAt": "2026-02-22T18:49:26.852Z",
+    "ranAt": "2026-02-24T00:30:53.616Z",
     "conduitVersion": "1.0.0",
     "tokenCount": 70,
     "sfidCount": 8,
@@ -26,11 +26,11 @@
     "updatedTokenCount": 1
   },
   "lastCanvasVerification": {
-    "status": "passed",
-    "ranAt": "2026-02-22T10:58:33.439Z",
+    "status": "failed",
+    "ranAt": "2026-02-23T18:42:34.432Z",
     "sourceFile": "handoff/canvas-to-code.json",
     "canvasProvider": "figma-sites",
-    "errorsCount": 0
+    "errorsCount": 5
   },
   "lastCodeToFigma": {
     "ranAt": "2026-02-22T01:21:37.529Z",
@@ -46,7 +46,7 @@
   },
   "lastVerification": {
     "status": "passed",
-    "ranAt": "2026-02-22T10:58:25.742Z",
+    "ranAt": "2026-02-23T18:35:31.857Z",
     "command": "npm run check"
   },
   "expectedSfids": [

@@ -11,6 +11,8 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { flattenTokens } from "./lib/token-utils.mjs";
+import { groupTokenFrame } from "./lib/workflow-utils.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, "..");
@@ -21,26 +23,6 @@ const tokenJson = JSON.parse(fs.readFileSync(path.join(ROOT, "tokens/figma-varia
 const pageContent = JSON.parse(fs.readFileSync(path.join(ROOT, "handoff/figma-page-content.json"), "utf8"));
 
 // ── Flatten tokens ─────────────────────────────────────────────────────────────
-function flattenTokens(obj, prefix) {
-  const result = [];
-  for (const key in obj) {
-    const child = obj[key];
-    const name = prefix ? prefix + "-" + key : key;
-    if (child && typeof child === "object" && "value" in child) {
-      result.push({ name, value: child.value });
-    } else if (child && typeof child === "object") {
-      result.push(...flattenTokens(child, name));
-    }
-  }
-  return result;
-}
-
-function groupTokenFrame(tokenName, tokenFrames) {
-  const prefix = tokenName.split("-")[0];
-  const match = tokenFrames.find((f) => f.prefixes.includes(prefix));
-  return match ? match.name : tokenFrames[tokenFrames.length - 1]?.name || "Tokens / Spacing";
-}
-
 const flatTokens = flattenTokens(tokenJson).map((t) => ({
   ...t,
   frame: groupTokenFrame(t.name, workflow.tokenFrames),

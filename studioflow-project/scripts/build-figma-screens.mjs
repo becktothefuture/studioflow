@@ -108,7 +108,8 @@ async function main() {
   try { execSync("pkill -f conduit-mcp", { stdio: "ignore" }); } catch {}
   await sleep(2000);
 
-  const proc = spawn("/Users/alexanderbeck/.local/bin/conduit-mcp", ["--stdio"], {
+  const conduitBin = process.env.CONDUIT_MCP_PATH || "conduit-mcp";
+  const proc = spawn(conduitBin, ["--stdio"], {
     env: { ...process.env, PORT: "3055", CHANNEL_KEY: "wise-panda-45" },
     stdio: ["pipe", "pipe", "pipe"],
   });

@@ -1,0 +1,51 @@
+{
+  "generatedAt": "2026-02-24T00:22:38.134Z",
+  "entries": {
+    "sfid:hero-actions": {
+      "element": "div",
+      "textContent": null,
+      "propReference": null
+    },
+    "sfid:hero-body": {
+      "element": "p",
+      "textContent": null,
+      "propReference": "content.hero.valueStatement"
+    },
+    "sfid:hero-content": {
+      "element": "div",
+      "textContent": null,
+      "propReference": null
+    },
+    "sfid:hero-kicker": {
+      "element": "p",
+      "textContent": null,
+      "propReference": "content.hero.kicker"
+    },
+    "sfid:hero-primary-cta": {
+      "element": "button",
+      "textContent": null,
+      "propReference": "content.hero.primaryActionLabel"
+    },
+    "sfid:hero-root": {
+      "element": "main",
+      "textContent": null,
+      "propReference": null
+    },
+    "sfid:hero-secondary-cta": {
+      "element": "button",
+      "textContent": null,
+      "propReference": "content.hero.secondaryActionLabel"
+    },
+    "sfid:hero-title": {
+      "element": "h1",
+      "textContent": null,
+      "propReference": "content.hero.heading"
+    }
+  },
+  "summary": {
+    "totalSfids": 8,
+    "withStaticText": 0,
+    "withPropReference": 5,
+    "withoutContent": 3
+  }
+}

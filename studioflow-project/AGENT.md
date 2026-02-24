@@ -68,6 +68,13 @@ Use npm scripts for repeatable workflows from any MCP-capable client (Cursor, Cl
 - `npm run conduit:generate` — build tokens + generate `handoff/code-to-canvas.json` and mapping artifact
 - `npm run report:token-coverage` — report token usage by category + hardcoded style violations
 - `npm run conduit:doctor -- --code <ERROR_CODE>` — print deterministic recovery guidance
+- `npm run sync:push` — unified code → Figma push (build:tokens + loop:code-to-canvas)
+- `npm run sync:pull` — unified Figma → code pull (verify-canvas + canvas-to-code + build:tokens + check)
+- `npm run scan:project` — scan source files for hardcoded values and component boundaries
+- `npm run apply:token-map` — apply approved token map: add tokens to source and rewrite hardcoded values
+- `npm run extract:content` — extract static content from JSX into content/content.json
+- `npm run verify:binding-coverage` — report token/style binding status per sfid property
+- `npm run migrate:sfids` — rename sfids across source files, snapshots, and manifest
 - `npm run loop:code-to-canvas` — push code state to Figma handoff payload
 - `npm run loop:verify-canvas` + `npm run loop:canvas-to-code` — apply Figma edits back to code
 - `npm run check` — run all quality gates

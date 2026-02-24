@@ -15,7 +15,7 @@ export const snapshotsDir = path.join(rootDir, "snapshots");
 const codeIdRegex = /data-sfid\s*=\s*['"]([^'"]+)['"]/g;
 
 export function sanitizeId(input) {
-  return input.trim().toLowerCase().replace(/[^a-z0-9:_-]/g, "");
+  return input.trim().toLowerCase().replace(/[^a-z0-9:_/-]/g, "");
 }
 
 export function utcStamp() {

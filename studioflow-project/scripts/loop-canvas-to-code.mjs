@@ -118,6 +118,44 @@ export async function runLoopCanvasToCode(options = {}) {
   };
   await writeJson(manifestPath, manifest);
 
+  // Content roundtrip: apply content from canvas payload back to content.json
+  const contentPath = path.join(rootDir, "content", "content.json");
+  if (payload.content && typeof payload.content === "object") {
+    let existingContent;
+    try {
+      existingContent = await loadJson(contentPath);
+    } catch {
+      existingContent = null;
+    }
+
+    if (existingContent) {
+      // Merge incoming content entries into existing
+      const updatedEntries = { ...existingContent.entries };
+      for (const [sfid, data] of Object.entries(payload.content)) {
+        if (updatedEntries[sfid]) {
+          // Update text content if provided
+          if (data.textContent !== undefined) {
+            updatedEntries[sfid].textContent = data.textContent;
+          }
+          if (data.propReference !== undefined) {
+            updatedEntries[sfid].propReference = data.propReference;
+          }
+        }
+      }
+
+      // Sort entries for determinism
+      const sorted = {};
+      for (const key of Object.keys(updatedEntries).sort()) {
+        sorted[key] = updatedEntries[key];
+      }
+
+      existingContent.entries = sorted;
+      existingContent.generatedAt = new Date().toISOString();
+      await writeJson(contentPath, existingContent);
+      console.log("Updated content/content.json from canvas payload.");
+    }
+  }
+
   console.log(`Updated tokens/figma-variables.json with mode "${canonicalMode}" values.`);
   console.log(`Created snapshots/${snapshotFilename}`);
   console.log("Next: run `npm run check && npm run build && npm run manifest:update`.");
