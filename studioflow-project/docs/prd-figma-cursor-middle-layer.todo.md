@@ -16,7 +16,8 @@ Source PRD: `docs/prd-figma-cursor-middle-layer.md`
 
 ## Next Chunks (Post-MVP)
 
-- [ ] US-008: Add phase-3 verification artifact (`bound`, `unbound`, `couldBeStyles`) under `handoff/` or `proof/`.
+- [ ] US-008A: Add pre-apply binding coverage script (`verify-binding-coverage.mjs`) producing `handoff/binding-coverage.json` with `BOUND_TOKEN`, `BOUND_STYLE`, `UNBOUND`, `COULD_BE_STYLE` per sfid.
+- [ ] US-008B: (Deferred) Add post-apply verification audit via plugin instrumentation + script.
 - [ ] US-009: Wire `styleLayer` payload into plugin/conduit apply path for real style creation + assignment.
 - [x] US-010: Implement shared `handoff/trust-ledger.json` lifecycle.
 - [x] US-011: Implement preview/commit flow with immutable receipts in `proof/receipts/`.
