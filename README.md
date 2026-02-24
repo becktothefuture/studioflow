@@ -4,10 +4,10 @@
 
 <h1 align="center">StudioFlow</h1>
 
-<p align="center"><strong>Preserve one intent from code to design.</strong></p>
+<p align="center"><strong>The formal system for deterministic design–code parity.</strong></p>
 
 <p align="center">
-  StudioFlow aligns code and design through deterministic contracts, naming parity, and verification gates that keep semantic intent stable across every transition.
+  StudioFlow operationalizes one non-negotiable standard: semantic intent must survive every transition between code and Figma without drift.
 </p>
 
 <p align="center">
@@ -15,140 +15,144 @@
   ·
   <a href="#quick-start"><strong>Quick Start</strong></a>
   ·
-  <a href="#system-guarantees"><strong>System Guarantees</strong></a>
+  <a href="#north-star"><strong>North Star</strong></a>
   ·
-  <a href="#workflow"><strong>Workflow</strong></a>
+  <a href="#required-architecture"><strong>Required Architecture</strong></a>
   ·
   <a href="studioflow-project/README.md"><strong>Project Docs</strong></a>
 </p>
 
 ![StudioFlow divider](studioflow-project/assets/studioflow-divider.gif)
 
-## Why StudioFlow
+## North Star
 
-Interface delivery drifts when intent is translated manually between tools. Token semantics shift, component identity changes, and breakpoint behavior fragments across teams. StudioFlow addresses this operational problem by preserving one shared intent model across code and canvas.
+StudioFlow is built for complete bidirectional parity:
+
+- **Figma ⇄ code parity with no semantic drift**
+- **Deterministic sync in either direction**
+- **Framework-agnostic operation across modern web stacks**
+
+Intent is treated as a first-class artifact, including:
+- UI structure and hierarchy
+- stable component identity via `sfid`
+- token semantics and references
+- responsive behavior per mode/breakpoint
+- style semantics, layout constraints, and content values
+
+## Why This Matters
+
+Most teams do not fail from lack of tooling—they fail from translation loss between environments. StudioFlow eliminates manual reinterpretation by enforcing contracts, identity continuity, and auditable evidence at each handoff stage.
 
 Primary audience:
 - Design system leads
-- Hybrid designers
 - Senior frontend engineers
+- Hybrid design/engineering operators
 
 Secondary audience:
 - Engineering managers
 - Product designers
 - Platform and DevEx teams
 
-## System Guarantees
+## Current Strengths
 
-Each guarantee maps to an executable command and an evidence path.
+StudioFlow already provides strong foundations:
+
+- deterministic token build pipeline
+- pre-apply contract validation (`loop:verify-canvas`)
+- identity continuity checks (`verify:id-sync`)
+- operator-friendly sync wrappers (`sync:push`, `sync:pull`)
+- manifest/proof artifacts for auditability
+
+## Critical Gaps Being Addressed
+
+The parity program now explicitly addresses five architectural flaws:
+
+1. Missing canonical intermediate representation (IR)
+2. Structure sync weaker than token sync
+3. Runtime/tooling bias toward React conventions
+4. Partial normalization of style semantics
+5. Fragmented operational documentation and command drift
+
+## Required Architecture
+
+StudioFlow is advancing toward a canonical parity model:
+
+1. **Versioned StudioFlow IR** as the deterministic contract between code and Figma
+2. **Deterministic engine + agentic assist split** for reliability and controlled intelligence
+3. **Adapter architecture** for `html-css-js`, `react`, `vue`, and `svelte`
+4. **Explicit style policy** (`tokenRef`, `namedStyleRef`, `resolvedLiteral`)
+5. **Expression fidelity rules** preventing token-expression overwrite from resolved exports
+
+## Universal Workflow
+
+1. **Onboard** project via adapter, token mapping, `sfid` map, and IR baseline.
+2. **Push** deterministic payload from IR + token authority into Figma.
+3. **Edit** with controlled parity-safe operations.
+4. **Pull** normalized IR diff back into source through safe apply.
+5. **Lock drift** with strict gate execution and generated receipts.
+
+## Non-Negotiable Operating Rules
+
+- No apply without contract verification.
+- No raw style values where token references are expected.
+- No `sfid` mutation without migration mapping.
+- No expression-token overwrite from resolved pull exports.
+- No undocumented workflow variants.
+
+## System Guarantees
 
 | Guarantee | Verify With | Evidence |
 | --- | --- | --- |
-| Stable component identity is preserved through `sfid` parity checks. | `npm run verify:id-sync` | Source `data-sfid` + `snapshots/*.json` |
-| All four breakpoint modes and screens are validated on every approved loop. | `npm run loop:verify-canvas` | `handoff/canvas-to-code.json` |
-| Style data entering code remains token-backed and contract-validated. | `npm run verify:tokens-sync` + `npm run loop:verify-canvas` | `tokens/figma-variables.json`, payload mode values |
-| Roundtrip apply is blocked when contract coverage is incomplete. | `npm run loop:verify-canvas` | `studioflow-project/studioflow.manifest.json` |
-| Proof artifacts are generated as required review evidence. | `npm run loop:proof` | `proof/latest/index.html`, `proof/latest/summary-card.png` |
-| Manifest state records loop outcomes for operational traceability. | `npm run manifest:update` | `studioflow-project/studioflow.manifest.json` |
-
-## Architecture
-
-1. Generate canonical handoff from code: `npm run loop:code-to-canvas`.
-2. Export approved canvas payload to `handoff/canvas-to-code.json`.
-3. Enforce contract coverage: `npm run loop:verify-canvas`.
-4. Apply verified updates to source: `npm run loop:canvas-to-code`.
-5. Publish evidence: `npm run loop:proof && npm run manifest:update`.
-
-## Workflow
-
-### Code-first
-
-```bash
-cd studioflow-project
-npm run setup:project
-npm run loop:code-to-canvas
-npm run export:tokens-studio
-# Import tokens/tokens-studio-import.json via Tokens Studio plugin in Figma
-# Figma operations and export to handoff/canvas-to-code.json
-npm run loop:verify-canvas
-npm run loop:canvas-to-code
-npm run check
-npm run build
-npm run loop:proof
-npm run manifest:update
-```
-
-### Design-first
-
-```bash
-cd studioflow-project
-# Export approved handoff/canvas-to-code.json from Figma
-npm run loop:verify-canvas
-npm run loop:canvas-to-code
-npm run check
-npm run build
-npm run loop:proof
-npm run manifest:update
-```
-
-## Website Content Map
-
-The website and repo use one narrative structure:
-1. Structural Alignment
-2. Preserving Intent Across Environments
-3. Deterministic Code-to-Canvas Generation
-4. Naming and Component Identity Parity
-5. Team-Level Outcomes
-6. Technical Foundations
-
-Live website:
-- https://becktothefuture.github.io/studioflow/
+| Stable component identity parity | `npm run verify:id-sync` | source `data-sfid` + `snapshots/*.json` |
+| Canvas payload contract coverage before apply | `npm run loop:verify-canvas` | `handoff/canvas-to-code.json` |
+| Token determinism and sync discipline | `npm run verify:tokens-sync` | `tokens/figma-variables.json` and generated artifacts |
+| Proof artifact generation for review | `npm run loop:proof` | `proof/latest/index.html`, `proof/latest/summary-card.png` |
+| Manifested loop traceability | `npm run manifest:update` | `studioflow-project/studioflow.manifest.json` |
 
 ## Quick Start
 
 ```bash
 cd studioflow-project
 npm run setup:project
-npm run demo:website:capture
+npm run sync:push
+# Export approved handoff/canvas-to-code.json from Figma
+npm run loop:verify-canvas
+npm run sync:pull
+npm run check
+npm run build
+npm run loop:proof
+npm run manifest:update
 ```
 
-Successful first run criteria:
-- `proof/latest/index.html` exists
-- `proof/latest/summary-card.png` exists
-- `npm run check` passes
-- `npm run build` passes
+## Command Surface
 
-## Naming and Semantic Conventions
+Current stable commands:
+- `npm run sync:push`
+- `npm run sync:pull`
+- `npm run conduit:generate`
+- `npm run loop:verify-canvas`
+- `npm run check`
 
-- `sfid:*` values define stable component identity.
-- Breakpoint modes are fixed: `mobile`, `tablet`, `laptop`, `desktop`.
-- Token authority starts in `tokens/figma-variables.json`.
-- Token Studio import file is `tokens/tokens-studio-import.json`.
-- Canonical handoff files are `handoff/code-to-canvas.json` and `handoff/canvas-to-code.json`.
+Target parity commands:
+- `npm run ir:build`
+- `npm run ir:verify-structure`
+- `npm run tokens:verify-expressions`
+- `npm run sync:orchestrate -- --direction push|pull --project-type auto`
 
-Glossary:
-- Intent: semantic meaning preserved across environments.
-- Parity: matching semantic identity between source and payload state.
-- Deterministic generation: repeatable payload output from the same source state.
-- Contract gate: required validation step before apply.
-- Proof artifact: generated file used for review and audit.
+## Success Criteria
 
-## Operator Docs
+StudioFlow is complete-parity ready only when all are true:
 
-- Project README: `studioflow-project/README.md`
-- Workflow spec: `studioflow-project/docs/STUDIOFLOW_WORKFLOW.md`
-- Canvas contract: `studioflow-project/docs/CANVAS_EXCHANGE_CONTRACT.md`
-- Demo roundtrip: `studioflow-project/docs/DEMO_WEBSITE_ROUNDTRIP.md`
-- Brand positioning: `studioflow-project/docs/BRAND_POSITIONING.md`
+1. identical structure in code and Figma after roundtrip
+2. identical token semantics preserved after roundtrip
+3. identical content semantics preserved after roundtrip
+4. deterministic receipts for every apply
+5. onboarding works across HTML/CSS/JS and React without project-specific rewrites
 
-## Roadmap
+## Operator References
 
-Near-term:
-1. Replace modeled performance ranges with measured baseline metrics.
-2. Expand CI templates for contract and proof gates.
-3. Publish versioned naming governance guidance.
-
-Mid-term:
-1. Add multi-repo manifest lineage aggregation.
-2. Ship platform rollout templates for large teams.
-3. Extend contract diagnostics for faster gate triage.
+- Canonical parity guide: `studioflow-project/docs/DESIGN_SYSTEM_AND_FIGMA_SYNC.md`
+- Implementation program: `studioflow-project/docs/PARITY_CHANGE_PROGRAM.md`
+- Standards baseline: `studioflow-project/docs/DESIGN_SYSTEM_STANDARD.md`
+- Conduit setup: `studioflow-project/docs/CONDUIT_SETUP.md`
+- MCP setup: `studioflow-project/docs/MCP_SETUP.md`
