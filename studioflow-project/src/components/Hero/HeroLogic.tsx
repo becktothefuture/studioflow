@@ -123,9 +123,9 @@ export function HeroLogic() {
           "StudioFlow keeps tokens and component anchors aligned so your approved design arrives in production the way you intended.",
         supportingParagraph:
           "Run one checklist, apply updates in Figma with Conduit, and send changes back to code through built-in safety checks.",
-        commandLine: "$ npm run loop:figma-roundtrip",
+        commandLine: "$ npm run sync:push",
         commandHint:
-          "After you export handoff/canvas-to-code.json from Figma, run npm run loop:figma-roundtrip:apply.",
+          "After you export handoff/canvas-to-code.json from Figma, run npm run sync:pull.",
         primaryActionLabel: "See the Loop",
         secondaryActionLabel: "View Proof"
       },
@@ -179,7 +179,7 @@ export function HeroLogic() {
             title: "3) Apply back to code",
             state: "Run the apply wrapper to verify, apply, check, build, and create proof output.",
             result: "Code and Figma remain aligned with a review trail.",
-            verification: "npm run loop:figma-roundtrip:apply"
+            verification: "npm run sync:pull"
           }
         ]
       },
@@ -196,19 +196,18 @@ export function HeroLogic() {
           {
             title: "Prepare payload",
             detail: "Build tokens and generate the code-to-Figma payload.",
-            command: "npm run build:tokens && npm run loop:code-to-canvas",
+            command: "npm run sync:push",
             verification: "Output file: handoff/code-to-canvas.json"
           },
           {
-            title: "Run checklist",
-            detail: "Print the operator checklist before editing in Figma.",
-            command: "npm run loop:figma-roundtrip",
-            verification: "The checklist shows steps 1 through 9."
+            title: "Apply in Figma",
+            detail: "Use Conduit/plugin to apply handoff/code-to-canvas.json and export handoff/canvas-to-code.json.",
+            verification: "Input to pull step: handoff/canvas-to-code.json"
           },
           {
             title: "Apply safely",
             detail: "After Figma export, run one command to apply and generate proof output.",
-            command: "npm run loop:figma-roundtrip:apply",
+            command: "npm run sync:pull",
             verification: "Output files: proof/latest/index.html + studioflow.manifest.json"
           }
         ]
@@ -235,7 +234,7 @@ export function HeroLogic() {
           {
             title: "Apply guard",
             control: "Code updates stop automatically if verification fails.",
-            verification: "npm run loop:figma-roundtrip:apply"
+            verification: "npm run sync:pull"
           }
         ]
       },
@@ -288,15 +287,15 @@ export function HeroLogic() {
           },
           {
             title: "Roundtrip walkthrough",
-            detail: "Follow the full demo flow from code to Figma and back.",
-            referenceLabel: "Open DEMO_WEBSITE_ROUNDTRIP.md",
-            referenceHref: "./docs/DEMO_WEBSITE_ROUNDTRIP.md"
+            detail: "Use the canonical parity guide for the full bidirectional workflow.",
+            referenceLabel: "Open DESIGN_SYSTEM_AND_FIGMA_SYNC.md",
+            referenceHref: "./docs/DESIGN_SYSTEM_AND_FIGMA_SYNC.md"
           },
           {
             title: "Workflow rules",
-            detail: "See the full system model and required quality gates.",
-            referenceLabel: "Open STUDIOFLOW_WORKFLOW.md",
-            referenceHref: "./docs/STUDIOFLOW_WORKFLOW.md"
+            detail: "See the prioritized program of system changes for full parity.",
+            referenceLabel: "Open PARITY_CHANGE_PROGRAM.md",
+            referenceHref: "./docs/PARITY_CHANGE_PROGRAM.md"
           }
         ]
       },
@@ -311,8 +310,8 @@ export function HeroLogic() {
         {
           title: "Workflow",
           links: [
-            { label: "Workflow Guide", href: "./docs/STUDIOFLOW_WORKFLOW.md" },
-            { label: "Demo Walkthrough", href: "./docs/DEMO_WEBSITE_ROUNDTRIP.md" }
+            { label: "Parity Guide", href: "./docs/DESIGN_SYSTEM_AND_FIGMA_SYNC.md" },
+            { label: "Change Program", href: "./docs/PARITY_CHANGE_PROGRAM.md" }
           ]
         },
         {

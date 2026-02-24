@@ -1,236 +1,353 @@
-# Design System & Code-to-Figma Sync
+# StudioFlow Roundtrip Parity Guide
 
-Single reference for the StudioFlow design system, token rules, code→Figma sync pipeline, and Figma MCP integration. Use for CLAUDE.md, Cursor rules, or agent prompts when implementing from Figma or working on the roundtrip.
+This guide defines how StudioFlow reaches the only acceptable target state:
 
-**Scope:** This doc covers the **design system structure**, the **three-phase code→Figma sync**, **current state and gaps**, and **how to improve Figma interpretation**. Sync from Figma back to code is a separate flow (see AGENT.md and CONDUIT_SETUP.md) once code→Figma is stable.
-**Canonical standard:** `docs/DESIGN_SYSTEM_STANDARD.md` is the invariant reference for spacing/typography/colour/radii/motion/breakpoints and the code↔Figma mapping contract.
+- **complete Figma ⇄ code parity**
+- **sync in either direction without drift**
+- **works for any web project, not just React**
 
+Use this as the canonical operating document for product, design, engineering, and agent workflows.
 
----
+## 1. North Star
 
-## 1. Design system standard (invariant)
+StudioFlow should behave like a tennis rally:
 
-The token system follows a **fixed design-system standard** so any project can be rolled out the same way. Use `docs/DESIGN_SYSTEM_STANDARD.md` for canonical definitions.
+1. Code sends structure + styling intent to Figma.
+2. Figma sends back edited structure + styling intent.
+3. No meaning is lost in either direction.
+4. No hidden rewrite changes the source of truth.
 
-- **Spacing:** 8 base spacing values + 2 micro spacing values (e.g. `xxs`, `xs` for micro; then `sm` … `xxl` or equivalent 8-step scale). All paddings, gaps, and rhythm map to these tokens.
-- **Sizes / layout:** Systematised tokens for borders, radii, min/max widths, key heights (e.g. button height). No ad-hoc px in styles.
-- **Colour:** Semantic colour tokens (brand primaries, surfaces, text, muted, stroke). No raw hex in component styles.
-- **Typography:** Font family, size scale, weight scale, line-height (prefer percentage or unitless ratio), letter-spacing. All text styles use tokens.
-- **Motion / effects:** Duration and easing tokens; shadow tokens where needed.
-- **Breakpoints:** Exactly four modes — **mobile** (390), **tablet** (768), **laptop** (1280), **desktop** (1440). Mode names and widths live in `studioflow.workflow.json`; Figma mode name must equal workflow breakpoint name.
-- **Non-token values:** Anything that cannot be a variable (e.g. complex shadows, gradients) is captured as **named styles** (e.g. “Card”, “Button”, “Gradient / Brand +20hue”) that reference tokens where possible.
+"Intent" includes:
+- DOM tree and hierarchy
+- component identity (`sfid`)
+- tokens and token references
+- responsive behavior by breakpoint/mode
+- style semantics (fills, strokes, typography, spacing, radius, effects)
+- static content values
 
----
+## 2. Current Reality Check
 
-## 2. Design system structure in this repo
+### What currently works toward parity
 
-### 2.1 Token definitions
+1. **Deterministic token pipeline exists**
+- `tokens/figma-variables.json` feeds generated token artifacts.
+- `npm run build:tokens` is stable and repeatable.
 
-**Where defined**
+2. **Contract gate exists before apply**
+- `npm run loop:verify-canvas` blocks malformed payloads.
+- Missing modes/screens/sfids are rejected.
 
-- **Single source of truth:** `tokens/figma-variables.json` — nested JSON (e.g. `color.brand.ink.value`, `space.sm.value`, `font.size.body.value`).
-- **Generated (do not edit):** `tokens/tokens.css`, `tokens/tokens.ts`, `src/styles/tokens.css`.
+3. **Stable identity primitive exists**
+- `data-sfid="sfid:*"` is enforced and checked.
+- `npm run verify:id-sync` protects anchor continuity.
 
-**Format**
+4. **Push/pull wrappers exist**
+- `npm run sync:push` and `npm run sync:pull` provide a simple operational path.
 
-- Nested JSON with `value` at leaves. Flattened names in code: first path segment + rest joined with `-` (e.g. `color-brand-ink`, `space-sm`, `font-size-body`).
-- CSS: `var(--color-brand-ink)`. TypeScript: `tokens["color-brand-ink"]` → `"var(--color-brand-ink)"`.
+5. **Evidence trail exists**
+- Manifest/proof artifacts provide auditability for each loop.
 
-**Transformation**
+### What currently works against parity
 
-- **Build:** `scripts/build-tokens.mjs` → `npm run build:tokens`.
-- **Figma sync:** `scripts/loop-code-to-canvas.mjs` assigns tokens to **token frames** via `studioflow.workflow.json`:
-  - **Tokens / Colors** — prefix `color`
-  - **Tokens / Typography** — prefix `font`
-  - **Tokens / Spacing** — prefixes `space`, `size`, `radius`, `shadow`, `opacity`, `z`
-- **Figma variable names:** Plugin replaces the **first** `-` with `/` (e.g. `color-brand-ink` → `color/brand-ink`). Any script or MCP that writes variables should use this same rule.
+1. **No structural roundtrip model**
+- Current pull path updates token values; it does not apply DOM/layout structure changes from Figma back to source.
+- Result: design structure can drift from code structure.
 
-**Rules**
+2. **Project-specific style mapping in conduit metadata**
+- `styleLayer` is hardcoded to hero-specific sfids and style assumptions.
+- This blocks universal project usage.
 
-1. Add or change tokens only in `tokens/figma-variables.json`; then run `npm run build:tokens`.
-2. In `src/`, use only token names (enforced by `verify:no-hardcoded`). When implementing from Figma, map to existing tokens or add new ones to the JSON and regenerate.
-3. Do not write resolved `color-mix()` or `clamp()` back into `figma-variables.json`; keep expressions there and resolve at sync time for Figma.
-4. Generate conduit + mapping artifacts from a single entrypoint: `npm run conduit:generate`.
+3. **Framework/path coupling**
+- Scanners/extractors assume `src/` and React-like files (`tsx/jsx`) as primary path.
+- HTML-first or other frameworks require manual adaptation.
 
-**Colors in Figma**
+4. **Expression fidelity risk on pull**
+- Figma-exported float/color values are serialized as resolved values.
+- Applying those directly can overwrite expression-based token intent (e.g. clamp semantics).
 
-- Only a subset are bindable as Figma COLOR variables (e.g. ink, signal, primary, secondary); others are resolved (e.g. from `color-mix()`) and applied as hex fills. Document or log which tokens are “variable-bound” vs “resolved fill” so designers know what updates with mode.
+5. **Documentation drift and command drift**
+- Multiple docs disagree on active commands and flows.
+- This causes operational confusion and inconsistent team behavior.
 
-### 2.2 Component library
+## 3. Five Fundamental Flaws
 
-- **Location:** `src/components/` (Hero/, Background/). React only; no separate design-system package.
-- **Styling:** Global CSS in `src/styles/globals.css` with BEM-like class names (e.g. `.hero-panel`, `.button-primary`). No CSS Modules or styled-components; all token-based.
-- **Stable IDs:** Elements that roundtrip use `data-sfid="sfid:hero-root"` (and similar). Do not remove or rename without updating handoff/snapshots.
-- **No Storybook.** For Figma-to-code, use tokens + class names + `data-sfid` mapping.
+These are the core reasons the system feels complicated and fragile.
 
-**Implementing a Figma component:** (1) Map to an existing or new class; (2) use only `var(--token-name)` in CSS; (3) add the same `data-sfid` in code if the node has a stable ID in Figma.
+### Flaw 1: Missing Canonical Intermediate Representation (IR)
 
-### 2.3 Frameworks & libraries
+The system has token payloads, but no single canonical **UI graph** that both code and Figma serialize to and from.
 
-- React 18, Vite 5, TypeScript. Plain CSS only; no Tailwind or CSS-in-JS.
-- When generating code from Figma: emit React + CSS with `var(--token-name)`; map Figma typography/fills to our token names.
+Impact:
+- cannot guarantee full structure parity
+- cannot diff intent at the right abstraction
+- roundtrip becomes value sync, not system sync
 
-### 2.4 Asset management
+### Flaw 2: Token sync is stronger than structure sync
 
-- Images referenced from `src/` (e.g. `import logoMark from "../../../assets/studioflow-logo.png"`). No central `public/` asset list. Base path via `STUDIOFLOW_BASE_PATH` in Vite if needed.
-- **Figma:** Use localhost or provided image/SVG URLs from the Figma payload; do not add new icon packages.
+Tokens are first-class. Structure is not.
 
-### 2.5 Icon system
+Impact:
+- Figma can change hierarchy while code remains unchanged
+- parity claim is overstated by current implementation
+- manual rewrite work creeps back in
 
-- No dedicated icon system. Icons are inline assets or SVGs. Use assets from the Figma payload; do not introduce new icon packages.
+### Flaw 3: Runtime and tooling are React-biased
 
-### 2.6 Styling approach
+Core onboarding/extraction scripts assume React conventions and `src/` layout.
 
-- Single stylesheet: `src/styles/globals.css` imports `tokens.css`. BEM-like naming.
-- **Responsive:** Four breakpoints in workflow only; no `@media` for layout in the current demo. Responsive typography uses `clamp()` (e.g. hero title). Spacing/sizing in Figma can be scaled per mode by the plugin; in CSS we use one value per token (and `clamp()` where needed).
-- Never use raw hex, px/rem/em, or `calc()` in `src/` except inside `var(--...)` (enforced by `verify:no-hardcoded`).
+Impact:
+- non-React projects need one-off handling
+- onboarding is not reproducible across project types
+- scale-to-any-project objective is blocked
 
-### 2.7 Project structure
+### Flaw 4: Style semantics are not fully normalized
 
-```
-studioflow-project/
-├── tokens/
-│   ├── figma-variables.json   # Source of truth
-│   ├── tokens.css             # Generated
-│   └── tokens.ts              # Generated
-├── src/
-│   ├── styles/
-│   │   ├── tokens.css         # Generated copy
-│   │   └── globals.css       # All component styles
-│   ├── components/ (Hero/, Background/)
-│   └── main.tsx
-├── handoff/
-│   ├── code-to-canvas.json    # Code → Figma payload
-│   └── canvas-to-code.json    # Figma → code payload
-├── studioflow.workflow.json   # Token frames, breakpoints, exchange paths
-└── figma-plugins/studioflow-screens/
-```
+The system partially maps token values, but style intent is still mixed between:
+- token-bound
+- resolved literal
+- custom plugin renderer behavior
 
----
+Impact:
+- inconsistent behavior across modes
+- hard-to-debug Figma binding outcomes
+- elevated drift risk when pulling back
 
-## 3. Code-to-Figma sync pipeline (three phases)
+### Flaw 5: Operational surface is fragmented
 
-**Goal:** Make the workflow applicable to any coded design project: code → tokenised design system → conduit file → Figma → verification.
+Too many partially overlapping docs and flows dilute confidence.
 
-### Phase 1 — Full tokenisation and coverage report
+Impact:
+- teams execute different workflows
+- quality gates are bypassed accidentally
+- trust in the system declines
 
-- **Input:** Current codebase (CSS/TS/JSX and existing tokens).
-- **Steps:** (1) Transform design into a fully tokenised system per the design system standard (Section 1). (2) Apply tokenisation across all four breakpoints. (3) Replace raw values with token references. (4) Produce a **coverage report:** token names/categories, properties covered, hardcoded remnants with file:line, and a summary %.
-- **Output:** Updated token set and source; coverage report (machine- and human-readable).
+## 4. Required Architecture For True Parity
 
-### Phase 2 — Conduit file for Figma
+### 4.1 Introduce a canonical `StudioFlow IR`
 
-- **Input:** Fully tokenised codebase and token definitions.
-- **Steps:** (1) Produce a conduit file (handoff payload for Conduit MCP / plugin) that: carries all token definitions with values **per mode** where they differ; maps tokens to Figma variable types (COLOR, FLOAT, STRING) and modes; defines assignments of tokens to element properties (fills, strokes, typography, padding, gap, sizes). (2) Introduce a **style layer:** semantic styles (e.g. “Card”, “Button”, “Text / Body”) as sets of token→property; special styles (e.g. gradient brand → brand+20° hue); mapping from element (e.g. sfid) + property to token or style name.
-- **Output:** Conduit handoff (e.g. `code-to-canvas.json` or extended schema) sufficient for Figma to create/update variables, modes, and styles and assign them to elements.
-- **Current implementation additions:** `conduitVersion`, `tokenMapping`, `styleLayer` in `handoff/code-to-canvas.json`, plus generated `handoff/code-to-figma-mapping.json`.
+Create a versioned, deterministic IR JSON that contains:
+- node tree (`type`, `children`, `order`)
+- stable ids (`sfid`)
+- semantic style refs (token/style names, not raw literals)
+- content entries (text, attributes)
+- layout primitives (stack/grid/constraints)
+- breakpoint mode overrides
 
-### Phase 3 — Build in Figma and verification
+All directions must use this flow:
+- code -> IR -> Figma
+- Figma -> IR -> code
 
-- **Input:** Conduit file; Figma file (plugin/Conduit available).
-- **Steps:** (1) Apply conduit in Figma: create/update variable collections and modes, create/update semantic and special styles, assign tokens/styles to elements. (2) Run **verification:** log which properties were bound (token or style); flag properties that could not be tokens but **could** be Figma styles; optionally persist result for auditing.
-- **Output:** Updated Figma file; verification log with coverage and “could be styles” suggestions.
+### 4.2 Separate deterministic engine from agentic assist
 
-**Out of scope here:** Sync from Figma back to code (separate flow). Exact conduit file format may be current `code-to-canvas.json` plus extensions; the important part is tokens per mode, style definitions, and element–property assignments.
+Deterministic responsibilities:
+- parsing adapters
+- serialization
+- contract validation
+- safe apply
+- diff and patch generation
 
----
+Agentic responsibilities:
+- semantic token naming proposals
+- fuzzy structure matching when ids are absent
+- conflict resolution suggestions for ambiguous merges
 
-## 4. Current state and gap analysis
+### 4.3 Add adapter architecture for "any project"
 
-### What already exists
+Use adapters per project type:
+- `html-css-js` adapter
+- `react` adapter
+- `vue` adapter
+- `svelte` adapter
 
-| Area | Current state |
-|------|----------------|
-| Token source | `tokens/figma-variables.json`; build generates `tokens.css` and `tokens.ts`. |
-| Spacing scale | 11 spacing-like tokens (`space-xxs` … `space-3xl`). Not yet normalised to “8 + 2 micro”. |
-| Breakpoints | Four modes in `studioflow.workflow.json`: mobile 390, tablet 768, laptop 1280, desktop 1440. |
-| Code→Figma payload | `handoff/code-to-canvas.json` with flat token list (name, value, frame); tokenFrames, variableModes, screens. |
-| Conduit / plugin | Conduit MCP applies payload; plugin creates “StudioFlow Tokens” collection, four modes, COLOR/FLOAT/STRING variables, scales FLOAT per mode, resolves `clamp()` per breakpoint. |
-| Canvas→code | `handoff/canvas-to-code.json` with `variableModes[].values` per mode; used for verify and apply. |
-| Enforcement | `verify-no-hardcoded`, `loop:verify-canvas`, `loop:proof`, manifest update. No dedicated token coverage or “could be styles” report. |
+Each adapter must implement the same interface:
+- `extract(project) -> IR`
+- `apply(irDiff, project) -> patch`
+- `verify(project, ir) -> report`
 
-### Gaps vs the pipeline
+### 4.4 Make style policy explicit
 
-| Gap | Description |
-|-----|-------------|
-| Design system standard not codified | “8 + 2 micro” and full standard (radii, typography scale, etc.) are not in a single canonical doc. |
-| No per-breakpoint token values in source | Token source is single-value; per-mode values are computed in plugin (scale, clamp) or from canvas-to-code. |
-| No coverage report | No script that outputs tokenised vs non-tokenised properties with file:line and summary %. |
-| Conduit file lacks styles and mapping | code-to-canvas has tokens and requirements but not semantic styles (Card, Button, gradient) or element–property→token/style mapping. |
-| No gradient/special style | No defined gradient style (e.g. brand → +20hue) in standard or conduit. |
-| Verification does not flag “could be styles” | Plugin logs created/skipped variable count only; no list of unbound but style-able properties. |
+Every style assignment in IR must be one of:
+- `tokenRef`
+- `namedStyleRef`
+- `resolvedLiteral` (only when unavoidable, explicitly flagged)
 
-### How close (rough)
+No silent fallback.
 
-- **Phase 1:** ~50–60%. Tokenisation enforced; missing canonical standard doc, optional per-mode source or derivation rules, and coverage report.
-- **Phase 2:** ~40–50%. Conduit and variables/modes exist; missing semantic styles, element–property mapping, and gradient style in spec.
-- **Phase 3:** ~40%. Variables and binding exist; verification is contract-focused; missing bound/unbound log and “could be styles” suggestions.
+### 4.5 Preserve token expression fidelity
 
-### Improvements (unified list)
+Rules:
+1. canonical token source may contain expressions.
+2. Figma export values are treated as mode projections, not canonical replacement values.
+3. pull flow must not overwrite expression tokens unless explicitly approved.
 
-1. **Codify design system standard** in one place (e.g. `docs/DESIGN_SYSTEM_STANDARD.md`): 8+2 spacing, typography scale, colour roles, radii, motion, four breakpoints. Align current spacing (e.g. map 11 → 8+2 or declare current scale as project standard).
-2. **Phase 1 coverage report:** Script (e.g. `scripts/report-token-coverage.mjs`) that scans `src/` and outputs token usage per category, hardcoded properties with location, summary %. Optionally integrate with `verify-no-hardcoded`.
-3. **Per-breakpoint tokens:** Either (a) per-mode overrides in token source, or (b) single value + documented derivation (scale factors, clamp) so conduit is generated with full per-mode values. Prefer (b) for single source of truth.
-4. **Style layer in conduit:** Extend code-to-canvas with: named styles (Card, Button, Text/Body, etc.) as token→property sets; gradient style (e.g. brand → +20hue); sfid (+ property) → token or style name. Plugin/Conduit create Figma styles and apply them.
-5. **Phase 3 verification log:** After applying in Figma: list bound vs unbound properties; list failed bindings and reason; flag “could not bind but could be a style”; write to log and optionally to `proof/` or `handoff/`.
-6. **Token naming / grouping:** Document and use consistently the rule “first `-` → `/`” for Figma variable names (`color/brand-ink`, `space/sm`).
-7. **Line-height roundtrip:** Document and enforce one convention (e.g. Figma line-height as % of font size, token value × 100 when writing; convert back to unitless when reading) so roundtrip matches `font-line-height-*` tokens.
-8. **Colors: variable vs resolved:** List which tokens are variable-bound vs resolved fill in this doc or plugin log so designers know what updates with mode.
-9. **Conduit schema and versioning:** Define a stable JSON schema (or version field) for the conduit payload so Cursor/MCP and the Figma plugin can validate and evolve the handoff format without breaking. Include a `conduitVersion` (or equivalent) in `code-to-canvas.json` and document supported versions in the design system doc.
-10. **Bidirectional mapping table (code ↔ Figma):** Maintain a single mapping table (e.g. in docs or as generated artifact) that lists: code token name, CSS `var(--…)` name, Figma variable grouped name, Figma type (COLOR/FLOAT/STRING), and which Figma node properties can be bound. Cursor and the plugin both consume this so the middle layer is unambiguous.
-11. **MCP-first conduit flow:** Document and, where possible, automate a path where Cursor (or any MCP client) can trigger “generate conduit from code” and “apply conduit to Figma” without manual script runs. For example: a single npm script or MCP tool that runs `build:tokens` → `loop:code-to-canvas` and outputs the path to the conduit file, so the middle layer is a clear “call this, get this file, then use Conduit to apply.”
-12. **Diff-friendly conduit output:** Ensure the conduit file (and any verification report) is deterministic and diff-friendly (e.g. sorted keys, stable ordering of tokens and modes) so that git diffs and code reviews can catch unintended changes to what gets sent to Figma.
-13. **Error taxonomy and recovery hints:** Define a small set of error types for the middle layer (e.g. “token missing in Figma”, “mode mismatch”, “sfid not found”, “style creation failed”) and document recommended recovery (e.g. “re-run plugin”, “add token to figma-variables.json”). Plugin and verification log should emit these codes so Cursor/agents can suggest fixes.
+## 5. Universal Workflow (Any Project)
 
----
+## Step A: Onboard codebase
 
-## 5. Figma MCP workflow (design-to-code)
+1. Detect project type and load adapter.
+2. Scan for hardcoded values.
+3. Generate token map proposal.
+4. Apply approved token map.
+5. Generate initial sfid map.
+6. Build IR baseline.
 
-When using Figma MCP (e.g. get_design_context, get_screenshot):
+## Step B: Push to Figma
 
-1. **Resolve design to tokens:** Map every Figma fill, text style, and spacing to a token from `tokens/figma-variables.json` (or add a new token there). Do not emit hardcoded colors or pixel values.
-2. **Use existing class names where possible:** Prefer `.hero-panel`, `.section-title`, `.button-primary`. If the design doesn’t match, add a new class in `globals.css` with tokens only.
-3. **Preserve sfids:** For nodes that correspond to known screens (e.g. hero), use the same `data-sfid` as in the codebase so roundtrip and verification keep working.
-4. **Output:** React components + CSS that only use `var(--token-name)` and the existing global stylesheet; no new styling framework.
+1. Generate conduit payload from IR + token source.
+2. Apply via Figma plugin/Conduit.
+3. Verify binding coverage and unresolved literals.
+4. Save push receipt.
 
----
+## Step C: Edit in Figma
 
-## 6. Code snippets and file reference
+Allowed edits:
+- token values by mode
+- semantic style assignments
+- content text
+- structure edits only when sfids are preserved or remapped
 
-**Token in CSS**
+## Step D: Pull back to code
 
-```css
-.card {
-  background: var(--color-brand-surface);
-  border-radius: var(--radius-lg);
-  padding: var(--space-md);
-  gap: var(--space-sm);
-}
-```
+1. Export canvas payload.
+2. Normalize to IR diff.
+3. Validate contract.
+4. Run safe apply through adapter.
+5. Re-run token build + checks.
+6. Generate proof + receipt.
 
-**Token in TS (if needed)**
+## Step E: Drift lock
 
-```ts
-import { tokens } from "../tokens/tokens";
-// tokens["color-brand-primary"] === "var(--color-brand-primary)"
-```
+Must pass:
+- token sync gate
+- no hardcoded style gate
+- id parity gate
+- canvas contract gate
+- structure parity gate (new)
+- expression fidelity gate (new)
 
-**Stable ID for roundtrip**
+## 6. Where Agentic Calls Are Required
 
-```tsx
-<div data-sfid="sfid:hero-content" className="hero-panel">
-```
+Use AI where deterministic parsing is insufficient.
 
-**Workflow token frames** (from `studioflow.workflow.json`): Colors `["color"]`, Typography `["font"]`, Spacing `["space","size","radius","shadow","opacity","z"]`.
+### Required agentic call 1: Semantic token naming
 
-| Purpose              | Path |
-|----------------------|------|
-| Token source         | `tokens/figma-variables.json` |
-| Generated CSS tokens | `tokens/tokens.css`, `src/styles/tokens.css` |
-| Generated TS tokens  | `tokens/tokens.ts` |
-| Global styles        | `src/styles/globals.css` |
-| Workflow config      | `studioflow.workflow.json` |
-| Code → Figma payload | `handoff/code-to-canvas.json` |
-| Figma → code payload | `handoff/canvas-to-code.json` |
-| Conduit setup        | `docs/CONDUIT_SETUP.md` |
-| Agent rules          | `AGENT.md` |
+Input:
+- scan report
+- existing tokens
+- style contexts
+
+Output:
+- deterministic token-map proposal
+- conflict/confidence scores
+
+### Required agentic call 2: sfid recovery/matching
+
+When structure changed and ids are missing, use AI to propose node matches.
+
+Input:
+- old IR tree
+- new IR tree
+- content/style similarity features
+
+Output:
+- match proposals + confidence
+- mandatory human review on low confidence
+
+### Required agentic call 3: merge conflict resolver
+
+When Figma and code changed same region, AI proposes merge plan.
+
+Input:
+- code-side IR diff
+- figma-side IR diff
+
+Output:
+- merge patch candidates + risk score
+
+## 7. Scripted Agentic Orchestration
+
+Yes, this should be scripted.
+
+Implement a single orchestrator:
+- `scripts/roundtrip-orchestrator.mjs`
+- command: `npm run sync:orchestrate -- --direction push|pull --project-type auto`
+
+Responsibilities:
+1. run deterministic pipeline stages
+2. invoke agentic calls via configured provider when required
+3. checkpoint each stage in trust ledger
+4. stop on gate failure with deterministic recovery hints
+5. emit one final receipt artifact with full lineage
+
+Add machine-readable config:
+- `studioflow.agentic.json`
+
+Example shape:
+- providers
+- retry policy
+- confidence thresholds
+- human-approval thresholds
+- deterministic fallback behavior
+
+## 8. Alternative Approaches Considered
+
+### Option 1: Continue token-only parity (current tendency)
+
+Pros:
+- fastest incremental progress
+
+Cons:
+- never reaches full structure parity
+- still drifts at layout/DOM level
+
+### Option 2: Figma as source of truth
+
+Pros:
+- designer-first
+
+Cons:
+- weak for engineering-led refactors
+- brittle for production semantics
+
+### Option 3: Dual-source with canonical IR (recommended)
+
+Pros:
+- true bidirectional parity
+- reproducible and auditable
+- framework-agnostic via adapters
+
+Cons:
+- higher upfront architecture work
+
+## 9. Non-Negotiable Operating Rules
+
+1. No apply without contract verification.
+2. No raw style values where tokens are expected.
+3. No sfid mutation without migration map.
+4. No expression token overwrite from resolved pull values.
+5. No undocumented workflow variants.
+
+## 10. Practical Commands (Current + Target)
+
+Current stable commands:
+- `npm run sync:push`
+- `npm run sync:pull`
+- `npm run conduit:generate`
+- `npm run loop:verify-canvas`
+- `npm run check`
+
+Target new commands:
+- `npm run ir:build`
+- `npm run ir:verify-structure`
+- `npm run tokens:verify-expressions`
+- `npm run sync:orchestrate`
+
+## 11. Success Criteria
+
+StudioFlow is "complete parity" ready when all are true:
+
+1. same UI structure in code and Figma after any roundtrip
+2. same token semantics preserved after any roundtrip
+3. same content semantics preserved after any roundtrip
+4. deterministic receipts for every apply
+5. onboarding works for HTML/CSS/JS and React with no custom rewrite

@@ -73,351 +73,670 @@ var PAYLOAD = {
     {
       "name": "color-brand-ink",
       "value": "#070A13",
+      "path": [
+        "color",
+        "brand",
+        "ink"
+      ],
       "frame": "Tokens / Colors"
     },
     {
       "name": "color-brand-signal",
       "value": "#88AEBF",
+      "path": [
+        "color",
+        "brand",
+        "signal"
+      ],
       "frame": "Tokens / Colors"
     },
     {
       "name": "color-brand-bg",
       "value": "#0F141D",
+      "path": [
+        "color",
+        "brand",
+        "bg"
+      ],
       "frame": "Tokens / Colors"
     },
     {
       "name": "color-brand-surface",
       "value": "#161E28",
+      "path": [
+        "color",
+        "brand",
+        "surface"
+      ],
       "frame": "Tokens / Colors"
     },
     {
       "name": "color-brand-panel",
       "value": "#1E2832",
+      "path": [
+        "color",
+        "brand",
+        "panel"
+      ],
       "frame": "Tokens / Colors"
     },
     {
       "name": "color-brand-text",
       "value": "#99B9C8",
+      "path": [
+        "color",
+        "brand",
+        "text"
+      ],
       "frame": "Tokens / Colors"
     },
     {
       "name": "color-brand-muted",
       "value": "#5A7381",
+      "path": [
+        "color",
+        "brand",
+        "muted"
+      ],
       "frame": "Tokens / Colors"
     },
     {
       "name": "color-brand-stroke",
       "value": "#3D4F5B",
+      "path": [
+        "color",
+        "brand",
+        "stroke"
+      ],
       "frame": "Tokens / Colors"
     },
     {
       "name": "color-brand-stroke-strong",
       "value": "#617D8B",
+      "path": [
+        "color",
+        "brand",
+        "stroke-strong"
+      ],
       "frame": "Tokens / Colors"
     },
     {
       "name": "color-brand-primary",
       "value": "#7A8DFF",
+      "path": [
+        "color",
+        "brand",
+        "primary"
+      ],
       "frame": "Tokens / Colors"
     },
     {
       "name": "color-brand-secondary",
       "value": "#7EF7F0",
+      "path": [
+        "color",
+        "brand",
+        "secondary"
+      ],
       "frame": "Tokens / Colors"
     },
     {
       "name": "color-brand-accent",
       "value": "#92B4C4",
+      "path": [
+        "color",
+        "brand",
+        "accent"
+      ],
       "frame": "Tokens / Colors"
     },
     {
       "name": "color-brand-good",
       "value": "#8DB1C2",
+      "path": [
+        "color",
+        "brand",
+        "good"
+      ],
       "frame": "Tokens / Colors"
     },
     {
       "name": "color-brand-danger",
       "value": "#4A5F6C",
+      "path": [
+        "color",
+        "brand",
+        "danger"
+      ],
       "frame": "Tokens / Colors"
     },
     {
       "name": "color-brand-white",
       "value": "#FFFFFF",
+      "path": [
+        "color",
+        "brand",
+        "white"
+      ],
       "frame": "Tokens / Colors"
     },
     {
       "name": "space-xxs",
       "value": "2px",
+      "path": [
+        "space",
+        "xxs"
+      ],
       "frame": "Tokens / Spacing"
     },
     {
       "name": "space-xs",
       "value": "4px",
+      "path": [
+        "space",
+        "xs"
+      ],
       "frame": "Tokens / Spacing"
     },
     {
       "name": "space-sm",
       "value": "8px",
+      "path": [
+        "space",
+        "sm"
+      ],
       "frame": "Tokens / Spacing"
     },
     {
       "name": "space-md",
       "value": "16px",
+      "path": [
+        "space",
+        "md"
+      ],
       "frame": "Tokens / Spacing"
     },
     {
       "name": "space-lg",
       "value": "24px",
+      "path": [
+        "space",
+        "lg"
+      ],
       "frame": "Tokens / Spacing"
     },
     {
       "name": "space-xl",
       "value": "44px",
+      "path": [
+        "space",
+        "xl"
+      ],
       "frame": "Tokens / Spacing"
     },
     {
       "name": "space-xxl",
       "value": "64px",
+      "path": [
+        "space",
+        "xxl"
+      ],
       "frame": "Tokens / Spacing"
     },
     {
       "name": "space-ms",
       "value": "12px",
+      "path": [
+        "space",
+        "ms"
+      ],
       "frame": "Tokens / Spacing"
     },
     {
       "name": "space-ml",
       "value": "20px",
+      "path": [
+        "space",
+        "ml"
+      ],
       "frame": "Tokens / Spacing"
     },
     {
       "name": "space-2xl",
       "value": "32px",
+      "path": [
+        "space",
+        "2xl"
+      ],
       "frame": "Tokens / Spacing"
     },
     {
       "name": "space-3xl",
       "value": "40px",
+      "path": [
+        "space",
+        "3xl"
+      ],
       "frame": "Tokens / Spacing"
     },
     {
       "name": "size-border-default",
       "value": "1px",
+      "path": [
+        "size",
+        "border",
+        "default"
+      ],
       "frame": "Tokens / Spacing"
     },
     {
       "name": "size-border-strong",
       "value": "2px",
+      "path": [
+        "size",
+        "border",
+        "strong"
+      ],
       "frame": "Tokens / Spacing"
     },
     {
       "name": "size-full",
       "value": "100%",
+      "path": [
+        "size",
+        "full"
+      ],
       "frame": "Tokens / Spacing"
     },
     {
       "name": "size-viewport",
       "value": "100dvh",
+      "path": [
+        "size",
+        "viewport"
+      ],
       "frame": "Tokens / Spacing"
     },
     {
       "name": "size-intro-height",
       "value": "220px",
+      "path": [
+        "size",
+        "intro-height"
+      ],
       "frame": "Tokens / Spacing"
     },
     {
       "name": "size-shell-max",
       "value": "1200px",
+      "path": [
+        "size",
+        "shell-max"
+      ],
       "frame": "Tokens / Spacing"
     },
     {
       "name": "size-content-max",
       "value": "780px",
+      "path": [
+        "size",
+        "content-max"
+      ],
       "frame": "Tokens / Spacing"
     },
     {
       "name": "size-card-min",
       "value": "240px",
+      "path": [
+        "size",
+        "card-min"
+      ],
       "frame": "Tokens / Spacing"
     },
     {
       "name": "size-button-min-width",
       "value": "210px",
+      "path": [
+        "size",
+        "button-min-width"
+      ],
       "frame": "Tokens / Spacing"
     },
     {
       "name": "size-logo",
       "value": "50px",
+      "path": [
+        "size",
+        "logo"
+      ],
       "frame": "Tokens / Spacing"
     },
     {
       "name": "size-blur-soft",
       "value": "8px",
+      "path": [
+        "size",
+        "blur-soft"
+      ],
       "frame": "Tokens / Spacing"
     },
     {
       "name": "size-blur-strong",
       "value": "22px",
+      "path": [
+        "size",
+        "blur-strong"
+      ],
       "frame": "Tokens / Spacing"
     },
     {
       "name": "size-button-height",
       "value": "48px",
+      "path": [
+        "size",
+        "button-height"
+      ],
       "frame": "Tokens / Spacing"
     },
     {
       "name": "radius-sm",
       "value": "6px",
+      "path": [
+        "radius",
+        "sm"
+      ],
       "frame": "Tokens / Spacing"
     },
     {
       "name": "radius-md",
       "value": "12px",
+      "path": [
+        "radius",
+        "md"
+      ],
       "frame": "Tokens / Spacing"
     },
     {
       "name": "radius-lg",
       "value": "20px",
+      "path": [
+        "radius",
+        "lg"
+      ],
       "frame": "Tokens / Spacing"
     },
     {
       "name": "radius-xl",
       "value": "28px",
+      "path": [
+        "radius",
+        "xl"
+      ],
       "frame": "Tokens / Spacing"
     },
     {
       "name": "radius-pill",
       "value": "999px",
+      "path": [
+        "radius",
+        "pill"
+      ],
       "frame": "Tokens / Spacing"
     },
     {
       "name": "shadow-card",
       "value": "0 18px 42px rgba(7, 10, 19, 0.76)",
+      "path": [
+        "shadow",
+        "card"
+      ],
       "frame": "Tokens / Spacing"
     },
     {
       "name": "shadow-glow",
       "value": "0 0 34px rgba(136, 174, 191, 0.34)",
+      "path": [
+        "shadow",
+        "glow"
+      ],
       "frame": "Tokens / Spacing"
     },
     {
       "name": "font-family-base",
       "value": "\"Space Grotesk\", \"Inter\", sans-serif",
+      "path": [
+        "font",
+        "family",
+        "base"
+      ],
       "frame": "Tokens / Typography"
     },
     {
       "name": "font-family-display",
       "value": "\"Xanh Mono\", \"Space Grotesk\", monospace",
+      "path": [
+        "font",
+        "family",
+        "display"
+      ],
       "frame": "Tokens / Typography"
     },
     {
       "name": "font-size-body",
       "value": "16px",
+      "path": [
+        "font",
+        "size",
+        "body"
+      ],
       "frame": "Tokens / Typography"
     },
     {
       "name": "font-size-title",
       "value": "clamp(56px, 6vw, 92px)",
+      "path": [
+        "font",
+        "size",
+        "title"
+      ],
       "frame": "Tokens / Typography"
     },
     {
       "name": "font-size-h2",
       "value": "42px",
+      "path": [
+        "font",
+        "size",
+        "h2"
+      ],
       "frame": "Tokens / Typography"
     },
     {
       "name": "font-size-h3",
       "value": "22px",
+      "path": [
+        "font",
+        "size",
+        "h3"
+      ],
       "frame": "Tokens / Typography"
     },
     {
       "name": "font-size-kicker",
       "value": "13px",
+      "path": [
+        "font",
+        "size",
+        "kicker"
+      ],
       "frame": "Tokens / Typography"
     },
     {
       "name": "font-size-meta",
       "value": "14px",
+      "path": [
+        "font",
+        "size",
+        "meta"
+      ],
       "frame": "Tokens / Typography"
     },
     {
       "name": "font-letter-spacing-kicker",
       "value": "0.16em",
+      "path": [
+        "font",
+        "letter-spacing",
+        "kicker"
+      ],
       "frame": "Tokens / Typography"
     },
     {
       "name": "font-letter-spacing-tight",
       "value": "-0.03em",
+      "path": [
+        "font",
+        "letter-spacing",
+        "tight"
+      ],
       "frame": "Tokens / Typography"
     },
     {
       "name": "font-weight-regular",
       "value": "400",
+      "path": [
+        "font",
+        "weight",
+        "regular"
+      ],
       "frame": "Tokens / Typography"
     },
     {
       "name": "font-weight-medium",
       "value": "500",
+      "path": [
+        "font",
+        "weight",
+        "medium"
+      ],
       "frame": "Tokens / Typography"
     },
     {
       "name": "font-weight-semibold",
       "value": "600",
+      "path": [
+        "font",
+        "weight",
+        "semibold"
+      ],
       "frame": "Tokens / Typography"
     },
     {
       "name": "font-weight-bold",
       "value": "700",
+      "path": [
+        "font",
+        "weight",
+        "bold"
+      ],
       "frame": "Tokens / Typography"
     },
     {
       "name": "font-line-height-body",
       "value": "1.6",
+      "path": [
+        "font",
+        "line-height",
+        "body"
+      ],
       "frame": "Tokens / Typography"
     },
     {
       "name": "font-line-height-snug",
       "value": "1.5",
+      "path": [
+        "font",
+        "line-height",
+        "snug"
+      ],
       "frame": "Tokens / Typography"
     },
     {
       "name": "font-line-height-title",
       "value": "0.96",
+      "path": [
+        "font",
+        "line-height",
+        "title"
+      ],
       "frame": "Tokens / Typography"
     },
     {
       "name": "motion-duration-intro",
       "value": "2200ms",
+      "path": [
+        "motion",
+        "duration",
+        "intro"
+      ],
       "frame": "Tokens / Spacing"
     },
     {
       "name": "motion-duration-fast",
       "value": "220ms",
+      "path": [
+        "motion",
+        "duration",
+        "fast"
+      ],
       "frame": "Tokens / Spacing"
     },
     {
       "name": "motion-duration-medium",
       "value": "420ms",
+      "path": [
+        "motion",
+        "duration",
+        "medium"
+      ],
       "frame": "Tokens / Spacing"
     },
     {
       "name": "motion-easing-standard",
       "value": "cubic-bezier(0.2, 0.8, 0.2, 1)",
+      "path": [
+        "motion",
+        "easing",
+        "standard"
+      ],
       "frame": "Tokens / Spacing"
     },
     {
       "name": "motion-easing-entrance",
       "value": "cubic-bezier(0.12, 0.92, 0.16, 1)",
+      "path": [
+        "motion",
+        "easing",
+        "entrance"
+      ],
       "frame": "Tokens / Spacing"
     },
     {
       "name": "opacity-full",
       "value": "1",
+      "path": [
+        "opacity",
+        "full"
+      ],
       "frame": "Tokens / Spacing"
     },
     {
       "name": "opacity-bg-fallback",
       "value": "0.84",
+      "path": [
+        "opacity",
+        "bg-fallback"
+      ],
       "frame": "Tokens / Spacing"
     }
   ],
@@ -478,8 +797,8 @@ var PAYLOAD = {
         "title": "Approve once. Keep it true in code.",
         "body": "StudioFlow keeps tokens and component anchors aligned so your approved design arrives in production the way you intended.",
         "supportingParagraph": "Run one checklist, apply updates in Figma with Conduit, and send changes back to code through built-in safety checks.",
-        "commandLine": "$ npm run loop:figma-roundtrip",
-        "commandHint": "After you export handoff/canvas-to-code.json from Figma, run npm run loop:figma-roundtrip:apply.",
+        "commandLine": "$ npm run sync:push",
+        "commandHint": "After you export handoff/canvas-to-code.json from Figma, run npm run sync:pull.",
         "primaryCta": "See the Loop",
         "secondaryCta": "View Proof"
       }
@@ -584,7 +903,7 @@ var PAYLOAD = {
                 "style": "muted"
               },
               {
-                "text": "npm run loop:code-to-canvas",
+                "text": "npm run sync:push",
                 "style": "signal"
               }
             ]
@@ -618,7 +937,7 @@ var PAYLOAD = {
                 "style": "muted"
               },
               {
-                "text": "npm run loop:figma-roundtrip:apply",
+                "text": "npm run sync:pull",
                 "style": "signal"
               }
             ]
@@ -661,7 +980,7 @@ var PAYLOAD = {
                     "style": "muted"
                   },
                   {
-                    "text": "npm run build:tokens && npm run loop:code-to-canvas",
+                    "text": "npm run sync:push",
                     "style": "signal"
                   },
                   {
@@ -695,7 +1014,7 @@ var PAYLOAD = {
                     "style": "muted"
                   },
                   {
-                    "text": "npm run loop:figma-roundtrip:apply",
+                    "text": "npm run sync:pull",
                     "style": "signal"
                   },
                   {
@@ -758,7 +1077,7 @@ var PAYLOAD = {
                     "style": "muted"
                   },
                   {
-                    "text": "npm run loop:figma-roundtrip:apply",
+                    "text": "npm run sync:pull",
                     "style": "signal"
                   }
                 ]
@@ -886,7 +1205,7 @@ var PAYLOAD = {
                 "style": "muted"
               },
               {
-                "text": "Open DEMO_WEBSITE_ROUNDTRIP.md",
+                "text": "Open DESIGN_SYSTEM_AND_FIGMA_SYNC.md",
                 "style": "muted"
               }
             ]
@@ -899,7 +1218,7 @@ var PAYLOAD = {
                 "style": "muted"
               },
               {
-                "text": "Open STUDIOFLOW_WORKFLOW.md",
+                "text": "Open PARITY_CHANGE_PROGRAM.md",
                 "style": "muted"
               }
             ]
@@ -921,8 +1240,8 @@ var PAYLOAD = {
           {
             "title": "Workflow",
             "links": [
-              "Workflow Guide",
-              "Demo Walkthrough"
+              "Parity Guide",
+              "Change Program"
             ]
           },
           {

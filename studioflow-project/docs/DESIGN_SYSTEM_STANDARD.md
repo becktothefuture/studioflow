@@ -67,7 +67,7 @@ These names and widths must match `studioflow.workflow.json` and Figma mode name
 - Current workflow version: `4.0.0` (from `studioflow.workflow.json`).
 - Key shape for conduit payload is documented in:
   - `docs/DESIGN_SYSTEM_AND_FIGMA_SYNC.md`
-  - `docs/prd-figma-cursor-middle-layer.md`
+  - `docs/PARITY_CHANGE_PROGRAM.md`
 
 ## Bidirectional Mapping Contract (Code ↔ Figma)
 
