@@ -19,12 +19,18 @@ import {
 
 const __filename = fileURLToPath(import.meta.url);
 
-function asModesMap(payload) {
-  const output = {};
-  for (const mode of payload.variableModes) {
-    output[String(mode.name)] = mode.values ?? {};
+function hasCssExpression(value) {
+  return /\b(?:clamp|color-mix|calc|min|max)\s*\(/i.test(value);
+}
+
+function shouldProtectExpressionToken({ currentValue, nextValue, expressionOverwriteEnabled }) {
+  if (expressionOverwriteEnabled) {
+    return false;
   }
-  return output;
+  if (!hasCssExpression(currentValue)) {
+    return false;
+  }
+  return !hasCssExpression(nextValue);
 }
 
 export async function runLoopCanvasToCode(options = {}) {
@@ -49,18 +55,31 @@ export async function runLoopCanvasToCode(options = {}) {
   const modeMap = new Map(payload.variableModes.map((mode) => [String(mode.name), mode]));
   const defaultMode = workflow.breakpoints[workflow.breakpoints.length - 1]?.name ?? "desktop";
   const canonicalMode = process.env.STUDIOFLOW_CANONICAL_MODE || defaultMode;
+  const expressionOverwriteEnabled = process.env.STUDIOFLOW_ALLOW_EXPRESSION_OVERWRITE === "1";
   const canonicalModeValues = modeMap.get(canonicalMode)?.values;
   if (!canonicalModeValues || typeof canonicalModeValues !== "object") {
     throw new Error(`Canonical mode "${canonicalMode}" is missing in canvas payload.`);
   }
 
   let updatedTokenCount = 0;
+  const expressionProtectedTokens = [];
   for (const token of tokenRows) {
     if (!(token.name in canonicalModeValues)) {
       throw new Error(`Missing canonical token value: ${token.name}`);
     }
 
     const nextValue = String(canonicalModeValues[token.name]);
+    if (
+      shouldProtectExpressionToken({
+        currentValue: token.value,
+        nextValue,
+        expressionOverwriteEnabled
+      })
+    ) {
+      expressionProtectedTokens.push(token.name);
+      continue;
+    }
+
     if (nextValue !== token.value) {
       const updated = setTokenValueByPath(tokenJson, token.path, nextValue);
       if (!updated) {
@@ -102,7 +121,9 @@ export async function runLoopCanvasToCode(options = {}) {
     canvasProvider: payload.canvasProvider,
     integrationMode: payload.integrationMode,
     canonicalMode,
-    updatedTokenCount
+    updatedTokenCount,
+    expressionOverwriteEnabled,
+    expressionProtectedTokenCount: expressionProtectedTokens.length
   };
   manifest.lastCanvasVerification = {
     status: "passed",
@@ -157,6 +178,12 @@ export async function runLoopCanvasToCode(options = {}) {
   }
 
   console.log(`Updated tokens/figma-variables.json with mode "${canonicalMode}" values.`);
+  if (expressionProtectedTokens.length > 0) {
+    console.log(
+      `Protected ${expressionProtectedTokens.length} expression tokens from resolved overwrite: ${expressionProtectedTokens.join(", ")}`
+    );
+    console.log("Set STUDIOFLOW_ALLOW_EXPRESSION_OVERWRITE=1 to allow explicit expression replacement.");
+  }
   console.log(`Created snapshots/${snapshotFilename}`);
   console.log("Next: run `npm run check && npm run build && npm run manifest:update`.");
 }

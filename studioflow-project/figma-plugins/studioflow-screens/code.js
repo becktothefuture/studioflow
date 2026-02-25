@@ -990,18 +990,18 @@ var PAYLOAD = {
                 ]
               },
               {
-                "heading": "Run checklist",
+                "heading": "Apply in Figma",
                 "lines": [
                   {
-                    "text": "Print the operator checklist before editing in Figma.",
+                    "text": "Use Conduit/plugin to apply handoff/code-to-canvas.json.",
                     "style": "muted"
                   },
                   {
-                    "text": "npm run loop:figma-roundtrip",
+                    "text": "Export handoff/canvas-to-code.json after approvals.",
                     "style": "signal"
                   },
                   {
-                    "text": "The checklist shows steps 1 through 9.",
+                    "text": "Then run npm run sync:pull in code.",
                     "style": "muted"
                   }
                 ]

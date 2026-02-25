@@ -109,7 +109,10 @@ export async function runLoopCodeToCanvas() {
   const modeValues = createModeValues(flattened);
   const screens = createScreens(workflow, codeSfids);
   const tokenMapping = createCodeToFigmaMapping(flattened);
-  const styleLayer = createConduitStyleLayer();
+  const styleLayer = createConduitStyleLayer({
+    sfids: codeSfids,
+    tokenNames: flattened.map((token) => token.name)
+  });
   const mappingOutputPath = path.join(rootDir, "handoff", "code-to-figma-mapping.json");
 
   const codeToCanvasPayload = {

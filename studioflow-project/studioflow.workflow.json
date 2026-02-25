@@ -38,6 +38,22 @@
       "width": 1440
     }
   ],
+  "projectScan": {
+    "includePatterns": [
+      "src/**/*.{ts,tsx,js,jsx,css,scss,sass,html,htm,vue,svelte}",
+      "**/*.{html,htm,css,scss,sass,js,ts,jsx,tsx,vue,svelte}"
+    ],
+    "excludePatterns": [
+      "**/node_modules/**",
+      "**/dist/**",
+      "**/.git/**",
+      "**/*.d.ts",
+      "**/coverage/**",
+      "**/.next/**",
+      "**/.nuxt/**",
+      "**/.svelte-kit/**"
+    ]
+  },
   "exchangeFiles": {
     "codeToCanvas": "handoff/code-to-canvas.json",
     "canvasToCode": "handoff/canvas-to-code.json",

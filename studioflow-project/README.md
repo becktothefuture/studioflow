@@ -32,6 +32,8 @@ npm run sync:pull
 ## Primary Docs
 - `docs/DESIGN_SYSTEM_AND_FIGMA_SYNC.md` — canonical parity guide and universal workflow.
 - `docs/PARITY_CHANGE_PROGRAM.md` — prioritized implementation program to reach full parity.
+- `docs/PRD_PARITY_STABILIZATION.md` — current sprint PRD for concrete parity fixes.
+- `docs/PROJECT_OVERVIEW_DELTA.md` — before-vs-now overview and inspection path.
 - `docs/DESIGN_SYSTEM_STANDARD.md` — invariant token and breakpoint standards.
 - `docs/MCP_SETUP.md` — MCP client/server setup.
 - `docs/CONDUIT_SETUP.md` — Conduit + plugin setup.

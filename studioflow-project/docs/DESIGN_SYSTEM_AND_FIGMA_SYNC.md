@@ -8,6 +8,10 @@ This guide defines how StudioFlow reaches the only acceptable target state:
 
 Use this as the canonical operating document for product, design, engineering, and agent workflows.
 
+Companion docs:
+- `docs/PRD_PARITY_STABILIZATION.md` — active sprint PRD for immediate parity fixes.
+- `docs/PROJECT_OVERVIEW_DELTA.md` — before-vs-now overview and inspection map.
+
 ## 1. North Star
 
 StudioFlow should behave like a tennis rally:
@@ -327,16 +331,22 @@ Cons:
 4. No expression token overwrite from resolved pull values.
 5. No undocumented workflow variants.
 
-## 10. Practical Commands (Current + Target)
+## 10. Practical Commands
 
-Current stable commands:
+Current (implemented and runnable now):
 - `npm run sync:push`
 - `npm run sync:pull`
 - `npm run conduit:generate`
 - `npm run loop:verify-canvas`
 - `npm run check`
+- `npm run scan:project -- --project-type html`
+- `npm run scan:project -- --project-type react`
 
-Target new commands:
+Expression-safety default on pull:
+- `npm run sync:pull` protects expression tokens (for example `clamp(...)`, `color-mix(...)`) from resolved overwrite.
+- Override only intentionally: `STUDIOFLOW_ALLOW_EXPRESSION_OVERWRITE=1 npm run loop:canvas-to-code`
+
+Roadmap (not implemented yet):
 - `npm run ir:build`
 - `npm run ir:verify-structure`
 - `npm run tokens:verify-expressions`

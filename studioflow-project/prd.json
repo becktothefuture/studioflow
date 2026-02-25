@@ -1,85 +1,72 @@
 {
   "project": "StudioFlow",
-  "branchName": "ralph/outstanding-items",
-  "description": "Complete remaining items from middle-layer and scale-to-N PRDs: binding coverage verification, content roundtrip integration, sfid migration script, documentation updates, and component-aware proof system.",
+  "branchName": "main",
+  "description": "Parity stabilization sprint covering command alignment, universal scan defaults, dynamic style-layer mappings, expression-fidelity protection in pull flow, and documentation/overview updates.",
   "userStories": [
     {
-      "id": "US-R01",
-      "title": "Phase 3 verification log (binding coverage)",
-      "description": "As a design system maintainer, I want a verification script that reports which element properties would be bound (token or style), unbound, or could-be-style so I can improve coverage before applying in Figma.",
+      "id": "US-PS1",
+      "title": "Command reality alignment",
+      "description": "As an operator, I need runtime-facing docs/content to only use current supported command paths.",
       "acceptanceCriteria": [
-        "Script exists at scripts/verify-binding-coverage.mjs runnable via npm run verify:binding-coverage",
-        "Reads handoff/code-to-canvas.json and uses conduit-metadata.mjs inferFigmaType and mapping data",
-        "Outputs per-sfid list of properties with status BOUND_TOKEN BOUND_STYLE UNBOUND COULD_BE_STYLE to stdout",
-        "Writes handoff/binding-coverage.json with generatedAt bindings[] and summary (bound unbound couldBeStyle total)",
-        "Output is deterministic (sorted by sfid then property)",
-        "npm run check passes"
+        "Canonical guide separates runnable commands from roadmap commands",
+        "No stale loop:figma-roundtrip references in runtime payload content",
+        "Regenerated plugin payload reflects sync:push/sync:pull workflow"
       ],
       "priority": 1,
       "passes": true,
-      "notes": "Origin: middle-layer PRD US-008. Created scripts/verify-binding-coverage.mjs. Reports 13 bound, 5 unbound, 0 could-be-style."
+      "notes": "Updated guide practical commands section, updated handoff/figma-page-content.json, regenerated figma plugin payload."
     },
     {
-      "id": "US-R02",
-      "title": "Content integration into conduit roundtrip",
-      "description": "As a developer, I want content/content.json integrated into the code-to-canvas payload and canvas-to-code apply path so text content roundtrips through Figma.",
+      "id": "US-PS2",
+      "title": "Universal scanner defaults",
+      "description": "As a user onboarding non-React projects, I need scan defaults and config that work beyond src/React assumptions.",
       "acceptanceCriteria": [
-        "loop-code-to-canvas.mjs reads content/content.json if it exists and includes content field in code-to-canvas.json payload",
-        "loop-canvas-to-code.mjs reads content from canvas-to-code.json if present and writes updates back to content/content.json",
-        "If content/content.json does not exist both scripts skip content handling silently",
-        "npm run conduit:generate succeeds with and without content/content.json",
-        "npm run check passes"
+        "scan-project supports multiple include/exclude patterns and project-type defaults",
+        "workflow config contains projectScan include/exclude defaults",
+        "scan report prints and persists effective scan config"
       ],
       "priority": 2,
       "passes": true,
-      "notes": "Origin: scale-to-N PRD US-N04 partial. loop-code-to-canvas includes content field. loop-canvas-to-code merges content back."
+      "notes": "Added projectScan config in workflow, extended scan-project args/config resolution and document-style sfid component detection."
     },
     {
-      "id": "US-R03",
-      "title": "sfid migration script",
-      "description": "As a developer migrating to namespaced sfids, I want a script that renames flat sfids to namespaced sfids across source files snapshots and manifest.",
+      "id": "US-PS3",
+      "title": "Dynamic style-layer mappings",
+      "description": "As a team syncing arbitrary projects, I need style mappings generated from discovered sfids and available tokens.",
       "acceptanceCriteria": [
-        "Script exists at scripts/migrate-sfids.mjs runnable via npm run migrate:sfids",
-        "Accepts --map flag pointing to a JSON file with old-to-new sfid mappings",
-        "Rewrites occurrences in src/**/*.tsx jsx html and snapshots/*.json and studioflow.manifest.json",
-        "Supports --dry-run flag that prints changes without writing files",
-        "Prints summary of files modified and replacements made",
-        "npm run check passes after migration with correct mapping"
+        "No hardcoded hero-only sfid mappings remain in createConduitStyleLayer",
+        "Style mappings are generated deterministically from sfids + token names",
+        "loop-code-to-canvas passes required inputs"
       ],
       "priority": 3,
       "passes": true,
-      "notes": "Origin: scale-to-N PRD US-N05 partial. Created scripts/migrate-sfids.mjs with --map and --dry-run."
+      "notes": "createConduitStyleLayer now infers style assignment by sfid semantics and token availability."
     },
     {
-      "id": "US-R04",
-      "title": "Documentation updates for new commands",
-      "description": "As a developer or agent, I want AGENT.md and the canonical parity docs updated with all new commands so operational docs are current.",
+      "id": "US-PS4",
+      "title": "Expression fidelity guard",
+      "description": "As token source maintainer, I need pull flow to protect canonical expression tokens from resolved overwrites by default.",
       "acceptanceCriteria": [
-        "AGENT.md Commands section includes sync:push sync:pull scan:project apply:token-map extract:content verify:binding-coverage migrate:sfids",
-        "docs/DESIGN_SYSTEM_AND_FIGMA_SYNC.md documents sync:push and sync:pull as the primary operator commands",
-        "docs/PARITY_CHANGE_PROGRAM.md captures onboarding and scale requirements including scan:project and apply:token-map",
-        "No broken references or stale command names in either file",
-        "npm run check passes"
+        "Expression tokens are protected by default in loop-canvas-to-code",
+        "Explicit env var override exists for intentional overwrite",
+        "Sync metadata/logging reports protected token count"
       ],
       "priority": 4,
       "passes": true,
-      "notes": "Origin: scale-to-N PRD US-N08 partial. Updated AGENT.md and canonical parity docs with active command paths."
+      "notes": "Added STUDIOFLOW_ALLOW_EXPRESSION_OVERWRITE gate and expression-protection reporting in manifest/log output."
     },
     {
-      "id": "US-R05",
-      "title": "Component-aware proof system",
-      "description": "As a developer or CI pipeline, I want proof generation to support per-component targeting so I can verify individual components at each breakpoint.",
+      "id": "US-PS5",
+      "title": "Documentation and overview refresh",
+      "description": "As project owner, I need a clear before-vs-now map and updated canonical docs.",
       "acceptanceCriteria": [
-        "loop:proof accepts --component flag that filters to sfid namespace (e.g. --component hero captures sfid:hero/* elements)",
-        "When --component is passed screenshots save to proof/latest/{component}/{breakpoint}.png",
-        "When no --component flag existing full-page behavior is preserved",
-        "HTML report includes component name in title when component-filtered",
-        "Summary JSON includes component field when filtered",
-        "npm run check passes"
+        "Added sprint PRD doc",
+        "Added project overview delta doc",
+        "README links to guide, PRD, and overview"
       ],
       "priority": 5,
       "passes": true,
-      "notes": "Origin: scale-to-N PRD US-N06. Added --component flag, captureComponentScreenshots(), per-component proof directories."
+      "notes": "Added docs/PRD_PARITY_STABILIZATION.md and docs/PROJECT_OVERVIEW_DELTA.md, updated README and guide references."
     }
   ]
 }

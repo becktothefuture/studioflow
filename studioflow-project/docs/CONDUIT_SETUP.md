@@ -42,7 +42,7 @@ bunx conduit-design@latest
 3. Run `npm run conduit:commit -- --run-id <preview-run-id>`.
 4. Run `npm run conduit:generate`.
 5. Use Conduit to apply and produce `handoff/canvas-to-code.json`.
-6. Run `npm run loop:figma-roundtrip:apply`.
+6. Run `npm run sync:pull`.
 
 StudioFlow contract gates remain mandatory for every apply path.
 

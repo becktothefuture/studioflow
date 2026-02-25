@@ -6,12 +6,27 @@ import {
   colorRegex,
   calcRegex,
   arbitraryValueRegex,
-  numberUnitRegex,
-  collectMatches,
+  numberUnitRegex
 } from "./lib/hardcoded-detect.mjs";
-import { rootDir, writeJson } from "./lib/workflow-utils.mjs";
+import { readWorkflowConfig, rootDir, writeJson } from "./lib/workflow-utils.mjs";
 
-const defaultPattern = "src/**/*.{ts,tsx,js,jsx,css}";
+const fallbackIncludePatterns = [
+  "src/**/*.{ts,tsx,js,jsx,css,scss,sass,html,htm,vue,svelte}",
+  "**/*.{html,htm,css,scss,sass,js,ts,jsx,tsx,vue,svelte}"
+];
+const fallbackExcludePatterns = [
+  "**/node_modules/**",
+  "**/dist/**",
+  "**/.git/**",
+  "**/*.d.ts"
+];
+
+const projectTypeDefaults = {
+  react: ["src/**/*.{tsx,jsx,ts,js,css,scss,sass}", "**/*.{tsx,jsx}"],
+  html: ["**/*.{html,htm,css,scss,sass,js,ts}"],
+  auto: fallbackIncludePatterns
+};
+
 const reportPath = path.join(rootDir, "handoff", "scan-report.json");
 
 const cssPropertyRegex = /^\s*([a-z-]+)\s*:/i;
@@ -21,14 +36,40 @@ const sfidRegex = /data-sfid\s*=\s*["']([^"']+)["']/g;
 
 function parseArgs() {
   const args = process.argv.slice(2);
-  let pattern = defaultPattern;
+  let projectType = "auto";
+  const includePatterns = [];
+  const excludePatterns = [];
+
+  function parseCsvOrValue(value) {
+    return String(value)
+      .split(",")
+      .map((part) => part.trim())
+      .filter(Boolean);
+  }
+
   for (let i = 0; i < args.length; i++) {
     if (args[i] === "--pattern" && args[i + 1]) {
-      pattern = args[i + 1];
+      includePatterns.push(...parseCsvOrValue(args[i + 1]));
       i++;
+      continue;
+    }
+    if (args[i] === "--include" && args[i + 1]) {
+      includePatterns.push(...parseCsvOrValue(args[i + 1]));
+      i++;
+      continue;
+    }
+    if (args[i] === "--exclude" && args[i + 1]) {
+      excludePatterns.push(...parseCsvOrValue(args[i + 1]));
+      i++;
+      continue;
+    }
+    if (args[i] === "--project-type" && args[i + 1]) {
+      projectType = String(args[i + 1]).toLowerCase();
+      i++;
+      continue;
     }
   }
-  return { pattern };
+  return { projectType, includePatterns, excludePatterns };
 }
 
 function isIgnoredLine(line) {
@@ -117,13 +158,76 @@ function scanComponents(content, relativeFile) {
   return components;
 }
 
-async function main() {
-  const { pattern } = parseArgs();
+function scanDocumentComponents(content, relativeFile) {
+  const sfids = [];
+  const sfidCloned = new RegExp(sfidRegex.source, sfidRegex.flags);
+  let sfidMatch;
+  while ((sfidMatch = sfidCloned.exec(content)) !== null) {
+    sfids.push(sfidMatch[1]);
+  }
 
-  const files = await glob([pattern], {
+  if (sfids.length === 0) {
+    return [];
+  }
+
+  return [
+    {
+      file: relativeFile,
+      name: path.basename(relativeFile),
+      sfidCandidates: [...new Set(sfids)].sort()
+    }
+  ];
+}
+
+function uniqueSorted(values) {
+  return [...new Set(values)].sort((a, b) => a.localeCompare(b));
+}
+
+function resolveScanConfig(workflow, cli) {
+  const workflowScan = workflow?.projectScan ?? {};
+  const workflowInclude = Array.isArray(workflowScan.includePatterns) ? workflowScan.includePatterns : [];
+  const workflowExclude = Array.isArray(workflowScan.excludePatterns) ? workflowScan.excludePatterns : [];
+
+  const baseInclude =
+    cli.projectType in projectTypeDefaults
+      ? projectTypeDefaults[cli.projectType]
+      : projectTypeDefaults.auto;
+
+  const includeFromProjectType = cli.projectType !== "auto";
+
+  const includePatterns = uniqueSorted(
+    cli.includePatterns.length > 0
+      ? cli.includePatterns
+      : includeFromProjectType
+        ? baseInclude
+        : workflowInclude.length > 0
+        ? workflowInclude
+        : baseInclude
+  );
+
+  const excludePatterns = uniqueSorted(
+    cli.excludePatterns.length > 0
+      ? cli.excludePatterns
+      : workflowExclude.length > 0
+        ? workflowExclude
+        : fallbackExcludePatterns
+  );
+
+  return {
+    projectType: cli.projectType,
+    includePatterns,
+    excludePatterns
+  };
+}
+
+async function main() {
+  const [workflow, cli] = await Promise.all([readWorkflowConfig(), Promise.resolve(parseArgs())]);
+  const scanConfig = resolveScanConfig(workflow, cli);
+
+  const files = await glob(scanConfig.includePatterns, {
     cwd: rootDir,
     nodir: true,
-    ignore: ["src/**/*.d.ts"],
+    ignore: scanConfig.excludePatterns
   });
 
   const allHardcoded = [];
@@ -140,6 +244,17 @@ async function main() {
     if (relativeFile.endsWith(".tsx") || relativeFile.endsWith(".jsx")) {
       const components = scanComponents(content, relativeFile);
       allComponents.push(...components);
+      continue;
+    }
+
+    if (
+      relativeFile.endsWith(".html") ||
+      relativeFile.endsWith(".htm") ||
+      relativeFile.endsWith(".vue") ||
+      relativeFile.endsWith(".svelte")
+    ) {
+      const components = scanDocumentComponents(content, relativeFile);
+      allComponents.push(...components);
     }
   }
 
@@ -153,6 +268,7 @@ async function main() {
 
   const report = {
     generatedAt: new Date().toISOString(),
+    scanConfig,
     scannedFiles: files.length,
     hardcodedValues: allHardcoded,
     components: allComponents,
@@ -167,6 +283,9 @@ async function main() {
   await writeJson(reportPath, report);
 
   console.log(`Scan complete.`);
+  console.log(`  Project type: ${scanConfig.projectType}`);
+  console.log(`  Includes: ${scanConfig.includePatterns.join(", ")}`);
+  console.log(`  Excludes: ${scanConfig.excludePatterns.join(", ")}`);
   console.log(`  Files scanned:  ${report.summary.totalFiles}`);
   console.log(`  Hardcoded values: ${report.summary.totalHardcoded}`);
   console.log(

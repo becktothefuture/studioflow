@@ -94,38 +94,74 @@ export function createCodeToFigmaMapping(tokens) {
     .sort((a, b) => a.codeTokenName.localeCompare(b.codeTokenName));
 }
 
-export function createConduitStyleLayer() {
+function buildStyleAssignments(styleName, tokenNames) {
+  const has = (tokenName) => tokenNames.has(tokenName);
+
+  if (styleName === "Surface/Card") {
+    const assignments = {};
+    if (has("color-brand-surface")) assignments["fills/0/color"] = "color-brand-surface";
+    if (has("color-brand-stroke")) assignments["strokes/0/color"] = "color-brand-stroke";
+    if (has("radius-lg")) assignments.cornerRadius = "radius-lg";
+    if (has("shadow-card")) assignments["effects/dropShadow"] = "shadow-card";
+    return assignments;
+  }
+
+  if (styleName === "Action/ButtonPrimary") {
+    const assignments = {};
+    if (has("color-brand-primary")) assignments["fills/0/color"] = "color-brand-primary";
+    if (has("color-brand-ink")) assignments["text/fills/0/color"] = "color-brand-ink";
+    if (has("radius-pill")) assignments.cornerRadius = "radius-pill";
+    if (has("space-sm")) assignments.paddingY = "space-sm";
+    if (has("space-lg")) assignments.paddingX = "space-lg";
+    return assignments;
+  }
+
+  if (styleName === "Text/Heading") {
+    const assignments = {};
+    if (has("font-family-display")) assignments.fontFamily = "font-family-display";
+    if (has("font-size-title")) assignments.fontSize = "font-size-title";
+    if (has("font-line-height-title")) assignments.lineHeight = "font-line-height-title";
+    if (has("color-brand-text")) assignments["fills/0/color"] = "color-brand-text";
+    return assignments;
+  }
+
+  const assignments = {};
+  if (has("font-family-base")) assignments.fontFamily = "font-family-base";
+  if (has("font-size-body")) assignments.fontSize = "font-size-body";
+  if (has("font-line-height-body")) assignments.lineHeight = "font-line-height-body";
+  if (has("color-brand-muted")) assignments["fills/0/color"] = "color-brand-muted";
+  return assignments;
+}
+
+function inferStyleForSfid(sfid) {
+  const key = sfid.replace(/^sfid:/, "").toLowerCase();
+  if (key.includes("cta") || key.includes("button")) return "Action/ButtonPrimary";
+  if (key.includes("title") || key.includes("heading") || key.endsWith("/h1") || key.endsWith("/h2")) return "Text/Heading";
+  if (key.includes("body") || key.includes("copy") || key.includes("text") || key.includes("paragraph")) return "Text/Body";
+  if (key.includes("card") || key.includes("panel") || key.includes("root") || key.includes("content") || key.includes("section")) {
+    return "Surface/Card";
+  }
+  return null;
+}
+
+export function createConduitStyleLayer({ sfids, tokenNames }) {
+  const tokenSet = new Set(tokenNames);
+  const semanticStyleNames = ["Surface/Card", "Action/ButtonPrimary", "Text/Heading", "Text/Body"];
+  const semanticStyles = semanticStyleNames
+    .map((name) => ({
+      name,
+      assignments: buildStyleAssignments(name, tokenSet)
+    }))
+    .filter((style) => Object.keys(style.assignments).length > 0);
+
+  const availableStyleNames = new Set(semanticStyles.map((style) => style.name));
+  const elementPropertyMappings = [...sfids]
+    .sort((a, b) => a.localeCompare(b))
+    .map((sfid) => ({ sfid, property: "style", style: inferStyleForSfid(sfid) }))
+    .filter((mapping) => mapping.style && availableStyleNames.has(mapping.style));
+
   return {
-    semanticStyles: [
-      {
-        name: "Card",
-        assignments: {
-          "fills/0/color": "color-brand-surface",
-          "strokes/0/color": "color-brand-stroke",
-          cornerRadius: "radius-lg",
-          "effects/dropShadow": "shadow-card"
-        }
-      },
-      {
-        name: "Button/Primary",
-        assignments: {
-          "fills/0/color": "color-brand-primary",
-          "text/fills/0/color": "color-brand-ink",
-          cornerRadius: "radius-pill",
-          paddingY: "space-sm",
-          paddingX: "space-lg"
-        }
-      },
-      {
-        name: "Text/Body",
-        assignments: {
-          fontFamily: "font-family-base",
-          fontSize: "font-size-body",
-          lineHeight: "font-line-height-body",
-          "fills/0/color": "color-brand-muted"
-        }
-      }
-    ],
+    semanticStyles,
     specialStyles: [
       {
         name: "Gradient/Brand Plus20Hue",
@@ -137,10 +173,6 @@ export function createConduitStyleLayer() {
         ]
       }
     ],
-    elementPropertyMappings: [
-      { sfid: "sfid:hero-content", property: "style", style: "Card" },
-      { sfid: "sfid:hero-primary-cta", property: "style", style: "Button/Primary" },
-      { sfid: "sfid:hero-title", property: "style", style: "Text/Body" }
-    ]
+    elementPropertyMappings
   };
 }
